@@ -1,0 +1,132 @@
+use env_logger::Env;
+use mozdevice::{AndroidStorageInput, Host};
+use spytrap_b::args::{Args, SubCommand};
+use spytrap_b::dumpsys;
+use spytrap_b::errors::*;
+use spytrap_b::parsers::accessibility::Accessibility;
+use spytrap_b::pm;
+use spytrap_b::remote_clock;
+use spytrap_b::rules::Rule;
+use structopt::StructOpt;
+
+fn human_option_str(x: Option<&String>) -> &str {
+    if let Some(x) = x {
+        x.as_str()
+    } else {
+        "-"
+    }
+}
+
+fn main() -> Result<()> {
+    let args = Args::from_args();
+
+    let logging = match args.verbose {
+        0 => "info",
+        1 => "spytrap_b=debug,info",
+        2 => "debug",
+        _ => "trace",
+    };
+
+    env_logger::init_from_env(Env::default().default_filter_or(logging));
+
+    // TODO: if adb is not running, it needs to be started
+    // doas adb start-server
+
+    let adb_host = Host::default();
+
+    match args.subcommand {
+        SubCommand::Monitor => bail!("This subcommand is not implemented yet"),
+        SubCommand::Scan(scan) => {
+            let rules = Rule::load_map_from_file(&scan.rules).context("Failed to load rules")?;
+            info!("Loaded {} rules from {:?}", rules.len(), scan.rules);
+
+            let device = adb_host
+                .device_or_default(scan.serial.as_ref(), AndroidStorageInput::Auto)
+                .with_context(|| anyhow!("Failed to access device: {:?}", scan.serial))?;
+            debug!("Using device: {:?}", device);
+
+            if device.is_rooted {
+                warn!("Device is rooted!");
+            } else {
+                info!("Device is not rooted");
+            }
+
+            info!("Fetching remote clock");
+            let (local_time, remote_time, drift) = remote_clock::determine(&device)?;
+            info!(
+                "Local time is {}, remote time is {}, drift={:#}",
+                local_time, remote_time, drift
+            );
+
+            // TODO: maybe `cmd package list packages -f`
+            info!("Comparing list of installed apps with known stalkerware ids");
+            for pkg in pm::list_packages(&device)? {
+                // TODO: test if apk is in hashset
+                // TODO: maybe fetch apk and inspect eg. cert
+
+                if let Some(name) = rules.get(&pkg.id) {
+                    warn!("Found app that matches rule: {:?} ({:?})", pkg.id, name);
+                }
+            }
+
+            info!("Enumerating service list");
+            let services = dumpsys::list_services(&device)?;
+
+            if services.contains("accessibility") {
+                info!("Reading accessibility settings");
+                let out = dumpsys::dump_service(&device, "accessibility")?;
+                let a = out.parse::<Accessibility>()
+                    .context("Failed to parse accessibility service output")?;
+                warn!("TODO: accessibility = {:?}", a);
+            }
+
+            /*
+            for service in &services {
+                if service == "meminfo" {
+                    continue;
+                }
+                info!("Dumping service: {:?}", service);
+                dumpsys::dump_service(&device, &service)?;
+            }
+            */
+
+            /*
+            for x in &["com.android.bluetooth", "com.asdf"] {
+                if device.is_app_installed(x).unwrap() {
+                    warn!("App is installed: {:?}", x);
+                } else {
+                    info!("App is not installed: {:?}", x);
+                }
+            }
+            */
+
+            info!("Scan finished");
+        }
+        SubCommand::List => {
+            let devices = adb_host
+                .devices::<Vec<_>>()
+                .map_err(|e| anyhow!("Failed to list devices: {}", e))?;
+
+            for device in devices {
+                debug!("Found device: {:?}", device);
+                println!(
+                    "{:30} device={:?}, model={:?}, product={:?}",
+                    device.serial,
+                    human_option_str(device.info.get("device")),
+                    human_option_str(device.info.get("model")),
+                    human_option_str(device.info.get("product")),
+                );
+            }
+        }
+    }
+
+    /*
+    // Host::device_or_default(None, AndroidStorageInput::Auto);
+    println!("Hello, world: {:?}", host);
+    let devices = host.devices::<Vec<DeviceInfo>>()
+        .map_err(|e| anyhow!("{}", e))?;
+    println!("devices: {:?}", devices);
+    */
+
+    Ok(())
+}

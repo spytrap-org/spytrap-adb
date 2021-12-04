@@ -1,0 +1,7 @@
+ACCESSIBILITY MANAGER (dumpsys accessibility)
+
+User state[attributes:{id=0, currentUser=true, touchExplorationEnabled=false, displayMagnificationEnabled=false, navBarMagnificationEnabled=false, autoclickEnabled=false, nonInteractiveUiTimeout=0, interactiveUiTimeout=0, installedServiceCount=4}
+     Bound services:{}
+     Enabled services:{}
+     Binding services:{}]
+

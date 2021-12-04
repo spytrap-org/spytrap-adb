@@ -1,0 +1,12 @@
+ACCESSIBILITY MANAGER (dumpsys accessibility)
+
+currentUserId=0
+User state[
+     attributes:{id=0, touchExplorationEnabled=false, serviceHandlesDoubleTap=false, requestMultiFingerGestures=false, requestTwoFingerPassthrough=false, displayMagnificationEnabled=false, autoclickEnabled=false, nonInteractiveUiTimeout=0, interactiveUiTimeout=0, installedServiceCount=0}
+     shortcut key:{}
+     button:{}
+     button target:{null}
+     Bound services:{}
+     Enabled services:{}
+     Binding services:{}
+     Crashed services:{}]
