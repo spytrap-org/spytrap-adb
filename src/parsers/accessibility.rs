@@ -83,7 +83,7 @@ mod tests {
     #[test]
     fn test_parse_plain() {
         init();
-        let data = include_str!("../../test_data/dumpsys-accessibility-plain.txt");
+        let data = include_str!("../../test_data/dumpsys/accessibility/plain.txt");
         let a = data.parse::<Accessibility>().unwrap();
         assert_eq!(a, Accessibility {
             attributes: hashmap![
@@ -111,7 +111,7 @@ mod tests {
     #[test]
     fn test_parse_plain2() {
         init();
-        let data = include_str!("../../test_data/dumpsys-accessibility-plain2.txt");
+        let data = include_str!("../../test_data/dumpsys/accessibility/plain2.txt");
         let a = data.parse::<Accessibility>().unwrap();
         assert_eq!(a, Accessibility {
             attributes: hashmap![
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn test_parse_spylive360() {
         init();
-        let data = include_str!("../../test_data/dumpsys-accessibility-spylive360.txt");
+        let data = include_str!("../../test_data/dumpsys/accessibility/spylive360.txt");
         let a = data.parse::<Accessibility>().unwrap();
         assert_eq!(a, Accessibility {
             attributes: hashmap![
