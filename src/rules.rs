@@ -30,3 +30,38 @@ impl Rule {
         Self::load_map_from_buf(&buf)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use maplit::hashmap;
+
+    #[test]
+    fn test_parse_appid_yml() {
+        let map = Rule::load_map_from_buf(b"
+- package: com.vvt.android.syncmanager
+  name: FlexiSpy
+- package: com.telephony.android
+  name: Flexispy
+- package: android.sys.process
+  name: mSpy
+- package: system.framework
+  name: mSpy
+- package: com.mspy.lite
+  name: mSpy
+- package: med.mspy.mspy
+  name: mspy
+- package: android.helper.system
+  name: mspy
+").unwrap();
+        assert_eq!(map, hashmap![
+            "android.helper.system".to_string() => "mspy".to_string(),
+            "android.sys.process".to_string() => "mSpy".to_string(),
+            "com.mspy.lite".to_string() => "mSpy".to_string(),
+            "com.telephony.android".to_string() => "Flexispy".to_string(),
+            "com.vvt.android.syncmanager".to_string() => "FlexiSpy".to_string(),
+            "med.mspy.mspy".to_string() => "mspy".to_string(),
+            "system.framework".to_string() => "mSpy".to_string(),
+        ]);
+    }
+}
