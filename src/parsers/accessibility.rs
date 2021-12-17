@@ -134,4 +134,32 @@ mod tests {
             crashed_services: None,
         });
     }
+
+    #[test]
+    fn test_parse_spylive360() {
+        init();
+        let data = include_str!("../../test_data/dumpsys-accessibility-spylive360.txt");
+        let a = data.parse::<Accessibility>().unwrap();
+        assert_eq!(a, Accessibility {
+            attributes: hashmap![
+                "id".to_string() => "0".to_string(),
+                "touchExplorationEnabled".to_string() => "false".to_string(),
+                "serviceHandlesDoubleTap".to_string() => "false".to_string(),
+                "requestMultiFingerGestures".to_string() => "false".to_string(),
+                "requestTwoFingerPassthrough".to_string() => "false".to_string(),
+                "displayMagnificationEnabled".to_string() => "false".to_string(),
+                "autoclickEnabled".to_string() => "false".to_string(),
+                "nonInteractiveUiTimeout".to_string() => "0".to_string(),
+                "interactiveUiTimeout".to_string() => "0".to_string(),
+                "installedServiceCount".to_string() => "1".to_string(),
+            ],
+            shortcut_key: None,
+            button: None,
+            button_target: Some("null".to_string()),
+            bound_services: Some("Service[label=WiFi, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=1, eventTypes=TYPES_ALL_MASK, notificationTimeout=1000, requestA11yBtn=false]".to_string()),
+            enabled_services: Some("{com.wifi0/com.wifi0.AccessibilityReceiver4}".to_string()),
+            binding_services: None,
+            crashed_services: None,
+        });
+    }
 }

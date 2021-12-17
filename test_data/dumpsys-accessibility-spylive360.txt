@@ -1,0 +1,15 @@
+ACCESSIBILITY MANAGER (dumpsys accessibility)
+
+currentUserId=0
+User state[
+     attributes:{id=0, touchExplorationEnabled=false, serviceHandlesDoubleTap=false, requestMultiFingerGestures=false, requestTwoFingerPassthrough=false, displayMagnificationEnabled=false, autoclickEnabled=false, nonInteractiveUiTimeout=0, interactiveUiTimeout=0, installedServiceCount=1}
+     shortcut key:{}
+     button:{}
+     button target:{null}
+     Bound services:{Service[label=WiFi, feedbackType[FEEDBACK_SPOKEN, FEEDBACK_HAPTIC, FEEDBACK_AUDIBLE, FEEDBACK_VISUAL, FEEDBACK_GENERIC, FEEDBACK_BRAILLE], capabilities=1, eventTypes=TYPES_ALL_MASK, notificationTimeout=1000, requestA11yBtn=false]}
+     Enabled services:{{com.wifi0/com.wifi0.AccessibilityReceiver4}}
+     Binding services:{}
+     Crashed services:{}]
+Display[0] : 
+Window[AccessibilityWindowInfo[title=null, displayId=0, id=8, type=TYPE_SYSTEM, layer=1, region=SkRegion((0,0,1080,72)), bounds=Rect(0, 0 - 1080, 72), focused=false, active=false, pictureInPicture=false, hasParent=false, isAnchored=false, hasChildren=false]],
+Window[AccessibilityWindowInfo[title=WiFi, displayId=0, id=15, type=TYPE_APPLICATION, layer=0, region=SkRegion((0,0,1080,1920)), bounds=Rect(0, 0 - 1080, 1920), focused=true, active=true, pictureInPicture=false, hasParent=false, isAnchored=false, hasChildren=false]]
