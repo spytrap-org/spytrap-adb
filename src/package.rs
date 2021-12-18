@@ -8,6 +8,9 @@ const CMD: &str = "dumpsys package";
 #[derive(Debug, PartialEq, Default)]
 pub struct PackageInfo {
     fields: HashMap<String, String>,
+    requested_permissions: Vec<String>,
+    install_permissions: Vec<String>,
+    runtime_permissions: Vec<String>,
 }
 
 impl PackageInfo {
@@ -25,21 +28,69 @@ pub fn dump_package(device: &Device, package: &str) -> Result<PackageInfo> {
     parse_output(&output, package)
 }
 
+fn count_whitespace_prefix(line: &str) -> usize {
+    let iter = line.chars();
+
+    let mut count = 0;
+    for c in iter {
+        if c != ' ' {
+            return count;
+        }
+        count += 1;
+    }
+
+    count
+}
+
 fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
-    let mut section = None;
+    let mut prev_line = None;
+    let mut section_stack = Vec::new();
+
     let mut info = PackageInfo::default();
 
+    let mut indent = 0;
     for line in output.split('\n') {
-        if !line.starts_with(' ') {
-            section = Some(line);
-        } else if let Some("Packages:") = section {
-            trace!("package section line: {:?}", line);
+        let trimmed_line = line.trim();
 
-            // TODO: we also want the app permissions
+        match count_whitespace_prefix(line) {
+            i if i < indent => {
+                section_stack.truncate(i / 2);
+                indent = i;
+            }
+            i if i > indent => {
+                if let Some(prev_line) = prev_line {
+                    section_stack.push(prev_line);
+                }
+                indent = i;
+            }
+            i if i == indent => (),
+            // unreachable
+            _ => (),
+        }
 
-            if let Some((key, value)) = line.trim().split_once('=') {
-                trace!("discovered for package {:?}: key={:?}, value={:?}", package, key, value);
-                info.fields.insert(key.to_string(), value.to_string());
+        prev_line = Some(trimmed_line);
+
+        match section_stack.last() {
+            Some(&"requested permissions:") => {
+                debug!("requested permission: {:?}", trimmed_line);
+                info.requested_permissions.push(trimmed_line.to_string());
+            }
+            Some(&"install permissions:") => {
+                debug!("install permission: {:?}", trimmed_line);
+                info.install_permissions.push(trimmed_line.to_string());
+            }
+            Some(&"runtime permissions:") => {
+                debug!("runtime permission: {:?}", trimmed_line);
+                info.runtime_permissions.push(trimmed_line.to_string());
+            }
+            _ => {
+                if let Some(&"Packages:") = section_stack.first() {
+                    trace!("package line: {:?}", line);
+                    if let Some((key, value)) = trimmed_line.split_once('=') {
+                        trace!("discovered for package {:?}: key={:?}, value={:?}", package, key, value);
+                        info.fields.insert(key.to_string(), value.to_string());
+                    }
+                }
             }
         }
     }
@@ -51,6 +102,17 @@ fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
 mod tests {
     use super::*;
     use maplit::hashmap;
+
+    #[test]
+    fn count_whitespace() {
+        assert_eq!(0, count_whitespace_prefix(""));
+        assert_eq!(1, count_whitespace_prefix(" "));
+        assert_eq!(1, count_whitespace_prefix(" a"));
+        assert_eq!(2, count_whitespace_prefix("  "));
+        assert_eq!(2, count_whitespace_prefix("  a"));
+        assert_eq!(3, count_whitespace_prefix("   ab c d e f"));
+        assert_eq!(3, count_whitespace_prefix("   User 0:"));
+    }
 
     #[test]
     fn parse_spylive360() {
@@ -83,38 +145,72 @@ mod tests {
                 "signatures".to_string() => "PackageSignatures{4cb6f75 version:2, signatures:[74831dfd], past signatures:[]}".to_string(),
                 "installPermissionsFixed".to_string() => "true".to_string(),
                 "pkgFlags".to_string() => "[ HAS_CODE ALLOW_CLEAR_USER_DATA ]".to_string(),
-                "android.permission.ACCESS_BACKGROUND_LOCATION: restricted".to_string() => "true".to_string(),
-                "android.permission.READ_SMS: restricted".to_string() => "true".to_string(),
-                "android.permission.READ_CALL_LOG: restricted".to_string() => "true".to_string(),
-                "android.permission.WRITE_EXTERNAL_STORAGE: restricted".to_string() => "true".to_string(),
-                "android.permission.READ_EXTERNAL_STORAGE: restricted".to_string() => "true".to_string(),
-                "android.permission.RECEIVE_SMS: restricted".to_string() => "true".to_string(),
-                "android.permission.FOREGROUND_SERVICE: granted".to_string() => "true".to_string(),
-                "android.permission.RECEIVE_BOOT_COMPLETED: granted".to_string() => "true".to_string(),
-                "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: granted".to_string() => "true".to_string(),
-                "android.permission.INTERNET: granted".to_string() => "true".to_string(),
-                "com.android.browser.permission.READ_HISTORY_BOOKMARKS: granted".to_string() => "true".to_string(),
-                "android.permission.CHANGE_WIFI_STATE: granted".to_string() => "true".to_string(),
-                "android.permission.ACCESS_NETWORK_STATE: granted".to_string() => "true".to_string(),
-                "android.permission.ACCESS_WIFI_STATE: granted".to_string() => "true".to_string(),
-                "android.permission.QUERY_ALL_PACKAGES: granted".to_string() => "true".to_string(),
-                "android.permission.WAKE_LOCK: granted".to_string() => "true".to_string(),
                 "User 0: ceDataInode".to_string() => "261852 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false".to_string(),
                 "gids".to_string() => "[3003]".to_string(),
-                "android.permission.READ_SMS: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
-                "android.permission.READ_CALL_LOG: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
-                "android.permission.ACCESS_FINE_LOCATION: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]".to_string(),
-                "android.permission.RECEIVE_SMS: granted".to_string() => "false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
-                "android.permission.READ_EXTERNAL_STORAGE: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
-                "android.permission.ACCESS_COARSE_LOCATION: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]".to_string(),
-                "android.permission.READ_PHONE_STATE: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]".to_string(),
-                "android.permission.CAMERA: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]".to_string(),
-                "android.permission.WRITE_EXTERNAL_STORAGE: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
-                "android.permission.RECORD_AUDIO: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]".to_string(),
-                "android.permission.READ_CONTACTS: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]".to_string(),
-                "android.permission.ACCESS_BACKGROUND_LOCATION: granted".to_string() => "false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
-                "android.permission.ACCESS_MEDIA_LOCATION: granted".to_string() => "false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]".to_string(),
             ],
+            requested_permissions: [
+                "android.permission.ACCESS_FINE_LOCATION",
+                "android.permission.ACCESS_COARSE_LOCATION",
+                "android.permission.ACCESS_NETWORK_STATE",
+                "android.permission.ACCESS_BACKGROUND_LOCATION: restricted=true",
+                "android.permission.INTERNET",
+                "ACTION_NOTIFICATION_LISTENER_SETTINGS",
+                "android.permission.READ_SMS: restricted=true",
+                "android.permission.READ_CONTACTS",
+                "android.permission.READ_CALL_LOG: restricted=true",
+                "android.permission.READ_PHONE_STATE",
+                "android.permission.WRITE_EXTERNAL_STORAGE: restricted=true",
+                "android.permission.CAMERA",
+                "android.permission.SYSTEM_ALERT_WINDOW",
+                "android.permission.ACTION_MANAGE_OVERLAY_PERMISSION",
+                "android.permission.ACCESS_WIFI_STATE",
+                "android.permission.CHANGE_WIFI_STATE",
+                "android.permission.RECEIVE_BOOT_COMPLETED",
+                "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+                "com.android.browser.permission.READ_HISTORY_BOOKMARKS",
+                "android.permission.READ_EXTERNAL_STORAGE: restricted=true",
+                "android.permission.RECEIVE_SMS: restricted=true",
+                "android.permission.RECORD_AUDIO",
+                "android.permission.BIND_ACCESSIBILITY_SERVICE",
+                "com.huawei.systemmanager.permission.ACCESS_INTERFACE",
+                "android.permission.QUERY_ALL_PACKAGES",
+                "android.permission.ACCESS_MEDIA_LOCATION",
+                "android.permission.WRITE_SETTINGS",
+                "android.permission.MANAGE_EXTERNAL_STORAGE",
+                "android.permission.WAKE_LOCK",
+                "com.google.android.c2dm.permission.RECEIVE",
+                "com.google.android.providers.gsf.permission.READ_GSERVICES",
+                "com.google.android.gms.permission.ACTIVITY_RECOGNITION",
+                "android.permission.FOREGROUND_SERVICE",
+                "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
+            ].into_iter().map(String::from).collect(),
+            install_permissions: [
+                "android.permission.FOREGROUND_SERVICE: granted=true",
+                "android.permission.RECEIVE_BOOT_COMPLETED: granted=true",
+                "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: granted=true",
+                "android.permission.INTERNET: granted=true",
+                "com.android.browser.permission.READ_HISTORY_BOOKMARKS: granted=true",
+                "android.permission.CHANGE_WIFI_STATE: granted=true",
+                "android.permission.ACCESS_NETWORK_STATE: granted=true",
+                "android.permission.ACCESS_WIFI_STATE: granted=true",
+                "android.permission.QUERY_ALL_PACKAGES: granted=true",
+                "android.permission.WAKE_LOCK: granted=true",
+            ].into_iter().map(String::from).collect(),
+            runtime_permissions: [
+                "android.permission.READ_SMS: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+                "android.permission.READ_CALL_LOG: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+                "android.permission.ACCESS_FINE_LOCATION: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+                "android.permission.RECEIVE_SMS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+                "android.permission.READ_EXTERNAL_STORAGE: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+                "android.permission.ACCESS_COARSE_LOCATION: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+                "android.permission.READ_PHONE_STATE: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+                "android.permission.CAMERA: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+                "android.permission.WRITE_EXTERNAL_STORAGE: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+                "android.permission.RECORD_AUDIO: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+                "android.permission.READ_CONTACTS: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+                "android.permission.ACCESS_BACKGROUND_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+                "android.permission.ACCESS_MEDIA_LOCATION: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+            ].into_iter().map(String::from).collect(),
         });
     }
 }
