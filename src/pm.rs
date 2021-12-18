@@ -1,11 +1,10 @@
 use crate::errors::*;
 use mozdevice::Device;
 
-const CMD: &str = "pm list packages -f";
+const CMD: &str = "pm list packages";
 
 #[derive(Debug, PartialEq)]
 pub struct Apk {
-    pub path: String,
     pub id: String,
 }
 
@@ -24,14 +23,11 @@ fn parse_output(output: &str) -> Result<Vec<Apk>> {
         }
 
         if let Some(package) = line.strip_prefix("package:") {
-            if let Some((apk, id)) = package.split_once('=') {
-                debug!("apk={:?}, id={:?}", apk, id);
+            debug!("discovered package={:?}", package);
 
-                pkgs.push(Apk {
-                    path: apk.to_string(),
-                    id: id.to_string(),
-                });
-            }
+            pkgs.push(Apk {
+                id: package.to_string(),
+            });
         }
     }
 
@@ -44,24 +40,24 @@ mod tests {
 
     #[test]
     pub fn test_parse_output() {
-        let data = "package:/data/app/~~0aX7BWdP29TqZaPPXkHNIA==/org.jitsi.meet-hcYO-DrfCgXIZKdu4pcUeA==/base.apk=org.jitsi.meet
-package:/system/product/overlay/LineageBlackAccent/LineageBlackAccent.apk=org.lineageos.overlay.accent.black
-package:/system/priv-app/CtsShimPrivPrebuilt/CtsShimPrivPrebuilt.apk=com.android.cts.priv.ctsshim
-package:/system/product/overlay/LineageBrownAccent/LineageBrownAccent.apk=org.lineageos.overlay.accent.brown
-package:/system/product/overlay/LineageGreenAccent/LineageGreenAccent.apk=org.lineageos.overlay.accent.green
-package:/system/product/overlay/DisplayCutoutEmulationCorner/DisplayCutoutEmulationCornerOverlay.apk=com.android.internal.display.cutout.emulation.corner
-package:/system/product/overlay/LineageBlackTheme/LineageBlackTheme.apk=org.lineageos.overlay.customization.blacktheme
+        let data = "package:org.jitsi.meet
+package:org.lineageos.overlay.accent.black
+package:com.android.cts.priv.ctsshim
+package:org.lineageos.overlay.accent.brown
+package:org.lineageos.overlay.accent.green
+package:com.android.internal.display.cutout.emulation.corner
+package:org.lineageos.overlay.customization.blacktheme
 ";
 
         let pkgs = parse_output(data).unwrap();
         assert_eq!(&pkgs, &[
-            Apk { path: "/data/app/~~0aX7BWdP29TqZaPPXkHNIA".to_string(), id: "=/org.jitsi.meet-hcYO-DrfCgXIZKdu4pcUeA==/base.apk=org.jitsi.meet".to_string() },
-            Apk { path: "/system/product/overlay/LineageBlackAccent/LineageBlackAccent.apk".to_string(), id: "org.lineageos.overlay.accent.black".to_string() },
-            Apk { path: "/system/priv-app/CtsShimPrivPrebuilt/CtsShimPrivPrebuilt.apk".to_string(), id: "com.android.cts.priv.ctsshim".to_string() },
-            Apk { path: "/system/product/overlay/LineageBrownAccent/LineageBrownAccent.apk".to_string(), id: "org.lineageos.overlay.accent.brown".to_string() },
-            Apk { path: "/system/product/overlay/LineageGreenAccent/LineageGreenAccent.apk".to_string(), id: "org.lineageos.overlay.accent.green".to_string() },
-            Apk { path: "/system/product/overlay/DisplayCutoutEmulationCorner/DisplayCutoutEmulationCornerOverlay.apk".to_string(), id: "com.android.internal.display.cutout.emulation.corner".to_string() },
-            Apk { path: "/system/product/overlay/LineageBlackTheme/LineageBlackTheme.apk".to_string(), id: "org.lineageos.overlay.customization.blacktheme".to_string() }
+            Apk { id: "org.jitsi.meet".to_string() },
+            Apk { id: "org.lineageos.overlay.accent.black".to_string() },
+            Apk { id: "com.android.cts.priv.ctsshim".to_string() },
+            Apk { id: "org.lineageos.overlay.accent.brown".to_string() },
+            Apk { id: "org.lineageos.overlay.accent.green".to_string() },
+            Apk { id: "com.android.internal.display.cutout.emulation.corner".to_string() },
+            Apk { id: "org.lineageos.overlay.customization.blacktheme".to_string() }
         ]);
     }
 }

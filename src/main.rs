@@ -2,6 +2,7 @@ use env_logger::Env;
 use mozdevice::{AndroidStorageInput, Host};
 use spytrap_b::args::{Args, SubCommand};
 use spytrap_b::dumpsys;
+use spytrap_b::package;
 use spytrap_b::errors::*;
 use spytrap_b::parsers::accessibility::Accessibility;
 use spytrap_b::pm;
@@ -66,6 +67,16 @@ fn main() -> Result<()> {
 
                 if let Some(name) = rules.get(&pkg.id) {
                     warn!("Found app that matches rule: {:?} ({:?})", pkg.id, name);
+                }
+
+                // fetch infos about package
+                let info = package::dump_package(&device, &pkg.id)?;
+                trace!("package infos {:?}: {:#?}", pkg.id, info);
+
+                if let Some(installer) = info.installer_package_name() {
+                    warn!("package {:?} installed by {:?}", pkg.id, installer);
+
+                    // TODO: suspicious, manually installed: com.android.packageinstaller
                 }
             }
 

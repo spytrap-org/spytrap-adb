@@ -16,6 +16,7 @@ mozdevice = { path="vendor/mozdevice" }
 regex = "1.5.4"
 serde = { version = "1.0.130", features = ["derive"] }
 serde_yaml = "0.8.21"
+shell-escape = "0.1.5"
 structopt = "0.3.25"
 
 [dev-dependencies]
