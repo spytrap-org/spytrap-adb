@@ -1,0 +1,126 @@
+Activity Resolver Table:
+  Schemes:
+      geo:
+        eb4b26e com.android.gpstest.osmdroid/com.android.gpstest.GpsTestActivity filter 4eb719c
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "geo"
+
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        eb4b26e com.android.gpstest.osmdroid/com.android.gpstest.GpsTestActivity filter 61ad0f
+          Action: "android.intent.action.MAIN"
+          Action: "com.google.android.radar.SHOW_RADAR"
+          Category: "android.intent.category.LAUNCHER"
+          Category: "android.intent.category.DEFAULT"
+        f8517a5 com.android.gpstest.osmdroid/com.android.gpstest.Preferences filter 77d877a
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.DEFAULT"
+      com.google.android.radar.SHOW_RADAR:
+        eb4b26e com.android.gpstest.osmdroid/com.android.gpstest.GpsTestActivity filter 61ad0f
+          Action: "android.intent.action.MAIN"
+          Action: "com.google.android.radar.SHOW_RADAR"
+          Category: "android.intent.category.LAUNCHER"
+          Category: "android.intent.category.DEFAULT"
+
+Registered ContentProviders:
+  com.android.gpstest.osmdroid/androidx.lifecycle.ProcessLifecycleOwnerInitializer:
+    Provider{a82b4a8 com.android.gpstest.osmdroid/androidx.lifecycle.ProcessLifecycleOwnerInitializer}
+  com.android.gpstest.osmdroid/androidx.core.content.FileProvider:
+    Provider{ea24bc1 com.android.gpstest.osmdroid/androidx.core.content.FileProvider}
+
+ContentProvider Authorities:
+  [com.android.gpstest.osmdroid.lifecycle-process]:
+    Provider{a82b4a8 com.android.gpstest.osmdroid/androidx.lifecycle.ProcessLifecycleOwnerInitializer}
+      applicationInfo=ApplicationInfo{2f8ef1e com.android.gpstest.osmdroid}
+  [com.android.gpstest.osmdroid.provider]:
+    Provider{ea24bc1 com.android.gpstest.osmdroid/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{c0d23ff com.android.gpstest.osmdroid}
+
+Key Set Manager:
+  [com.android.gpstest.osmdroid]
+      Signing KeySets: 11
+
+Packages:
+  Package [com.android.gpstest.osmdroid] (ca27354):
+    userId=10153
+    pkg=Package{746e2fd com.android.gpstest.osmdroid}
+    codePath=/data/app/~~DtCl3GSWjjDeCZQY6-JYjQ==/com.android.gpstest.osmdroid-R1hWv_dQbz--sDQlVH8myQ==
+    resourcePath=/data/app/~~DtCl3GSWjjDeCZQY6-JYjQ==/com.android.gpstest.osmdroid-R1hWv_dQbz--sDQlVH8myQ==
+    legacyNativeLibraryDir=/data/app/~~DtCl3GSWjjDeCZQY6-JYjQ==/com.android.gpstest.osmdroid-R1hWv_dQbz--sDQlVH8myQ==/lib
+    primaryCpuAbi=null
+    secondaryCpuAbi=null
+    versionCode=18093 minSdk=18 targetSdk=29
+    versionName=3.9.16
+    splits=[base]
+    apkSigningVersion=3
+    applicationInfo=ApplicationInfo{746e2fd com.android.gpstest.osmdroid}
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/com.android.gpstest.osmdroid
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesLibraries:
+      android.test.base
+    usesLibraryFiles:
+      /system/framework/android.test.base.jar
+    timeStamp=2021-11-07 23:55:08
+    firstInstallTime=2021-11-07 23:55:09
+    lastUpdateTime=2021-11-07 23:55:09
+    installerPackageName=com.android.packageinstaller
+    signatures=PackageSignatures{f05ebf2 version:3, signatures:[8f857bc5], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    requested permissions:
+      android.permission.ACCESS_NETWORK_STATE
+      android.permission.ACCESS_FINE_LOCATION
+      android.permission.ACCESS_LOCATION_EXTRA_COMMANDS
+      android.permission.INTERNET
+      android.permission.WRITE_EXTERNAL_STORAGE: restricted=true
+      android.permission.ACCESS_COARSE_LOCATION
+      android.permission.READ_EXTERNAL_STORAGE: restricted=true
+    install permissions:
+      android.permission.INTERNET: granted=true
+      android.permission.ACCESS_LOCATION_EXTRA_COMMANDS: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+    User 0: ceDataInode=392616 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      lastDisabledCaller: com.android.packageinstaller
+      gids=[3003]
+      runtime permissions:
+        android.permission.ACCESS_FINE_LOCATION: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_EXTERNAL_STORAGE: granted=false, flags=[ REVOKE_WHEN_REQUESTED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_COARSE_LOCATION: granted=true, flags=[ USER_SET|REVOKE_WHEN_REQUESTED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.WRITE_EXTERNAL_STORAGE: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+  queryable via interaction:
+    User 0:
+      [lineageos.platform,org.lineageos.flipflap,com.android.location.fused,com.android.providers.settings,com.android.server.telecom,org.lineageos.settings.device,org.lineageos.lineageparts,org.lineageos.setupwizard,com.android.localtransport,android,org.lineageos.settings.doze,com.android.settings,com.android.keychain,com.android.wallpaperbackup,com.android.inputdevices,com.android.dynsystem,org.lineageos.lineagesettings]:
+        com.android.gpstest.osmdroid
+      com.android.inputmethod.latin:
+        com.android.gpstest.osmdroid
+      com.android.permissioncontroller:
+        com.android.gpstest.osmdroid
+
+Package Changes:
+  Sequence number=7
+  User 0:
+    seq=0, package=com.android.traceur
+    seq=3, package=org.fdroid.fdroid
+    seq=5, package=org.jitsi.meet
+    seq=6, package=com.android.gpstest.osmdroid
+
+
+Dexopt state:
+  [com.android.gpstest.osmdroid]
+    path: /data/app/~~DtCl3GSWjjDeCZQY6-JYjQ==/com.android.gpstest.osmdroid-R1hWv_dQbz--sDQlVH8myQ==/base.apk
+      arm64: [status=speed-profile] [reason=install]
+
+
+Compiler stats:
+  [com.android.gpstest.osmdroid]
+     base.apk - 883

@@ -1,0 +1,603 @@
+Activity Resolver Table:
+  Schemes:
+      FDROIDREPOS:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 6f56c05
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "fdroidrepo"
+          Scheme: "FDROIDREPO"
+          Scheme: "fdroidrepos"
+          Scheme: "FDROIDREPOS"
+      market:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter c0cf3e4
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "market"
+          Authority: "details": -1
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter fbcd449
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "market"
+          Authority: "search": -1
+      fdroid.search:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter f976a50
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "fdroid.search"
+      HTTP:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter b10db7c
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "http"
+          Scheme: "HTTP"
+          Scheme: "https"
+          Scheme: "HTTPS"
+          Authority: "": -1 WILD
+          Path: "PatternMatcher{LITERAL: /fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{LITERAL: /fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{LITERAL: /FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/FDROID/REPO}"
+      amzn:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter e2b4702
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "amzn"
+          Authority: "apps": -1
+          Path: "PatternMatcher{LITERAL: /android}"
+      http:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 93a2b77
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Authority: "f-droid.org": -1
+          Authority: "www.f-droid.org": -1
+          Authority: "staging.f-droid.org": -1
+          Path: "PatternMatcher{PREFIX: /app/}"
+          Path: "PatternMatcher{PREFIX: /packages/}"
+          Path: "PatternMatcher{PREFIX: /repository/browse}"
+          Path: "PatternMatcher{GLOB: /.*/packages/.*}"
+          Path: "PatternMatcher{GLOB: /.*/packages/.*/}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter a2b804d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "play.google.com": -1
+          Path: "PatternMatcher{LITERAL: /store/apps/details}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 59c0813
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "amazon.com": -1
+          Authority: "www.amazon.com": -1
+          Path: "PatternMatcher{LITERAL: /gp/mas/dl/android}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 58ad14e
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "play.google.com": -1
+          Path: "PatternMatcher{LITERAL: /store/search}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter b10db7c
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "http"
+          Scheme: "HTTP"
+          Scheme: "https"
+          Scheme: "HTTPS"
+          Authority: "": -1 WILD
+          Path: "PatternMatcher{LITERAL: /fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{LITERAL: /fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{LITERAL: /FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/FDROID/REPO}"
+      HTTPS:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter b10db7c
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "http"
+          Scheme: "HTTP"
+          Scheme: "https"
+          Scheme: "HTTPS"
+          Authority: "": -1 WILD
+          Path: "PatternMatcher{LITERAL: /fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{LITERAL: /fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{LITERAL: /FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/FDROID/REPO}"
+      https:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 1500976
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "https"
+          Authority: "f-droid.org": -1
+          Authority: "www.f-droid.org": -1
+          Authority: "staging.f-droid.org": -1
+          Path: "PatternMatcher{PREFIX: /app/}"
+          Path: "PatternMatcher{PREFIX: /packages/}"
+          Path: "PatternMatcher{PREFIX: /repository/browse}"
+          Path: "PatternMatcher{GLOB: /.*/packages/.*}"
+          Path: "PatternMatcher{GLOB: /.*/packages/.*/}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter a2b804d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "play.google.com": -1
+          Path: "PatternMatcher{LITERAL: /store/apps/details}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 59c0813
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "amazon.com": -1
+          Authority: "www.amazon.com": -1
+          Path: "PatternMatcher{LITERAL: /gp/mas/dl/android}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 58ad14e
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "play.google.com": -1
+          Path: "PatternMatcher{LITERAL: /store/search}"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter b10db7c
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "http"
+          Scheme: "HTTP"
+          Scheme: "https"
+          Scheme: "HTTPS"
+          Authority: "": -1 WILD
+          Path: "PatternMatcher{LITERAL: /fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/.*/.*/fdroid/repo/*}"
+          Path: "PatternMatcher{LITERAL: /fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/.*/fdroid/archive/*}"
+          Path: "PatternMatcher{LITERAL: /FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/FDROID/REPO}"
+          Path: "PatternMatcher{GLOB: /.*/.*/.*/FDROID/REPO}"
+      fdroid.app:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 400b411
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "fdroid.app"
+      fdroidrepo:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 6f56c05
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "fdroidrepo"
+          Scheme: "FDROIDREPO"
+          Scheme: "fdroidrepos"
+          Scheme: "FDROIDREPOS"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter e46b45a
+          Action: "android.nfc.action.NDEF_DISCOVERED"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "fdroidrepo"
+          Scheme: "fdroidrepos"
+      fdroidrepos:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 6f56c05
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "fdroidrepo"
+          Scheme: "FDROIDREPO"
+          Scheme: "fdroidrepos"
+          Scheme: "FDROIDREPOS"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter e46b45a
+          Action: "android.nfc.action.NDEF_DISCOVERED"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "fdroidrepo"
+          Scheme: "fdroidrepos"
+      FDROIDREPO:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 6f56c05
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "fdroidrepo"
+          Scheme: "FDROIDREPO"
+          Scheme: "fdroidrepos"
+          Scheme: "FDROIDREPOS"
+
+  Non-Data Actions:
+      info.guardianproject.panic.action.CONNECT:
+        24282d9 org.fdroid.fdroid/.panic.PanicPreferencesActivity filter 706049e
+          Action: "info.guardianproject.panic.action.CONNECT"
+          Action: "info.guardianproject.panic.action.DISCONNECT"
+          Category: "android.intent.category.DEFAULT"
+      android.intent.action.MAIN:
+        acf7395 org.fdroid.fdroid/.panic.CalculatorActivity filter 9c9ccaa
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 4534c38
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+      info.guardianproject.panic.action.DISCONNECT:
+        24282d9 org.fdroid.fdroid/.panic.PanicPreferencesActivity filter 706049e
+          Action: "info.guardianproject.panic.action.CONNECT"
+          Action: "info.guardianproject.panic.action.DISCONNECT"
+          Category: "android.intent.category.DEFAULT"
+      info.guardianproject.panic.action.TRIGGER:
+        32c4b7f org.fdroid.fdroid/.panic.PanicResponderActivity filter c17074c
+          Action: "info.guardianproject.panic.action.TRIGGER"
+          Category: "android.intent.category.DEFAULT"
+      android.intent.action.SEARCH:
+        cc4209b org.fdroid.fdroid/.views.main.MainActivity filter 835126f
+          Action: "android.intent.action.SEARCH"
+
+Receiver Resolver Table:
+  Schemes:
+      package:
+        935755f org.fdroid.fdroid/.receiver.PackageManagerReceiver filter c001bac
+          Action: "android.intent.action.PACKAGE_ADDED"
+          Action: "android.intent.action.PACKAGE_CHANGED"
+          Action: "android.intent.action.PACKAGE_REMOVED"
+          Scheme: "package"
+      file:
+        3671c03 org.fdroid.fdroid/.nearby.UsbDeviceMediaMountedReceiver filter ac20780
+          Action: "android.intent.action.MEDIA_EJECT"
+          Action: "android.intent.action.MEDIA_REMOVED"
+          Action: "android.intent.action.MEDIA_MOUNTED"
+          Action: "android.intent.action.MEDIA_BAD_REMOVAL"
+          Scheme: "content"
+          Scheme: "file"
+      content:
+        3671c03 org.fdroid.fdroid/.nearby.UsbDeviceMediaMountedReceiver filter ac20780
+          Action: "android.intent.action.MEDIA_EJECT"
+          Action: "android.intent.action.MEDIA_REMOVED"
+          Action: "android.intent.action.MEDIA_MOUNTED"
+          Action: "android.intent.action.MEDIA_BAD_REMOVAL"
+          Scheme: "content"
+          Scheme: "file"
+
+  Non-Data Actions:
+      android.hardware.usb.action.USB_DEVICE_ATTACHED:
+        1d6e067 org.fdroid.fdroid/.nearby.UsbDeviceAttachedReceiver filter 7871e14
+          Action: "android.hardware.usb.action.USB_DEVICE_ATTACHED"
+      android.intent.action.BATTERY_OKAY:
+        a66087b org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy filter e294698
+          Action: "android.intent.action.BATTERY_OKAY"
+          Action: "android.intent.action.BATTERY_LOW"
+      android.intent.action.ACTION_POWER_DISCONNECTED:
+        7826075 org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy filter b64e80a
+          Action: "android.intent.action.ACTION_POWER_CONNECTED"
+          Action: "android.intent.action.ACTION_POWER_DISCONNECTED"
+      android.hardware.usb.action.USB_DEVICE_DETACHED:
+        72a16bd org.fdroid.fdroid/.nearby.UsbDeviceDetachedReceiver filter 30774b2
+          Action: "android.hardware.usb.action.USB_DEVICE_DETACHED"
+      android.intent.action.DEVICE_STORAGE_LOW:
+        b65c381 org.fdroid.fdroid/.receiver.DeviceStorageReceiver filter 2abbc26
+          Action: "android.intent.action.DEVICE_STORAGE_LOW"
+        ca58ef1 org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy filter 3717ad6
+          Action: "android.intent.action.DEVICE_STORAGE_LOW"
+          Action: "android.intent.action.DEVICE_STORAGE_OK"
+      android.net.conn.CONNECTIVITY_CHANGE:
+        242b157 org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy filter 8b83444
+          Action: "android.net.conn.CONNECTIVITY_CHANGE"
+      android.intent.action.DEVICE_STORAGE_OK:
+        ca58ef1 org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy filter 3717ad6
+          Action: "android.intent.action.DEVICE_STORAGE_LOW"
+          Action: "android.intent.action.DEVICE_STORAGE_OK"
+      android.net.wifi.STATE_CHANGE:
+        6aa668b org.fdroid.fdroid/.nearby.WifiStateChangeReceiver filter c4e3368
+          Action: "android.net.wifi.STATE_CHANGE"
+      android.intent.action.BATTERY_LOW:
+        a66087b org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy filter e294698
+          Action: "android.intent.action.BATTERY_OKAY"
+          Action: "android.intent.action.BATTERY_LOW"
+      android.intent.action.TIMEZONE_CHANGED:
+        6f3292d org.fdroid.fdroid/androidx.work.impl.background.systemalarm.RescheduleReceiver filter 1e26e62
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+      android.intent.action.TIME_SET:
+        6f3292d org.fdroid.fdroid/androidx.work.impl.background.systemalarm.RescheduleReceiver filter 1e26e62
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+      android.intent.action.BOOT_COMPLETED:
+        fe661b9 org.fdroid.fdroid/.receiver.StartupReceiver filter 4f429fe
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Category: "android.intent.category.HOME"
+        6f3292d org.fdroid.fdroid/androidx.work.impl.background.systemalarm.RescheduleReceiver filter 1e26e62
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+      android.intent.action.ACTION_POWER_CONNECTED:
+        7826075 org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy filter b64e80a
+          Action: "android.intent.action.ACTION_POWER_CONNECTED"
+          Action: "android.intent.action.ACTION_POWER_DISCONNECTED"
+      androidx.work.diagnostics.REQUEST_DIAGNOSTICS:
+        b062b29 org.fdroid.fdroid/androidx.work.impl.diagnostics.DiagnosticsReceiver filter d7d0eae
+          Action: "androidx.work.diagnostics.REQUEST_DIAGNOSTICS"
+      androidx.work.impl.background.systemalarm.UpdateProxies:
+        cd70bf3 org.fdroid.fdroid/androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver filter e2650b0
+          Action: "androidx.work.impl.background.systemalarm.UpdateProxies"
+
+Registered ContentProviders:
+  org.fdroid.fdroid/.data.TempApkProvider:
+    Provider{133a3eb org.fdroid.fdroid/.data.TempApkProvider}
+  org.fdroid.fdroid/.data.AppProvider:
+    Provider{1b09548 org.fdroid.fdroid/.data.AppProvider}
+  org.fdroid.fdroid/.data.ApkProvider:
+    Provider{35bafe1 org.fdroid.fdroid/.data.ApkProvider}
+  org.fdroid.fdroid/.installer.ApkFileProvider:
+    Provider{6a6a106 org.fdroid.fdroid/.installer.ApkFileProvider}
+  org.fdroid.fdroid/.data.RepoProvider:
+    Provider{aa693c7 org.fdroid.fdroid/.data.RepoProvider}
+  org.fdroid.fdroid/androidx.core.content.FileProvider:
+    Provider{cddbdf4 org.fdroid.fdroid/androidx.core.content.FileProvider}
+  org.fdroid.fdroid/.data.PackageIdProvider:
+    Provider{902691d org.fdroid.fdroid/.data.PackageIdProvider}
+  org.fdroid.fdroid/.data.AppPrefsProvider:
+    Provider{b7bc792 org.fdroid.fdroid/.data.AppPrefsProvider}
+  org.fdroid.fdroid/.data.CategoryProvider:
+    Provider{76ea563 org.fdroid.fdroid/.data.CategoryProvider}
+  org.fdroid.fdroid/.data.InstalledAppProvider:
+    Provider{e12c560 org.fdroid.fdroid/.data.InstalledAppProvider}
+  org.fdroid.fdroid/.data.TempAppProvider:
+    Provider{e617a19 org.fdroid.fdroid/.data.TempAppProvider}
+
+ContentProvider Authorities:
+  [org.fdroid.fdroid.data.TempApkProvider]:
+    Provider{133a3eb org.fdroid.fdroid/.data.TempApkProvider}
+      applicationInfo=ApplicationInfo{da0cf24 org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.AppProvider]:
+    Provider{1b09548 org.fdroid.fdroid/.data.AppProvider}
+      applicationInfo=ApplicationInfo{66d5a8d org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.ApkProvider]:
+    Provider{35bafe1 org.fdroid.fdroid/.data.ApkProvider}
+      applicationInfo=ApplicationInfo{434b442 org.fdroid.fdroid}
+  [org.fdroid.fdroid.installer.ApkFileProvider]:
+    Provider{6a6a106 org.fdroid.fdroid/.installer.ApkFileProvider}
+      applicationInfo=ApplicationInfo{6690c53 org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.RepoProvider]:
+    Provider{aa693c7 org.fdroid.fdroid/.data.RepoProvider}
+      applicationInfo=ApplicationInfo{7adb990 org.fdroid.fdroid}
+  [org.fdroid.fdroid.installer]:
+    Provider{cddbdf4 org.fdroid.fdroid/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{8e21289 org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.PackageIdProvider]:
+    Provider{902691d org.fdroid.fdroid/.data.PackageIdProvider}
+      applicationInfo=ApplicationInfo{8ddd28e org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.AppPrefsProvider]:
+    Provider{b7bc792 org.fdroid.fdroid/.data.AppPrefsProvider}
+      applicationInfo=ApplicationInfo{46e1aaf org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.CategoryProvider]:
+    Provider{76ea563 org.fdroid.fdroid/.data.CategoryProvider}
+      applicationInfo=ApplicationInfo{15cdebc org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.InstalledAppProvider]:
+    Provider{e12c560 org.fdroid.fdroid/.data.InstalledAppProvider}
+      applicationInfo=ApplicationInfo{1d04e45 org.fdroid.fdroid}
+  [org.fdroid.fdroid.data.TempAppProvider]:
+    Provider{e617a19 org.fdroid.fdroid/.data.TempAppProvider}
+      applicationInfo=ApplicationInfo{be8899a org.fdroid.fdroid}
+
+Key Set Manager:
+  [org.fdroid.fdroid]
+      Signing KeySets: 9
+
+Packages:
+  Package [org.fdroid.fdroid] (c34d38d):
+    userId=10151
+    pkg=Package{7013942 org.fdroid.fdroid}
+    codePath=/data/app/~~STVfdipYRYJs6KMukOgQrg==/org.fdroid.fdroid-v49NvZi77MbfUKeimvYw9A==
+    resourcePath=/data/app/~~STVfdipYRYJs6KMukOgQrg==/org.fdroid.fdroid-v49NvZi77MbfUKeimvYw9A==
+    legacyNativeLibraryDir=/data/app/~~STVfdipYRYJs6KMukOgQrg==/org.fdroid.fdroid-v49NvZi77MbfUKeimvYw9A==/lib
+    primaryCpuAbi=null
+    secondaryCpuAbi=null
+    versionCode=1013051 minSdk=22 targetSdk=25
+    versionName=1.13.1
+    splits=[base]
+    apkSigningVersion=3
+    applicationInfo=ApplicationInfo{7013942 org.fdroid.fdroid}
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE HAS_DOMAIN_URLS PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/org.fdroid.fdroid
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesLibraries:
+      android.test.base
+      org.apache.http.legacy
+    usesLibraryFiles:
+      /system/framework/android.test.base.jar
+      /system/framework/org.apache.http.legacy.jar
+    timeStamp=2021-11-04 20:12:50
+    firstInstallTime=2021-11-04 20:12:50
+    lastUpdateTime=2021-11-04 20:12:50
+    installerPackageName=com.android.packageinstaller
+    signatures=PackageSignatures{603ad53 version:3, signatures:[8b8a3ff5], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    requested permissions:
+      android.permission.INTERNET
+      android.permission.ACCESS_NETWORK_STATE
+      android.permission.ACCESS_WIFI_STATE
+      android.permission.CHANGE_WIFI_MULTICAST_STATE
+      android.permission.CHANGE_NETWORK_STATE
+      android.permission.CHANGE_WIFI_STATE
+      android.permission.BLUETOOTH
+      android.permission.BLUETOOTH_ADMIN
+      android.permission.RECEIVE_BOOT_COMPLETED
+      android.permission.READ_EXTERNAL_STORAGE: restricted=true
+      android.permission.WRITE_EXTERNAL_STORAGE: restricted=true
+      android.permission.WRITE_SETTINGS
+      android.permission.NFC
+      android.permission.WAKE_LOCK
+      android.permission.ACCESS_COARSE_LOCATION
+      android.permission.FOREGROUND_SERVICE
+      android.permission.ACCESS_BACKGROUND_LOCATION: restricted=true
+      android.permission.ACCESS_MEDIA_LOCATION
+    install permissions:
+      android.permission.NFC: granted=true
+      android.permission.CHANGE_NETWORK_STATE: granted=true
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.RECEIVE_BOOT_COMPLETED: granted=true
+      android.permission.BLUETOOTH: granted=true
+      android.permission.CHANGE_WIFI_MULTICAST_STATE: granted=true
+      android.permission.INTERNET: granted=true
+      android.permission.BLUETOOTH_ADMIN: granted=true
+      android.permission.CHANGE_WIFI_STATE: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+      android.permission.ACCESS_WIFI_STATE: granted=true
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=392899 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      lastDisabledCaller: com.android.packageinstaller
+      gids=[3002, 3003, 3001]
+      runtime permissions:
+        android.permission.READ_EXTERNAL_STORAGE: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_COARSE_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.WRITE_EXTERNAL_STORAGE: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_BACKGROUND_LOCATION: granted=false, flags=[ REVOKE_WHEN_REQUESTED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_MEDIA_LOCATION: granted=false, flags=[ REVOKE_WHEN_REQUESTED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+      enabledComponents:
+        androidx.work.impl.background.systemalarm.RescheduleReceiver
+        androidx.work.impl.background.systemjob.SystemJobService
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+    org.lineageos.etar:
+      org.fdroid.fdroid
+  queryable via interaction:
+    User 0:
+      [lineageos.platform,org.lineageos.flipflap,com.android.location.fused,com.android.providers.settings,com.android.server.telecom,org.lineageos.settings.device,org.lineageos.lineageparts,org.lineageos.setupwizard,com.android.localtransport,android,org.lineageos.settings.doze,com.android.settings,com.android.keychain,com.android.wallpaperbackup,com.android.inputdevices,com.android.dynsystem,org.lineageos.lineagesettings]:
+        org.fdroid.fdroid
+      com.android.bluetooth:
+        org.fdroid.fdroid
+      com.android.packageinstaller:
+        org.fdroid.fdroid
+      com.android.inputmethod.latin:
+        org.fdroid.fdroid
+      org.fdroid.fdroid:
+        [lineageos.platform,org.lineageos.flipflap,com.android.location.fused,com.android.providers.settings,com.android.server.telecom,org.lineageos.settings.device,org.lineageos.lineageparts,org.lineageos.setupwizard,com.android.localtransport,android,org.lineageos.settings.doze,com.android.settings,com.android.keychain,com.android.wallpaperbackup,com.android.inputdevices,com.android.dynsystem,org.lineageos.lineagesettings]
+        com.android.packageinstaller
+
+Package Changes:
+  Sequence number=6
+  User 0:
+    seq=0, package=com.android.traceur
+    seq=3, package=org.fdroid.fdroid
+    seq=5, package=org.jitsi.meet
+
+
+Dexopt state:
+  [org.fdroid.fdroid]
+    path: /data/app/~~STVfdipYRYJs6KMukOgQrg==/org.fdroid.fdroid-v49NvZi77MbfUKeimvYw9A==/base.apk
+      arm64: [status=speed-profile] [reason=bg-dexopt]
+
+
+Compiler stats:
+  [org.fdroid.fdroid]
+     base.apk - 5956

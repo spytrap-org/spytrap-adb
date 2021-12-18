@@ -1,0 +1,141 @@
+Activity Resolver Table:
+  Schemes:
+      org.jitsi.meet:
+        83deac1 org.jitsi.meet/.MainActivity filter 36dde54
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "org.jitsi.meet"
+      https:
+        83deac1 org.jitsi.meet/.MainActivity filter 49b79a7
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "https"
+          Authority: "alpha.jitsi.net": -1
+          Authority: "beta.meet.jit.si": -1
+          Authority: "meet.jit.si": -1
+
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        83deac1 org.jitsi.meet/.MainActivity filter 229f266
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Service Resolver Table:
+  Non-Data Actions:
+      android.telecom.ConnectionService:
+        87d71fd org.jitsi.meet/.sdk.ConnectionService filter cd2cef2 permission android.permission.BIND_TELECOM_CONNECTION_SERVICE
+          Action: "android.telecom.ConnectionService"
+
+Registered ContentProviders:
+  org.jitsi.meet/com.oblador.performance.StartTimeProvider:
+    Provider{91ed803 org.jitsi.meet/com.oblador.performance.StartTimeProvider}
+  org.jitsi.meet/com.reactnativecommunity.webview.RNCWebViewFileProvider:
+    Provider{d451380 org.jitsi.meet/com.reactnativecommunity.webview.RNCWebViewFileProvider}
+
+ContentProvider Authorities:
+  [org.jitsi.meet.start.time.provider]:
+    Provider{91ed803 org.jitsi.meet/com.oblador.performance.StartTimeProvider}
+      applicationInfo=ApplicationInfo{75a7db9 org.jitsi.meet}
+  [org.jitsi.meet.fileprovider]:
+    Provider{d451380 org.jitsi.meet/com.reactnativecommunity.webview.RNCWebViewFileProvider}
+      applicationInfo=ApplicationInfo{9ec15fe org.jitsi.meet}
+
+Key Set Manager:
+  [org.jitsi.meet]
+      Signing KeySets: 10
+
+Packages:
+  Package [org.jitsi.meet] (8acf15f):
+    userId=10152
+    pkg=Package{1a7e7ac org.jitsi.meet}
+    codePath=/data/app/~~0aX7BWdP29TqZaPPXkHNIA==/org.jitsi.meet-hcYO-DrfCgXIZKdu4pcUeA==
+    resourcePath=/data/app/~~0aX7BWdP29TqZaPPXkHNIA==/org.jitsi.meet-hcYO-DrfCgXIZKdu4pcUeA==
+    legacyNativeLibraryDir=/data/app/~~0aX7BWdP29TqZaPPXkHNIA==/org.jitsi.meet-hcYO-DrfCgXIZKdu4pcUeA==/lib
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    versionCode=214010 minSdk=23 targetSdk=30
+    versionName=21.4.1
+    splits=[base]
+    apkSigningVersion=3
+    applicationInfo=ApplicationInfo{1a7e7ac org.jitsi.meet}
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE HAS_DOMAIN_URLS PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/org.jitsi.meet
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2021-11-04 20:13:57
+    firstInstallTime=2021-11-04 20:13:55
+    lastUpdateTime=2021-11-04 20:13:58
+    installerPackageName=com.android.packageinstaller
+    signatures=PackageSignatures{81c3c75 version:3, signatures:[224eb835], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    requested permissions:
+      android.permission.ACCESS_NETWORK_STATE
+      android.permission.BLUETOOTH
+      android.permission.CAMERA
+      android.permission.INTERNET
+      android.permission.MANAGE_OWN_CALLS
+      android.permission.MODIFY_AUDIO_SETTINGS
+      android.permission.RECORD_AUDIO
+      android.permission.SYSTEM_ALERT_WINDOW
+      android.permission.WAKE_LOCK
+      android.permission.ACCESS_WIFI_STATE
+      android.permission.FOREGROUND_SERVICE
+      android.permission.WRITE_CALENDAR
+      android.permission.READ_CALENDAR
+    install permissions:
+      android.permission.MODIFY_AUDIO_SETTINGS: granted=true
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.BLUETOOTH: granted=true
+      android.permission.INTERNET: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+      android.permission.MANAGE_OWN_CALLS: granted=true
+      android.permission.ACCESS_WIFI_STATE: granted=true
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=392898 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      lastDisabledCaller: com.android.packageinstaller
+      gids=[3002, 3003]
+      runtime permissions:
+        android.permission.READ_CALENDAR: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.CAMERA: granted=false, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.WRITE_CALENDAR: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.RECORD_AUDIO: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+  queryable via interaction:
+    User 0:
+      [lineageos.platform,org.lineageos.flipflap,com.android.location.fused,com.android.providers.settings,com.android.server.telecom,org.lineageos.settings.device,org.lineageos.lineageparts,org.lineageos.setupwizard,com.android.localtransport,android,org.lineageos.settings.doze,com.android.settings,com.android.keychain,com.android.wallpaperbackup,com.android.inputdevices,com.android.dynsystem,org.lineageos.lineagesettings]:
+        org.jitsi.meet
+      com.android.webview:
+        org.jitsi.meet
+      com.android.inputmethod.latin:
+        org.jitsi.meet
+      com.android.permissioncontroller:
+        org.jitsi.meet
+      org.jitsi.meet:
+        com.android.webview
+
+Package Changes:
+  Sequence number=6
+  User 0:
+    seq=0, package=com.android.traceur
+    seq=3, package=org.fdroid.fdroid
+    seq=5, package=org.jitsi.meet
+
+
+Dexopt state:
+  [org.jitsi.meet]
+    path: /data/app/~~0aX7BWdP29TqZaPPXkHNIA==/org.jitsi.meet-hcYO-DrfCgXIZKdu4pcUeA==/base.apk
+      arm64: [status=speed-profile] [reason=bg-dexopt]
+
+
+Compiler stats:
+  [org.jitsi.meet]
+     base.apk - 2802

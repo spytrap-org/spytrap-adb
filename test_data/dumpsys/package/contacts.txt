@@ -1,0 +1,1027 @@
+Activity Resolver Table:
+  Full MIME Types:
+      vnd.android.cursor.dir/raw_contact:
+        e069d70 com.android.contacts/.activities.ContactEditorActivity filter 16958e9
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+        28096e com.android.contacts/.activities.CompactContactEditorActivity filter cffb80f
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      vnd.android.cursor.item/person:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter dde9f79
+          Action: "android.intent.action.INSERT_OR_EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter 4af3d22
+          Action: "com.android.contacts.action.QUICK_CONTACT"
+          Action: "android.provider.action.QUICK_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter d8993b3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        d90209c com.android.contacts/.activities.ContactEditorSpringBoardActivity filter 4f59aa5
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+      vnd.android.cursor.dir/postal-address:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+      vnd.android.cursor.dir/calls:
+        3c5e734 com.android.contacts/.NonPhoneActivity filter c1ecfa3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          StaticType: "vnd.android.cursor.dir/calls"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      vnd.android.cursor.dir/group:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 3c433c3
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+      vnd.android.cursor.dir/phone:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+      vnd.android.cursor.item/postal-address:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+      vnd.android.cursor.item/postal-address_v2:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+      vnd.android.cursor.dir/email_v2:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+      vnd.android.cursor.dir/person:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9e5f87d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.item/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e069d70 com.android.contacts/.activities.ContactEditorActivity filter 16958e9
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+        28096e com.android.contacts/.activities.CompactContactEditorActivity filter cffb80f
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      vnd.android.cursor.item/contact:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter dde9f79
+          Action: "android.intent.action.INSERT_OR_EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter 4af3d22
+          Action: "com.android.contacts.action.QUICK_CONTACT"
+          Action: "android.provider.action.QUICK_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter d8993b3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        d90209c com.android.contacts/.activities.ContactEditorSpringBoardActivity filter 4f59aa5
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+      vnd.android.cursor.dir/postal-address_v2:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+      text/x-vcard:
+        8ccaa88 com.android.contacts/.vcard.ImportVCardActivity filter 84a3c21
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/directory"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+        873d846 com.android.contacts/.vcard.NfcImportVCardActivity filter 15c9a07
+          Action: "android.nfc.action.NDEF_DISCOVERED"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+      text/directory:
+        8ccaa88 com.android.contacts/.vcard.ImportVCardActivity filter 84a3c21
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/directory"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+      vnd.android.cursor.item/phone_v2:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+      text/vcard:
+        8ccaa88 com.android.contacts/.vcard.ImportVCardActivity filter 84a3c21
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/directory"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+        873d846 com.android.contacts/.vcard.NfcImportVCardActivity filter 15c9a07
+          Action: "android.nfc.action.NDEF_DISCOVERED"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+      vnd.android.cursor.item/group:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9e5f87d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.item/group"
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 64f1372
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/group"
+      vnd.android.cursor.item/phone:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+      vnd.android.cursor.dir/contact:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter a7dfc27
+          Action: "android.intent.action.SEARCH"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9e5f87d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.item/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e069d70 com.android.contacts/.activities.ContactEditorActivity filter 16958e9
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+        28096e com.android.contacts/.activities.CompactContactEditorActivity filter cffb80f
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      vnd.android.cursor.item/raw_contact:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter dde9f79
+          Action: "android.intent.action.INSERT_OR_EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter d8993b3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        d90209c com.android.contacts/.activities.ContactEditorSpringBoardActivity filter 4f59aa5
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+      vnd.android.cursor.dir/phone_v2:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+      image/*:
+        24f4e7a com.android.contacts/.activities.AttachPhotoActivity filter 209c62b
+          Action: "android.intent.action.ATTACH_DATA"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "image"
+          mPriority=0, mOrder=0, mHasStaticPartialTypes=true, mHasDynamicPartialTypes=false
+
+  Base MIME Types:
+      vnd.android.cursor.dir:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter a7dfc27
+          Action: "android.intent.action.SEARCH"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9e5f87d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.item/group"
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9e5f87d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.item/group"
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 3c433c3
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+        e069d70 com.android.contacts/.activities.ContactEditorActivity filter 16958e9
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+        e069d70 com.android.contacts/.activities.ContactEditorActivity filter 16958e9
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+        e069d70 com.android.contacts/.activities.ContactEditorActivity filter 16958e9
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+        28096e com.android.contacts/.activities.CompactContactEditorActivity filter cffb80f
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+        28096e com.android.contacts/.activities.CompactContactEditorActivity filter cffb80f
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+        28096e com.android.contacts/.activities.CompactContactEditorActivity filter cffb80f
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+        3c5e734 com.android.contacts/.NonPhoneActivity filter c1ecfa3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          StaticType: "vnd.android.cursor.dir/calls"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      vnd.android.cursor.item:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9e5f87d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.item/group"
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 64f1372
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/group"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter dde9f79
+          Action: "android.intent.action.INSERT_OR_EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter dde9f79
+          Action: "android.intent.action.INSERT_OR_EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter dde9f79
+          Action: "android.intent.action.INSERT_OR_EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter 4af3d22
+          Action: "com.android.contacts.action.QUICK_CONTACT"
+          Action: "android.provider.action.QUICK_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter 4af3d22
+          Action: "com.android.contacts.action.QUICK_CONTACT"
+          Action: "android.provider.action.QUICK_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter d8993b3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter d8993b3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter d8993b3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        d90209c com.android.contacts/.activities.ContactEditorSpringBoardActivity filter 4f59aa5
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        d90209c com.android.contacts/.activities.ContactEditorSpringBoardActivity filter 4f59aa5
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        d90209c com.android.contacts/.activities.ContactEditorSpringBoardActivity filter 4f59aa5
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+      text:
+        8ccaa88 com.android.contacts/.vcard.ImportVCardActivity filter 84a3c21
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/directory"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+        8ccaa88 com.android.contacts/.vcard.ImportVCardActivity filter 84a3c21
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/directory"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+        8ccaa88 com.android.contacts/.vcard.ImportVCardActivity filter 84a3c21
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/directory"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+        873d846 com.android.contacts/.vcard.NfcImportVCardActivity filter 15c9a07
+          Action: "android.nfc.action.NDEF_DISCOVERED"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+        873d846 com.android.contacts/.vcard.NfcImportVCardActivity filter 15c9a07
+          Action: "android.nfc.action.NDEF_DISCOVERED"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+
+  Wild MIME Types:
+      image:
+        24f4e7a com.android.contacts/.activities.AttachPhotoActivity filter 209c62b
+          Action: "android.intent.action.ATTACH_DATA"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "image"
+          mPriority=0, mOrder=0, mHasStaticPartialTypes=true, mHasDynamicPartialTypes=false
+
+  Schemes:
+      mailto:
+        3c83d17 com.android.contacts/.activities.ShowOrCreateActivity filter 5a93504
+          Action: "com.android.contacts.action.SHOW_OR_CREATE_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "mailto"
+          Scheme: "tel"
+      tel:
+        3c83d17 com.android.contacts/.activities.ShowOrCreateActivity filter 5a93504
+          Action: "com.android.contacts.action.SHOW_OR_CREATE_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          Scheme: "mailto"
+          Scheme: "tel"
+        3c5e734 com.android.contacts/.NonPhoneActivity filter 40532d2
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "tel"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+
+  Non-Data Actions:
+      com.android.contacts.action.LIST_CONTACTS_WITH_PHONES:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 43464b
+          Action: "com.android.contacts.action.LIST_CONTACTS_WITH_PHONES"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.TAB"
+      com.android.contacts.action.LIST_STREQUENT:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter d2eee6
+          Action: "com.android.contacts.action.LIST_STREQUENT"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.TAB"
+      android.intent.action.MAIN:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter c6b762f
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.LAUNCHER"
+          Category: "android.intent.category.BROWSABLE"
+          Category: "android.intent.category.APP_CONTACTS"
+        3c5e734 com.android.contacts/.NonPhoneActivity filter ded795d
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      android.intent.action.VIEW:
+        77442a0 com.android.contacts/.dialog.CallSubjectDialog filter 8d4e59
+          Action: "android.intent.action.VIEW"
+      com.android.contacts.action.LIST_ALL_CONTACTS:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter ebc3b1a
+          Action: "com.android.contacts.action.LIST_ALL_CONTACTS"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.TAB"
+      com.android.contacts.action.LIST_DEFAULT:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter f1dd43c
+          Action: "com.android.contacts.action.LIST_DEFAULT"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.TAB"
+      com.android.contacts.action.LIST_STARRED:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 511f828
+          Action: "com.android.contacts.action.LIST_STARRED"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.TAB"
+      com.android.contacts.action.LIST_FREQUENT:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9330941
+          Action: "com.android.contacts.action.LIST_FREQUENT"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.TAB"
+      com.android.contacts.action.JOIN_CONTACT:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter 9cc46c
+          Action: "com.android.contacts.action.JOIN_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+      com.android.contacts.action.LIST_CONTACTS:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 8c5d5c5
+          Action: "com.android.contacts.action.LIST_CONTACTS"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.TAB"
+      android.intent.action.CREATE_SHORTCUT:
+        e20ba35 com.android.contacts/alias.MessageShortcut filter 6a99eca
+          Action: "android.intent.action.CREATE_SHORTCUT"
+          Category: "android.intent.category.DEFAULT"
+        ed6583b com.android.contacts/alias.DialShortcut filter 8c7bb58
+          Action: "android.intent.action.CREATE_SHORTCUT"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.CAR_MODE"
+        62fc4b1 com.android.contacts/.ContactShortcut filter 22add96
+          Action: "android.intent.action.CREATE_SHORTCUT"
+          Category: "android.intent.category.DEFAULT"
+      android.intent.action.SEARCH:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 7a26ed4
+          Action: "android.intent.action.SEARCH"
+          Category: "android.intent.category.DEFAULT"
+
+  MIME Typed Actions:
+      com.android.contacts.action.QUICK_CONTACT:
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter 4af3d22
+          Action: "com.android.contacts.action.QUICK_CONTACT"
+          Action: "android.provider.action.QUICK_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+      android.intent.action.EDIT:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 64f1372
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/group"
+        d90209c com.android.contacts/.activities.ContactEditorSpringBoardActivity filter 4f59aa5
+          Action: "android.intent.action.EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+      android.intent.action.PICK:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cf6f4be
+          Action: "android.intent.action.PICK"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/phone_v2"
+          StaticType: "vnd.android.cursor.dir/phone"
+          StaticType: "vnd.android.cursor.dir/postal-address_v2"
+          StaticType: "vnd.android.cursor.dir/postal-address"
+          StaticType: "vnd.android.cursor.dir/email_v2"
+          StaticType: "vnd.android.cursor.dir/group"
+      android.intent.action.VIEW:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 9e5f87d
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.item/group"
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter d8993b3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+        8ccaa88 com.android.contacts/.vcard.ImportVCardActivity filter 84a3c21
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/directory"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+        3c5e734 com.android.contacts/.NonPhoneActivity filter c1ecfa3
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          StaticType: "vnd.android.cursor.dir/calls"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      android.provider.action.QUICK_CONTACT:
+        c4afaed com.android.contacts/.quickcontact.QuickContactActivity filter 4af3d22
+          Action: "com.android.contacts.action.QUICK_CONTACT"
+          Action: "android.provider.action.QUICK_CONTACT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+      android.intent.action.GET_CONTENT:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter cac491f
+          Action: "android.intent.action.GET_CONTENT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/phone_v2"
+          StaticType: "vnd.android.cursor.item/phone"
+          StaticType: "vnd.android.cursor.item/postal-address_v2"
+          StaticType: "vnd.android.cursor.item/postal-address"
+      android.intent.action.INSERT_OR_EDIT:
+        e21a440 com.android.contacts/.activities.ContactSelectionActivity filter dde9f79
+          Action: "android.intent.action.INSERT_OR_EDIT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.item/person"
+          StaticType: "vnd.android.cursor.item/contact"
+          StaticType: "vnd.android.cursor.item/raw_contact"
+      android.intent.action.INSERT:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter 3c433c3
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/group"
+        e069d70 com.android.contacts/.activities.ContactEditorActivity filter 16958e9
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+        28096e com.android.contacts/.activities.CompactContactEditorActivity filter cffb80f
+          Action: "android.intent.action.INSERT"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/person"
+          StaticType: "vnd.android.cursor.dir/contact"
+          StaticType: "vnd.android.cursor.dir/raw_contact"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      android.nfc.action.NDEF_DISCOVERED:
+        873d846 com.android.contacts/.vcard.NfcImportVCardActivity filter 15c9a07
+          Action: "android.nfc.action.NDEF_DISCOVERED"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "text/vcard"
+          StaticType: "text/x-vcard"
+      android.intent.action.ATTACH_DATA:
+        24f4e7a com.android.contacts/.activities.AttachPhotoActivity filter 209c62b
+          Action: "android.intent.action.ATTACH_DATA"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "image"
+          mPriority=0, mOrder=0, mHasStaticPartialTypes=true, mHasDynamicPartialTypes=false
+      android.intent.action.SEARCH:
+        2516c0e com.android.contacts/.activities.PeopleActivity filter a7dfc27
+          Action: "android.intent.action.SEARCH"
+          Category: "android.intent.category.DEFAULT"
+          StaticType: "vnd.android.cursor.dir/contact"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      android.intent.action.BOOT_COMPLETED:
+        bdfaa1e com.android.contacts/.interactions.OnBootOrUpgradeReceiver filter 544c2ff
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+      android.intent.action.MY_PACKAGE_REPLACED:
+        bdfaa1e com.android.contacts/.interactions.OnBootOrUpgradeReceiver filter 544c2ff
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+
+Service Resolver Table:
+  Full MIME Types:
+      vnd.android.cursor.item/contact:
+        1eae8cc com.android.contacts/.ViewNotificationService filter dbb7715 permission android.permission.WRITE_CONTACTS
+          Action: "com.android.contacts.VIEW_NOTIFICATION"
+          StaticType: "vnd.android.cursor.item/contact"
+
+  Base MIME Types:
+      vnd.android.cursor.item:
+        1eae8cc com.android.contacts/.ViewNotificationService filter dbb7715 permission android.permission.WRITE_CONTACTS
+          Action: "com.android.contacts.VIEW_NOTIFICATION"
+          StaticType: "vnd.android.cursor.item/contact"
+
+  MIME Typed Actions:
+      com.android.contacts.VIEW_NOTIFICATION:
+        1eae8cc com.android.contacts/.ViewNotificationService filter dbb7715 permission android.permission.WRITE_CONTACTS
+          Action: "com.android.contacts.VIEW_NOTIFICATION"
+          StaticType: "vnd.android.cursor.item/contact"
+
+Registered ContentProviders:
+  com.android.contacts/androidx.core.content.FileProvider:
+    Provider{df5c7f3 com.android.contacts/androidx.core.content.FileProvider}
+
+ContentProvider Authorities:
+  [com.android.contacts.files]:
+    Provider{df5c7f3 com.android.contacts/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{d845cb0 com.android.contacts}
+
+Key Set Manager:
+  [com.android.contacts]
+      Signing KeySets: 4
+
+Packages:
+  Package [com.android.contacts] (5b94729):
+    userId=10118
+    pkg=Package{647faae com.android.contacts}
+    codePath=/system/product/priv-app/Contacts
+    resourcePath=/system/product/priv-app/Contacts
+    legacyNativeLibraryDir=/system/product/priv-app/Contacts/lib
+    primaryCpuAbi=null
+    secondaryCpuAbi=null
+    versionCode=10731 minSdk=26 targetSdk=29
+    versionName=1.7.31
+    splits=[base]
+    apkSigningVersion=3
+    applicationInfo=ApplicationInfo{647faae com.android.contacts}
+    flags=[ SYSTEM HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVILEGED PRODUCT PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/com.android.contacts
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesLibraries:
+      android.test.base
+    usesLibraryFiles:
+      /system/framework/android.test.base.jar
+    timeStamp=2009-01-01 01:00:00
+    firstInstallTime=2009-01-01 01:00:00
+    lastUpdateTime=2009-01-01 01:00:00
+    signatures=PackageSignatures{b9af04f version:3, signatures:[ed46f865], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ SYSTEM HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    requested permissions:
+      android.permission.READ_CONTACTS
+      android.permission.WRITE_CONTACTS
+      android.permission.GET_ACCOUNTS
+      android.permission.GET_ACCOUNTS_PRIVILEGED
+      android.permission.MANAGE_ACCOUNTS
+      android.permission.ACCESS_NETWORK_STATE
+      android.permission.CALL_PHONE
+      android.permission.READ_PROFILE
+      android.permission.WRITE_PROFILE
+      android.permission.INTERNET
+      android.permission.NFC
+      android.permission.READ_PHONE_STATE
+      android.permission.WAKE_LOCK
+      android.permission.WRITE_SETTINGS
+      android.permission.USE_CREDENTIALS
+      android.permission.VIBRATE
+      android.permission.READ_SYNC_SETTINGS
+      android.permission.READ_EXTERNAL_STORAGE: restricted=true
+      com.android.launcher.permission.INSTALL_SHORTCUT
+      android.permission.WRITE_SYNC_SETTINGS
+      android.permission.READ_SYNC_STATS
+      android.permission.RECEIVE_BOOT_COMPLETED
+      android.permission.FOREGROUND_SERVICE
+      android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS
+    install permissions:
+      android.permission.WRITE_SETTINGS: granted=true
+      android.permission.USE_CREDENTIALS: granted=true
+      android.permission.MANAGE_ACCOUNTS: granted=true
+      android.permission.NFC: granted=true
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.WRITE_SYNC_SETTINGS: granted=true
+      android.permission.RECEIVE_BOOT_COMPLETED: granted=true
+      android.permission.READ_PROFILE: granted=true
+      android.permission.INTERNET: granted=true
+      android.permission.WRITE_PROFILE: granted=true
+      android.permission.GET_ACCOUNTS_PRIVILEGED: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+      android.permission.READ_SYNC_STATS: granted=true
+      android.permission.READ_SYNC_SETTINGS: granted=true
+      android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS: granted=true
+      android.permission.VIBRATE: granted=true
+      com.android.launcher.permission.INSTALL_SHORTCUT: granted=true
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=261398 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+        android.permission.READ_EXTERNAL_STORAGE: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_UPGRADE_EXEMPT]
+        android.permission.READ_PHONE_STATE: granted=true, flags=[ GRANTED_BY_DEFAULT|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.CALL_PHONE: granted=true, flags=[ GRANTED_BY_DEFAULT|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.WRITE_CONTACTS: granted=true, flags=[ GRANTED_BY_DEFAULT|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.GET_ACCOUNTS: granted=true, flags=[ GRANTED_BY_DEFAULT|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_CONTACTS: granted=true, flags=[ GRANTED_BY_DEFAULT|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+  queryable via interaction:
+    User 0:
+      [lineageos.platform,org.lineageos.flipflap,com.android.location.fused,com.android.providers.settings,com.android.server.telecom,org.lineageos.settings.device,org.lineageos.lineageparts,org.lineageos.setupwizard,com.android.localtransport,android,org.lineageos.settings.doze,com.android.settings,com.android.keychain,com.android.wallpaperbackup,com.android.inputdevices,com.android.dynsystem,org.lineageos.lineagesettings]:
+        com.android.contacts
+      [com.android.providers.contacts,com.android.calllogbackup,com.android.providers.blockednumber,com.android.providers.userdictionary]:
+        com.android.contacts
+
+Package Changes:
+  Sequence number=6
+  User 0:
+    seq=0, package=com.android.traceur
+    seq=3, package=org.fdroid.fdroid
+    seq=5, package=org.jitsi.meet
+
+
+Dexopt state:
+  [com.android.contacts]
+    path: /system/product/priv-app/Contacts/Contacts.apk
+      arm64: [status=speed-profile] [reason=bg-dexopt]
+
+
+Compiler stats:
+  [com.android.contacts]
+     Contacts.apk - 1049
