@@ -73,10 +73,8 @@ fn main() -> Result<()> {
                 let info = package::dump(&device, &pkg.id)?;
                 trace!("package infos {:?}: {:#?}", pkg.id, info);
 
-                if let Some(installer) = info.installer_package_name() {
-                    warn!("package {:?} installed by {:?}", pkg.id, installer);
-
-                    // TODO: suspicious, manually installed: com.android.packageinstaller
+                for sus in info.audit() {
+                    warn!("Suspicious {:?}: {:?}", sus.level, sus.description);
                 }
             }
 
@@ -86,8 +84,8 @@ fn main() -> Result<()> {
             if services.contains("accessibility") {
                 info!("Reading accessibility settings");
                 let accessibility = accessibility::dump(&device)?;
-                for suspicion in accessibility.audit() {
-                    warn!("Suspicious {:?}: {:?}", suspicion.level, suspicion.description);
+                for sus in accessibility.audit() {
+                    warn!("Suspicious {:?}: {:?}", sus.level, sus.description);
                 }
             }
 

@@ -1,5 +1,5 @@
 use crate::errors::*;
-use crate::iocs::Suspicion;
+use crate::iocs::{Suspicion, SuspicionLevel};
 use crate::parsers::{self, package::PackageInfo};
 use mozdevice::Device;
 use std::borrow::Cow;
@@ -15,7 +15,25 @@ pub fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
 
 impl PackageInfo {
     pub fn audit(&self) -> Vec<Suspicion> {
-        vec![]
+        let mut sus = Vec::new();
+
+        match self.installer_package_name() {
+            Some("com.android.packageinstaller") => {
+                sus.push(Suspicion {
+                    level: SuspicionLevel::Medium,
+                    description: format!("Package {:?} was manually installed", self.id),
+                });
+            },
+            Some(installer) => {
+                sus.push(Suspicion {
+                    level: SuspicionLevel::Medium,
+                    description: format!("Package {:?} was manually installed by an unknown installer: {:?}", self.id, installer),
+                });
+            },
+            None => (),
+        }
+
+        sus
     }
 
     pub fn installer_package_name(&self) -> Option<&str> {
@@ -32,7 +50,12 @@ mod tests {
         let data = include_str!("../test_data/dumpsys/package/spylive360.txt");
         let pkginfo = parsers::package::parse_output(data, "com.wifi0").unwrap();
         let sus = pkginfo.audit();
-        assert_eq!(&sus, &[]);
+        assert_eq!(&sus, &[
+            Suspicion {
+                level: SuspicionLevel::Medium,
+                description: "Package \"com.wifi0\" was manually installed".to_string(),
+            },
+        ]);
     }
 
     #[test]
@@ -48,7 +71,12 @@ mod tests {
         let data = include_str!("../test_data/dumpsys/package/fdroid.txt");
         let pkginfo = parsers::package::parse_output(data, "org.fdroid.fdroid").unwrap();
         let sus = pkginfo.audit();
-        assert_eq!(&sus, &[]);
+        assert_eq!(&sus, &[
+            Suspicion {
+                level: SuspicionLevel::Medium,
+                description: "Package \"org.fdroid.fdroid\" was manually installed".to_string(),
+            },
+        ]);
     }
 
     #[test]
@@ -56,7 +84,12 @@ mod tests {
         let data = include_str!("../test_data/dumpsys/package/gpstest.txt");
         let pkginfo = parsers::package::parse_output(data, "com.android.gpstest.osmdroid").unwrap();
         let sus = pkginfo.audit();
-        assert_eq!(&sus, &[]);
+        assert_eq!(&sus, &[
+            Suspicion {
+                level: SuspicionLevel::Medium,
+                description: "Package \"com.android.gpstest.osmdroid\" was manually installed".to_string(),
+            },
+        ]);
     }
 
     #[test]
@@ -64,6 +97,11 @@ mod tests {
         let data = include_str!("../test_data/dumpsys/package/jitsi.txt");
         let pkginfo = parsers::package::parse_output(data, "org.jitsi.meet").unwrap();
         let sus = pkginfo.audit();
-        assert_eq!(&sus, &[]);
+        assert_eq!(&sus, &[
+            Suspicion {
+                level: SuspicionLevel::Medium,
+                description: "Package \"org.jitsi.meet\" was manually installed".to_string(),
+            },
+        ]);
     }
 }

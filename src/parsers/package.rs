@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Default)]
 pub struct PackageInfo {
+    pub id: String,
     pub fields: HashMap<String, String>,
     pub requested_permissions: Vec<Permission>,
     pub install_permissions: Vec<Permission>,
@@ -55,7 +56,10 @@ pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
     let mut prev_line = None;
     let mut section_stack = Vec::new();
 
-    let mut info = PackageInfo::default();
+    let mut info = PackageInfo {
+        id: package.to_string(),
+        ..Default::default()
+    };
 
     let mut indent = 0;
     for line in output.split('\n') {
@@ -128,6 +132,7 @@ mod tests {
         let data = include_str!("../../test_data/dumpsys/package/spylive360.txt");
         let pkginfo = parse_output(data, "com.wifi0").unwrap();
         assert_eq!(pkginfo, PackageInfo {
+            id: "com.wifi0".to_string(),
             fields: hashmap![
                 "userId".to_string() => "10155".to_string(),
                 "pkg".to_string() => "Package{19806ac com.wifi0}".to_string(),
@@ -228,6 +233,7 @@ mod tests {
         let data = include_str!("../../test_data/dumpsys/package/contacts.txt");
         let pkginfo = parse_output(data, "com.android.contacts").unwrap();
         assert_eq!(pkginfo, PackageInfo {
+            id: "com.android.contacts".to_string(),
             fields: hashmap![
                 "userId".to_string() => "10118".to_string(),
                 "pkg".to_string() => "Package{647faae com.android.contacts}".to_string(),
@@ -318,6 +324,7 @@ mod tests {
         let data = include_str!("../../test_data/dumpsys/package/fdroid.txt");
         let pkginfo = parse_output(data, "org.fdroid.fdroid").unwrap();
         assert_eq!(pkginfo, PackageInfo {
+            id: "org.fdroid.fdroid".to_string(),
             fields: hashmap![
                 "userId".to_string() => "10151".to_string(),
                 "pkg".to_string() => "Package{7013942 org.fdroid.fdroid}".to_string(),
@@ -396,6 +403,7 @@ mod tests {
         let data = include_str!("../../test_data/dumpsys/package/gpstest.txt");
         let pkginfo = parse_output(data, "com.android.gpstest.osmdroid").unwrap();
         assert_eq!(pkginfo, PackageInfo {
+            id: "com.android.gpstest.osmdroid".to_string(),
             fields: hashmap![
                 "userId".to_string() => "10153".to_string(),
                 "pkg".to_string() => "Package{746e2fd com.android.gpstest.osmdroid}".to_string(),
@@ -453,6 +461,7 @@ mod tests {
         let data = include_str!("../../test_data/dumpsys/package/jitsi.txt");
         let pkginfo = parse_output(data, "org.jitsi.meet").unwrap();
         assert_eq!(pkginfo, PackageInfo {
+            id: "org.jitsi.meet".to_string(),
             fields: hashmap![
                 "userId".to_string() => "10152".to_string(),
                 "pkg".to_string() => "Package{1a7e7ac org.jitsi.meet}".to_string(),
