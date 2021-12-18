@@ -1,0 +1,247 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        6e6b31 com.wifi0/.activities.WelcomeActivity filter c92c216
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      android.intent.action.BATTERY_OKAY:
+        5ab7925 com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy filter 8a0afa
+          Action: "android.intent.action.BATTERY_OKAY"
+          Action: "android.intent.action.BATTERY_LOW"
+      android.intent.action.ACTION_POWER_DISCONNECTED:
+        fa9d28f com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy filter 310691c
+          Action: "android.intent.action.ACTION_POWER_CONNECTED"
+          Action: "android.intent.action.ACTION_POWER_DISCONNECTED"
+      android.intent.action.QUICKBOOT_POWERON:
+        4a38797 com.wifi0/.BootComplete filter 2baed84
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Category: "android.intent.category.DEFAULT"
+      com.htc.intent.action.QUICKBOOT_POWERON:
+        4a38797 com.wifi0/.BootComplete filter 2baed84
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Category: "android.intent.category.DEFAULT"
+      android.intent.action.DEVICE_STORAGE_LOW:
+        17b08ab com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy filter d48fb08
+          Action: "android.intent.action.DEVICE_STORAGE_LOW"
+          Action: "android.intent.action.DEVICE_STORAGE_OK"
+      android.net.conn.CONNECTIVITY_CHANGE:
+        60d896d com.wifi0/.NetworkWatcher filter af0e9a2
+          Action: "android.net.conn.CONNECTIVITY_CHANGE"
+        4bf82a1 com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy filter 8dddcc6
+          Action: "android.net.conn.CONNECTIVITY_CHANGE"
+      android.intent.action.DEVICE_STORAGE_OK:
+        17b08ab com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy filter d48fb08
+          Action: "android.intent.action.DEVICE_STORAGE_LOW"
+          Action: "android.intent.action.DEVICE_STORAGE_OK"
+      android.app.action.DEVICE_ADMIN_ENABLED:
+        50f0633 com.wifi0/.receivers.DeviceAdmin filter 9bb5df0
+          Action: "android.app.action.DEVICE_ADMIN_ENABLED"
+      com.google.android.c2dm.intent.RECEIVE:
+        3064f69 com.wifi0/com.google.firebase.iid.FirebaseInstanceIdReceiver filter a17fdee
+          Action: "com.google.android.c2dm.intent.RECEIVE"
+      android.intent.action.BATTERY_LOW:
+        5ab7925 com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy filter 8a0afa
+          Action: "android.intent.action.BATTERY_OKAY"
+          Action: "android.intent.action.BATTERY_LOW"
+      android.intent.action.TIMEZONE_CHANGED:
+        6df8487 com.wifi0/androidx.work.impl.background.systemalarm.RescheduleReceiver filter ef6bfb4
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+      android.intent.action.TIME_SET:
+        6df8487 com.wifi0/androidx.work.impl.background.systemalarm.RescheduleReceiver filter ef6bfb4
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+      android.intent.action.BOOT_COMPLETED:
+        4a38797 com.wifi0/.BootComplete filter 2baed84
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Category: "android.intent.category.DEFAULT"
+        6df8487 com.wifi0/androidx.work.impl.background.systemalarm.RescheduleReceiver filter ef6bfb4
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+      android.intent.action.ACTION_POWER_CONNECTED:
+        fa9d28f com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy filter 310691c
+          Action: "android.intent.action.ACTION_POWER_CONNECTED"
+          Action: "android.intent.action.ACTION_POWER_DISCONNECTED"
+      androidx.work.diagnostics.REQUEST_DIAGNOSTICS:
+        b25e223 com.wifi0/androidx.work.impl.diagnostics.DiagnosticsReceiver filter 41a2320
+          Action: "androidx.work.diagnostics.REQUEST_DIAGNOSTICS"
+      android.intent.action.MY_PACKAGE_REPLACED:
+        4a38797 com.wifi0/.BootComplete filter 2baed84
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Category: "android.intent.category.DEFAULT"
+      androidx.work.impl.background.systemalarm.UpdateProxies:
+        6b0a7dd com.wifi0/androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver filter e4aff52
+          Action: "androidx.work.impl.background.systemalarm.UpdateProxies"
+
+Service Resolver Table:
+  Non-Data Actions:
+      com.google.firebase.MESSAGING_EVENT:
+        5ea7d7f com.wifi0/.services.FbMessagingService filter 64e514c
+          Action: "com.google.firebase.MESSAGING_EVENT"
+        233729b com.wifi0/com.google.firebase.messaging.FirebaseMessagingService filter bb53638
+          Action: "com.google.firebase.MESSAGING_EVENT"
+          mPriority=-500, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      android.service.notification.NotificationListenerService:
+        8e5f595 com.wifi0/.listeners.NotificationListener filter fb26aa permission android.permission.BIND_NOTIFICATION_LISTENER_SERVICE
+          Action: "android.service.notification.NotificationListenerService"
+      android.accessibilityservice.AccessibilityService:
+        94e4d9 com.wifi0/.AccessibilityReceiver4 filter 5f5be9e permission android.permission.BIND_ACCESSIBILITY_SERVICE
+          Action: "android.accessibilityservice.AccessibilityService"
+
+Registered ContentProviders:
+  com.wifi0/com.google.firebase.provider.FirebaseInitProvider:
+    Provider{2226303 com.wifi0/com.google.firebase.provider.FirebaseInitProvider}
+  com.wifi0/androidx.work.impl.WorkManagerInitializer:
+    Provider{a214280 com.wifi0/androidx.work.impl.WorkManagerInitializer}
+
+ContentProvider Authorities:
+  [com.wifi0.firebaseinitprovider]:
+    Provider{2226303 com.wifi0/com.google.firebase.provider.FirebaseInitProvider}
+      applicationInfo=ApplicationInfo{5ee0270 com.wifi0}
+  [com.wifi0.workmanager-init]:
+    Provider{a214280 com.wifi0/androidx.work.impl.WorkManagerInitializer}
+      applicationInfo=ApplicationInfo{db559e9 com.wifi0}
+
+Key Set Manager:
+  [com.wifi0]
+      Signing KeySets: 13
+
+Packages:
+  Package [com.wifi0] (5de2c5f):
+    userId=10155
+    pkg=Package{19806ac com.wifi0}
+    codePath=/data/app/~~V5jud4ex5-s8L3x2B4lvUA==/com.wifi0-q-C29yRZYy55N91XTD2EoA==
+    resourcePath=/data/app/~~V5jud4ex5-s8L3x2B4lvUA==/com.wifi0-q-C29yRZYy55N91XTD2EoA==
+    legacyNativeLibraryDir=/data/app/~~V5jud4ex5-s8L3x2B4lvUA==/com.wifi0-q-C29yRZYy55N91XTD2EoA==/lib
+    primaryCpuAbi=null
+    secondaryCpuAbi=null
+    versionCode=140 minSdk=19 targetSdk=30
+    versionName=1.4.0
+    splits=[base]
+    apkSigningVersion=2
+    applicationInfo=ApplicationInfo{19806ac com.wifi0}
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/com.wifi0
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2021-12-15 17:52:55
+    firstInstallTime=2021-12-15 17:51:52
+    lastUpdateTime=2021-12-15 17:52:55
+    installerPackageName=com.android.packageinstaller
+    signatures=PackageSignatures{4cb6f75 version:2, signatures:[74831dfd], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    requested permissions:
+      android.permission.ACCESS_FINE_LOCATION
+      android.permission.ACCESS_COARSE_LOCATION
+      android.permission.ACCESS_NETWORK_STATE
+      android.permission.ACCESS_BACKGROUND_LOCATION: restricted=true
+      android.permission.INTERNET
+      ACTION_NOTIFICATION_LISTENER_SETTINGS
+      android.permission.READ_SMS: restricted=true
+      android.permission.READ_CONTACTS
+      android.permission.READ_CALL_LOG: restricted=true
+      android.permission.READ_PHONE_STATE
+      android.permission.WRITE_EXTERNAL_STORAGE: restricted=true
+      android.permission.CAMERA
+      android.permission.SYSTEM_ALERT_WINDOW
+      android.permission.ACTION_MANAGE_OVERLAY_PERMISSION
+      android.permission.ACCESS_WIFI_STATE
+      android.permission.CHANGE_WIFI_STATE
+      android.permission.RECEIVE_BOOT_COMPLETED
+      android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+      com.android.browser.permission.READ_HISTORY_BOOKMARKS
+      android.permission.READ_EXTERNAL_STORAGE: restricted=true
+      android.permission.RECEIVE_SMS: restricted=true
+      android.permission.RECORD_AUDIO
+      android.permission.BIND_ACCESSIBILITY_SERVICE
+      com.huawei.systemmanager.permission.ACCESS_INTERFACE
+      android.permission.QUERY_ALL_PACKAGES
+      android.permission.ACCESS_MEDIA_LOCATION
+      android.permission.WRITE_SETTINGS
+      android.permission.MANAGE_EXTERNAL_STORAGE
+      android.permission.WAKE_LOCK
+      com.google.android.c2dm.permission.RECEIVE
+      com.google.android.providers.gsf.permission.READ_GSERVICES
+      com.google.android.gms.permission.ACTIVITY_RECOGNITION
+      android.permission.FOREGROUND_SERVICE
+      com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE
+    install permissions:
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.RECEIVE_BOOT_COMPLETED: granted=true
+      android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: granted=true
+      android.permission.INTERNET: granted=true
+      com.android.browser.permission.READ_HISTORY_BOOKMARKS: granted=true
+      android.permission.CHANGE_WIFI_STATE: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+      android.permission.ACCESS_WIFI_STATE: granted=true
+      android.permission.QUERY_ALL_PACKAGES: granted=true
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=261852 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+        android.permission.READ_SMS: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.READ_CALL_LOG: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_FINE_LOCATION: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.RECEIVE_SMS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.READ_EXTERNAL_STORAGE: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_COARSE_LOCATION: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_PHONE_STATE: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.CAMERA: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.WRITE_EXTERNAL_STORAGE: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.RECORD_AUDIO: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_CONTACTS: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_BACKGROUND_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_MEDIA_LOCATION: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+      enabledComponents:
+        androidx.work.impl.background.systemalarm.RescheduleReceiver
+        androidx.work.impl.background.systemjob.SystemJobService
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+  queryable via interaction:
+    User 0:
+      [org.lineageos.lineageparts,com.android.localtransport,com.android.keychain,com.android.inputdevices,android,com.android.settings,org.lineageos.setupwizard,org.lineageos.settings.device,org.lineageos.lineagesettings,com.android.providers.settings,lineageos.platform,com.android.wallpaperbackup,com.android.location.fused,com.android.dynsystem,org.lineageos.flipflap,com.android.server.telecom,org.lineageos.settings.doze]:
+        com.wifi0
+      [com.android.mms.service,com.android.ons,com.android.providers.telephony,com.android.phone,com.android.stk]:
+        com.wifi0
+      com.android.providers.media.module:
+        com.wifi0
+      com.wifi0:
+        [org.lineageos.lineageparts,com.android.localtransport,com.android.keychain,com.android.inputdevices,android,com.android.settings,org.lineageos.setupwizard,org.lineageos.settings.device,org.lineageos.lineagesettings,com.android.providers.settings,lineageos.platform,com.android.wallpaperbackup,com.android.location.fused,com.android.dynsystem,org.lineageos.flipflap,com.android.server.telecom,org.lineageos.settings.doze]
+
+Package Changes:
+  Sequence number=0
+
+
+Dexopt state:
+  [com.wifi0]
+    path: /data/app/~~V5jud4ex5-s8L3x2B4lvUA==/com.wifi0-q-C29yRZYy55N91XTD2EoA==/base.apk
+      arm64: [status=speed-profile] [reason=bg-dexopt]
+
+
+Compiler stats:
+  [com.wifi0]
+     base.apk - 3741
