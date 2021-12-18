@@ -5,9 +5,11 @@ use std::collections::HashSet;
 const CMD_LIST_SERVICES: &str = "dumpsys -l";
 
 pub fn list_services(device: &Device) -> Result<HashSet<String>> {
+    let cmd = CMD_LIST_SERVICES;
+    debug!("Executing {:?}", cmd);
     let output = device
-        .execute_host_shell_command(CMD_LIST_SERVICES)
-        .with_context(|| anyhow!("Failed to run: {:?}", CMD_LIST_SERVICES))?;
+        .execute_host_shell_command(cmd)
+        .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
 
     let mut services = HashSet::new();
     for line in output.split('\n') {
@@ -26,6 +28,7 @@ pub fn list_services(device: &Device) -> Result<HashSet<String>> {
 
 pub fn dump_service(device: &Device, service: &str) -> Result<String> {
     let cmd = format!("dumpsys {}", service);
+    debug!("Executing {:?}", cmd);
     let output = device
         .execute_host_shell_command(&cmd)
         .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;

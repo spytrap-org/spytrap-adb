@@ -1,10 +1,10 @@
 use env_logger::Env;
 use mozdevice::{AndroidStorageInput, Host};
 use spytrap_b::args::{Args, SubCommand};
+use spytrap_b::accessibility;
 use spytrap_b::dumpsys;
 use spytrap_b::package;
 use spytrap_b::errors::*;
-use spytrap_b::parsers::accessibility::Accessibility;
 use spytrap_b::pm;
 use spytrap_b::remote_clock;
 use spytrap_b::rules::Rule;
@@ -70,7 +70,7 @@ fn main() -> Result<()> {
                 }
 
                 // fetch infos about package
-                let info = package::dump_package(&device, &pkg.id)?;
+                let info = package::dump(&device, &pkg.id)?;
                 trace!("package infos {:?}: {:#?}", pkg.id, info);
 
                 if let Some(installer) = info.installer_package_name() {
@@ -85,9 +85,7 @@ fn main() -> Result<()> {
 
             if services.contains("accessibility") {
                 info!("Reading accessibility settings");
-                let out = dumpsys::dump_service(&device, "accessibility")?;
-                let a = out.parse::<Accessibility>()
-                    .context("Failed to parse accessibility service output")?;
+                let a = accessibility::dump(&device)?;
                 warn!("TODO: accessibility = {:?}", a);
             }
 

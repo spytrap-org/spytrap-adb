@@ -1,3 +1,4 @@
+pub mod accessibility;
 pub mod args;
 pub mod dumpsys;
 pub mod errors;

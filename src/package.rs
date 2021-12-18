@@ -4,14 +4,12 @@ use crate::parsers::package::PackageInfo;
 use mozdevice::Device;
 use std::borrow::Cow;
 
-const CMD: &str = "dumpsys package";
-
-pub fn dump_package(device: &Device, package: &str) -> Result<PackageInfo> {
-    let cmd = format!("{} {}", CMD, shell_escape::escape(Cow::Borrowed(package)));
+pub fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
+    let cmd = format!("dumpsys package {}", shell_escape::escape(Cow::Borrowed(package)));
     debug!("Executing {:?}", cmd);
     let output = device
         .execute_host_shell_command(&cmd)
-        .with_context(|| anyhow!("Failed to run: {:?}", CMD))?;
+        .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
     parsers::package::parse_output(&output, package)
 }
 
