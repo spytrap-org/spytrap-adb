@@ -42,8 +42,8 @@ impl FromStr for Permission {
 }
 
 impl PackageInfo {
-    pub fn installer_package_name(&self) -> Option<&String> {
-        self.fields.get("installerPackageName")
+    pub fn installer_package_name(&self) -> Option<&str> {
+        self.fields.get("installerPackageName").map(String::as_str)
     }
 }
 
