@@ -2,15 +2,43 @@ use crate::errors::*;
 use mozdevice::Device;
 use std::borrow::Cow;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 const CMD: &str = "dumpsys package";
 
 #[derive(Debug, PartialEq, Default)]
 pub struct PackageInfo {
     fields: HashMap<String, String>,
-    requested_permissions: Vec<String>,
-    install_permissions: Vec<String>,
-    runtime_permissions: Vec<String>,
+    requested_permissions: Vec<Permission>,
+    install_permissions: Vec<Permission>,
+    runtime_permissions: Vec<Permission>,
+}
+
+#[derive(Debug, PartialEq, Default)]
+pub struct Permission {
+    name: String,
+    fields: HashMap<String, String>,
+}
+
+impl FromStr for Permission {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let mut permission = Permission::default();
+
+        if let Some((key, value)) = s.split_once(": ") {
+            permission.name = key.to_string();
+            for field in value.split(", ") {
+                if let Some((key, value)) = field.split_once('=') {
+                    permission.fields.insert(key.into(), value.into());
+                }
+            }
+        } else {
+            permission.name = s.to_string();
+        }
+
+        Ok(permission)
+    }
 }
 
 impl PackageInfo {
@@ -73,15 +101,15 @@ fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
         match section_stack.last() {
             Some(&"requested permissions:") => {
                 debug!("requested permission: {:?}", trimmed_line);
-                info.requested_permissions.push(trimmed_line.to_string());
+                info.requested_permissions.push(trimmed_line.parse()?);
             }
             Some(&"install permissions:") => {
                 debug!("install permission: {:?}", trimmed_line);
-                info.install_permissions.push(trimmed_line.to_string());
+                info.install_permissions.push(trimmed_line.parse()?);
             }
             Some(&"runtime permissions:") => {
                 debug!("runtime permission: {:?}", trimmed_line);
-                info.runtime_permissions.push(trimmed_line.to_string());
+                info.runtime_permissions.push(trimmed_line.parse()?);
             }
             _ => {
                 if let Some(&"Packages:") = section_stack.first() {
@@ -183,7 +211,7 @@ mod tests {
                 "com.google.android.gms.permission.ACTIVITY_RECOGNITION",
                 "android.permission.FOREGROUND_SERVICE",
                 "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
-            ].into_iter().map(String::from).collect(),
+            ].into_iter().map(|s| s.parse().unwrap()).collect(),
             install_permissions: [
                 "android.permission.FOREGROUND_SERVICE: granted=true",
                 "android.permission.RECEIVE_BOOT_COMPLETED: granted=true",
@@ -195,7 +223,7 @@ mod tests {
                 "android.permission.ACCESS_WIFI_STATE: granted=true",
                 "android.permission.QUERY_ALL_PACKAGES: granted=true",
                 "android.permission.WAKE_LOCK: granted=true",
-            ].into_iter().map(String::from).collect(),
+            ].into_iter().map(|s| s.parse().unwrap()).collect(),
             runtime_permissions: [
                 "android.permission.READ_SMS: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
                 "android.permission.READ_CALL_LOG: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
@@ -210,7 +238,54 @@ mod tests {
                 "android.permission.READ_CONTACTS: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
                 "android.permission.ACCESS_BACKGROUND_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
                 "android.permission.ACCESS_MEDIA_LOCATION: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
-            ].into_iter().map(String::from).collect(),
+            ].into_iter().map(|s| s.parse().unwrap()).collect(),
+        });
+    }
+
+    #[test]
+    fn test_parse_permission_plain() {
+        let line = "android.permission.ACCESS_FINE_LOCATION";
+        let p = Permission::from_str(line).unwrap();
+        assert_eq!(p, Permission {
+            name: "android.permission.ACCESS_FINE_LOCATION".to_string(),
+            fields: HashMap::new(),
+        });
+    }
+
+    #[test]
+    fn test_parse_permission_fields1() {
+        let line = "android.permission.INTERNET: granted=true";
+        let p = Permission::from_str(line).unwrap();
+        assert_eq!(p, Permission {
+            name: "android.permission.INTERNET".to_string(),
+            fields: hashmap![
+                "granted".to_string() => "true".to_string(),
+            ],
+        });
+    }
+
+    #[test]
+    fn test_parse_permission_fields2() {
+        let line = "android.permission.ACCESS_BACKGROUND_LOCATION: restricted=true";
+        let p = Permission::from_str(line).unwrap();
+        assert_eq!(p, Permission {
+            name: "android.permission.ACCESS_BACKGROUND_LOCATION".to_string(),
+            fields: hashmap![
+                "restricted".to_string() => "true".to_string(),
+            ],
+        });
+    }
+
+    #[test]
+    fn test_parse_permission_flags() {
+        let line = "android.permission.READ_CALL_LOG: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]";
+        let p = Permission::from_str(line).unwrap();
+        assert_eq!(p, Permission {
+            name: "android.permission.READ_CALL_LOG".to_string(),
+            fields: hashmap![
+                "granted".to_string() => "false".to_string(),
+                "flags".to_string() => "[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
+            ],
         });
     }
 }
