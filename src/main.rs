@@ -85,29 +85,11 @@ fn main() -> Result<()> {
 
             if services.contains("accessibility") {
                 info!("Reading accessibility settings");
-                let a = accessibility::dump(&device)?;
-                warn!("TODO: accessibility = {:?}", a);
-            }
-
-            /*
-            for service in &services {
-                if service == "meminfo" {
-                    continue;
-                }
-                info!("Dumping service: {:?}", service);
-                dumpsys::dump_service(&device, &service)?;
-            }
-            */
-
-            /*
-            for x in &["com.android.bluetooth", "com.asdf"] {
-                if device.is_app_installed(x).unwrap() {
-                    warn!("App is installed: {:?}", x);
-                } else {
-                    info!("App is not installed: {:?}", x);
+                let accessibility = accessibility::dump(&device)?;
+                for suspicion in accessibility.audit() {
+                    warn!("Suspicious {:?}: {:?}", suspicion.level, suspicion.description);
                 }
             }
-            */
 
             info!("Scan finished");
         }
@@ -128,14 +110,6 @@ fn main() -> Result<()> {
             }
         }
     }
-
-    /*
-    // Host::device_or_default(None, AndroidStorageInput::Auto);
-    println!("Hello, world: {:?}", host);
-    let devices = host.devices::<Vec<DeviceInfo>>()
-        .map_err(|e| anyhow!("{}", e))?;
-    println!("devices: {:?}", devices);
-    */
 
     Ok(())
 }

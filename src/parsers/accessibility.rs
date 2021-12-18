@@ -9,8 +9,8 @@ pub struct Accessibility {
     shortcut_key: Option<String>,
     button: Option<String>,
     button_target: Option<String>,
-    bound_services: Option<String>,
-    enabled_services: Option<String>,
+    pub bound_services: Option<String>,
+    pub enabled_services: Option<String>,
     binding_services: Option<String>,
     crashed_services: Option<String>,
 }
