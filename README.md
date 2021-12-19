@@ -28,7 +28,7 @@ cd spytrap-b/
 # compile the project
 cargo build --release --locked
 # this is the release binary
-./target/debug/spytrap-b
+./target/release/spytrap-b
 ```
 
 ## Example output
