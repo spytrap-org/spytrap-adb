@@ -22,7 +22,7 @@ git clone https://github.com/Te-k/stalkerware-indicators.git
 # install rustup
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # clone the repository
-https://github.com/kpcyrd/spytrap-b
+git clone https://github.com/kpcyrd/spytrap.b
 # enter the directory
 cd spytrap-b/
 # compile the project
