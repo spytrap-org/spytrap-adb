@@ -1,10 +1,11 @@
 use env_logger::Env;
 use mozdevice::{AndroidStorageInput, Host};
-use spytrap_b::args::{Args, SubCommand};
 use spytrap_b::accessibility;
+use spytrap_b::args::{Args, SubCommand};
 use spytrap_b::dumpsys;
-use spytrap_b::package;
 use spytrap_b::errors::*;
+use spytrap_b::iocs::SuspicionLevel;
+use spytrap_b::package;
 use spytrap_b::pm;
 use spytrap_b::remote_clock;
 use spytrap_b::rules::Rule;
@@ -61,20 +62,32 @@ fn main() -> Result<()> {
 
             // TODO: maybe `cmd package list packages -f`
             info!("Comparing list of installed apps with known stalkerware ids");
-            for pkg in pm::list_packages(&device)? {
-                // TODO: test if apk is in hashset
-                // TODO: maybe fetch apk and inspect eg. cert
 
-                if let Some(name) = rules.get(&pkg.id) {
-                    warn!("Found app that matches rule: {:?} ({:?})", pkg.id, name);
-                }
 
-                // fetch infos about package
-                let info = package::dump(&device, &pkg.id)?;
-                trace!("package infos {:?}: {:#?}", pkg.id, info);
 
-                for sus in info.audit() {
-                    warn!("Suspicious {:?}: {:?}", sus.level, sus.description);
+
+            let installed_apps = pm::list_packages(&device)?;
+            let mut progress = 0;
+            for apps in installed_apps.chunks(100) {
+                info!("Scanning installed apps ({}/{})", progress, installed_apps.len());
+
+                for pkg in apps {
+                    progress += 1;
+
+                    // TODO: maybe fetch apk and inspect eg. cert
+
+                    if let Some(name) = rules.get(&pkg.id) {
+                        let alert = format!("Found known stalkerware with rule: {:?} ({:?})", pkg.id, name);
+                        warn!("Suspicious {:?}: {}", SuspicionLevel::High, alert);
+                    }
+
+                    // fetch infos about package
+                    let info = package::dump(&device, &pkg.id)?;
+                    trace!("package infos {:?}: {:#?}", pkg.id, info);
+
+                    for sus in info.audit() {
+                        warn!("Suspicious {:?}: {}", sus.level, sus.description);
+                    }
                 }
             }
 
@@ -85,7 +98,7 @@ fn main() -> Result<()> {
                 info!("Reading accessibility settings");
                 let accessibility = accessibility::dump(&device)?;
                 for sus in accessibility.audit() {
-                    warn!("Suspicious {:?}: {:?}", sus.level, sus.description);
+                    warn!("Suspicious {:?}: {}", sus.level, sus.description);
                 }
             }
 
