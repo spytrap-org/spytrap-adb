@@ -1,11 +1,11 @@
 use crate::errors::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Default)]
 pub struct PackageInfo {
     pub id: String,
-    pub fields: HashMap<String, String>,
+    pub fields: BTreeMap<String, String>,
     pub requested_permissions: Vec<Permission>,
     pub install_permissions: Vec<Permission>,
     pub runtime_permissions: Vec<Permission>,
@@ -13,8 +13,8 @@ pub struct PackageInfo {
 
 #[derive(Debug, PartialEq, Default)]
 pub struct Permission {
-    name: String,
-    fields: HashMap<String, String>,
+    pub name: String,
+    pub fields: BTreeMap<String, String>,
 }
 
 impl FromStr for Permission {
@@ -114,7 +114,7 @@ pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use maplit::hashmap;
+    use maplit::btreemap;
 
     #[test]
     fn count_whitespace() {
@@ -133,7 +133,7 @@ mod tests {
         let pkginfo = parse_output(data, "com.wifi0").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "com.wifi0".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "userId".to_string() => "10155".to_string(),
                 "pkg".to_string() => "Package{19806ac com.wifi0}".to_string(),
                 "codePath".to_string() => "/data/app/~~V5jud4ex5-s8L3x2B4lvUA==/com.wifi0-q-C29yRZYy55N91XTD2EoA==".to_string(),
@@ -234,7 +234,7 @@ mod tests {
         let pkginfo = parse_output(data, "com.android.contacts").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "com.android.contacts".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "userId".to_string() => "10118".to_string(),
                 "pkg".to_string() => "Package{647faae com.android.contacts}".to_string(),
                 "codePath".to_string() => "/system/product/priv-app/Contacts".to_string(),
@@ -325,7 +325,7 @@ mod tests {
         let pkginfo = parse_output(data, "org.fdroid.fdroid").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "org.fdroid.fdroid".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "userId".to_string() => "10151".to_string(),
                 "pkg".to_string() => "Package{7013942 org.fdroid.fdroid}".to_string(),
                 "codePath".to_string() => "/data/app/~~STVfdipYRYJs6KMukOgQrg==/org.fdroid.fdroid-v49NvZi77MbfUKeimvYw9A==".to_string(),
@@ -404,7 +404,7 @@ mod tests {
         let pkginfo = parse_output(data, "com.android.gpstest.osmdroid").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "com.android.gpstest.osmdroid".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "userId".to_string() => "10153".to_string(),
                 "pkg".to_string() => "Package{746e2fd com.android.gpstest.osmdroid}".to_string(),
                 "codePath".to_string() => "/data/app/~~DtCl3GSWjjDeCZQY6-JYjQ==/com.android.gpstest.osmdroid-R1hWv_dQbz--sDQlVH8myQ==".to_string(),
@@ -462,7 +462,7 @@ mod tests {
         let pkginfo = parse_output(data, "org.jitsi.meet").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "org.jitsi.meet".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "userId".to_string() => "10152".to_string(),
                 "pkg".to_string() => "Package{1a7e7ac org.jitsi.meet}".to_string(),
                 "codePath".to_string() => "/data/app/~~0aX7BWdP29TqZaPPXkHNIA==/org.jitsi.meet-hcYO-DrfCgXIZKdu4pcUeA==".to_string(),
@@ -531,7 +531,7 @@ mod tests {
         let p = Permission::from_str(line).unwrap();
         assert_eq!(p, Permission {
             name: "android.permission.ACCESS_FINE_LOCATION".to_string(),
-            fields: HashMap::new(),
+            fields: BTreeMap::new(),
         });
     }
 
@@ -541,7 +541,7 @@ mod tests {
         let p = Permission::from_str(line).unwrap();
         assert_eq!(p, Permission {
             name: "android.permission.INTERNET".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "granted".to_string() => "true".to_string(),
             ],
         });
@@ -553,7 +553,7 @@ mod tests {
         let p = Permission::from_str(line).unwrap();
         assert_eq!(p, Permission {
             name: "android.permission.ACCESS_BACKGROUND_LOCATION".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "restricted".to_string() => "true".to_string(),
             ],
         });
@@ -565,7 +565,7 @@ mod tests {
         let p = Permission::from_str(line).unwrap();
         assert_eq!(p, Permission {
             name: "android.permission.READ_CALL_LOG".to_string(),
-            fields: hashmap![
+            fields: btreemap![
                 "granted".to_string() => "false".to_string(),
                 "flags".to_string() => "[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
             ],
