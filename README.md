@@ -13,7 +13,7 @@ sudo adb start-server
 # fetch rules for scanning
 git clone https://github.com/Te-k/stalkerware-indicators.git
 # scan the first connected device
-./spytrap-adb scan --rules stalkerware-indicators/appid.yaml
+./spytrap-adb scan --rules stalkerware-indicators/ioc.yaml
 ```
 
 ## Building from source
@@ -34,8 +34,8 @@ cargo build --release --locked
 ## Example output
 
 ```
-% target/release/spytrap-adb scan --rules stalkerware-indicators/appid.yaml
-[2021-12-19T21:26:41Z INFO  spytrap_adb] Loaded 130 rules from "stalkerware-indicators/appid.yaml"
+% target/release/spytrap-adb scan --rules stalkerware-indicators/ioc.yaml
+[2021-12-19T21:26:41Z INFO  spytrap_adb] Loaded 130 rules from "stalkerware-indicators/ioc.yaml"
 [2021-12-19T21:26:41Z INFO  spytrap_adb] Device is not rooted
 [2021-12-19T21:26:41Z INFO  spytrap_adb] Fetching remote clock
 [2021-12-19T21:26:41Z INFO  spytrap_adb] Local time is 2021-12-19 21:26:41.847457823 UTC, remote time is 2021-12-19 21:26:42.318497288 UTC, drift=PT0.471039465S
