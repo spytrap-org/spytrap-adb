@@ -1,3 +1,4 @@
+use clap::Parser;
 use env_logger::Env;
 use mozdevice::{AndroidStorageInput, Host};
 use spytrap_adb::accessibility;
@@ -9,7 +10,6 @@ use spytrap_adb::package;
 use spytrap_adb::pm;
 use spytrap_adb::remote_clock;
 use spytrap_adb::rules::Rule;
-use structopt::StructOpt;
 
 fn human_option_str(x: Option<&String>) -> &str {
     if let Some(x) = x {
@@ -20,7 +20,7 @@ fn human_option_str(x: Option<&String>) -> &str {
 }
 
 fn main() -> Result<()> {
-    let args = Args::from_args();
+    let args = Args::parse();
 
     let logging = match args.verbose {
         0 => "info",
@@ -41,6 +41,11 @@ fn main() -> Result<()> {
         SubCommand::Scan(scan) => {
             let rules = Rule::load_map_from_file(&scan.rules).context("Failed to load rules")?;
             info!("Loaded {} rules from {:?}", rules.len(), scan.rules);
+
+            if scan.test_load_only {
+                info!("Rules loaded successfully");
+                return Ok(());
+            }
 
             let device = adb_host
                 .device_or_default(scan.serial.as_ref(), AndroidStorageInput::Auto)
