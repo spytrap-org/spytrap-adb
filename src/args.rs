@@ -20,6 +20,8 @@ pub enum SubCommand {
 #[derive(Debug, StructOpt)]
 pub struct Scan {
     pub serial: Option<String>,
-    #[structopt(long, default_value = "./appid.yaml")]
+    #[structopt(long, default_value = "./ioc.yaml")]
     pub rules: String,
+    #[structopt(long)]
+    pub test_load_only: bool,
 }

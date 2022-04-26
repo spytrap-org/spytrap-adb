@@ -42,6 +42,11 @@ fn main() -> Result<()> {
             let rules = Rule::load_map_from_file(&scan.rules).context("Failed to load rules")?;
             info!("Loaded {} rules from {:?}", rules.len(), scan.rules);
 
+            if scan.test_load_only {
+                info!("Rules loaded successfully");
+                return Ok(());
+            }
+
             let device = adb_host
                 .device_or_default(scan.serial.as_ref(), AndroidStorageInput::Auto)
                 .with_context(|| anyhow!("Failed to access device: {:?}", scan.serial))?;
