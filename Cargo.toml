@@ -1,5 +1,5 @@
 [package]
-name = "spytrap-b"
+name = "spytrap-adb"
 version = "0.1.0"
 authors = ["user"]
 edition = "2021"
