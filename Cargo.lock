@@ -206,7 +206,9 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 
 [[package]]
 name = "mozdevice"
-version = "0.4.0"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "853947b2e889c7ce59735b00833e75f27beecca6b2b03116cf1decd57b335ca0"
 dependencies = [
  "log",
  "once_cell",
