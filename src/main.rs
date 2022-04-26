@@ -1,14 +1,14 @@
 use env_logger::Env;
 use mozdevice::{AndroidStorageInput, Host};
-use spytrap_b::accessibility;
-use spytrap_b::args::{Args, SubCommand};
-use spytrap_b::dumpsys;
-use spytrap_b::errors::*;
-use spytrap_b::iocs::SuspicionLevel;
-use spytrap_b::package;
-use spytrap_b::pm;
-use spytrap_b::remote_clock;
-use spytrap_b::rules::Rule;
+use spytrap_adb::accessibility;
+use spytrap_adb::args::{Args, SubCommand};
+use spytrap_adb::dumpsys;
+use spytrap_adb::errors::*;
+use spytrap_adb::iocs::SuspicionLevel;
+use spytrap_adb::package;
+use spytrap_adb::pm;
+use spytrap_adb::remote_clock;
+use spytrap_adb::rules::Rule;
 use structopt::StructOpt;
 
 fn human_option_str(x: Option<&String>) -> &str {
@@ -24,7 +24,7 @@ fn main() -> Result<()> {
 
     let logging = match args.verbose {
         0 => "info",
-        1 => "spytrap_b=debug,info",
+        1 => "spytrap_adb=debug,info",
         2 => "debug",
         _ => "trace",
     };
