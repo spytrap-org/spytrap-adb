@@ -1,27 +1,26 @@
-use structopt::{clap::AppSettings, StructOpt};
+use clap::Parser;
 
-#[derive(Debug, StructOpt)]
-#[structopt(global_settings = &[AppSettings::ColoredHelp])]
+#[derive(Debug, Parser)]
 pub struct Args {
     /// More verbose logs
-    #[structopt(short, long, global = true, parse(from_occurrences))]
+    #[clap(short, long, global = true, parse(from_occurrences))]
     pub verbose: u8,
-    #[structopt(subcommand)]
+    #[clap(subcommand)]
     pub subcommand: SubCommand,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub enum SubCommand {
     Monitor,
     Scan(Scan),
     List,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub struct Scan {
     pub serial: Option<String>,
-    #[structopt(long, default_value = "./ioc.yaml")]
+    #[clap(long, default_value = "./ioc.yaml")]
     pub rules: String,
-    #[structopt(long)]
+    #[clap(long)]
     pub test_load_only: bool,
 }
