@@ -9,7 +9,7 @@ use spytrap_adb::iocs::SuspicionLevel;
 use spytrap_adb::package;
 use spytrap_adb::pm;
 use spytrap_adb::remote_clock;
-use spytrap_adb::rules::Rule;
+use spytrap_adb::rules;
 
 fn human_option_str(x: Option<&String>) -> &str {
     if let Some(x) = x {
@@ -39,7 +39,7 @@ fn main() -> Result<()> {
     match args.subcommand {
         SubCommand::Monitor => bail!("This subcommand is not implemented yet"),
         SubCommand::Scan(scan) => {
-            let rules = Rule::load_map_from_file(&scan.rules).context("Failed to load rules")?;
+            let rules = rules::load_map_from_file(&scan.rules).context("Failed to load rules")?;
             info!("Loaded {} rules from {:?}", rules.len(), scan.rules);
 
             if scan.test_load_only {
