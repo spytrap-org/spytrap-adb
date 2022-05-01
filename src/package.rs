@@ -63,7 +63,7 @@ impl PackageInfo {
         for permission in &self.requested_permissions {
             // warn!("requested permission: {:?}", permission);
             // println!("permission {:?}", permission.name);
-            if let Some(level) = is_permission_suspcious(&permission) {
+            if let Some(level) = is_permission_suspcious(permission) {
                 sus.push(Suspicion {
                     level,
                     description: format!("Package {:?} has requested permission {:?}", self.id, permission),
@@ -74,7 +74,7 @@ impl PackageInfo {
         for permission in &self.install_permissions {
             // warn!("install permission: {:?}", permission);
             // println!("permission {:?}", permission.name);
-            if let Some(level) = is_permission_suspcious(&permission) {
+            if let Some(level) = is_permission_suspcious(permission) {
                 sus.push(Suspicion {
                     level,
                     description: format!("Package {:?} has install permission {:?}", self.id, permission),
@@ -85,7 +85,7 @@ impl PackageInfo {
         for permission in &self.runtime_permissions {
             // warn!("runtime permission: {:?}", permission);
             // println!("permission {:?}", permission.name);
-            if let Some(level) = is_permission_suspcious(&permission) {
+            if let Some(level) = is_permission_suspcious(permission) {
                 sus.push(Suspicion {
                     level,
                     description: format!("Package {:?} has runtime permission {:?}", self.id, permission),
