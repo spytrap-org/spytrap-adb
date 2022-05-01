@@ -6,7 +6,7 @@ use mozdevice::Device;
 
 pub fn dump(device: &Device) -> Result<Accessibility> {
     info!("Reading accessibility settings");
-    let out = dumpsys::dump_service(&device, "accessibility")?;
+    let out = dumpsys::dump_service(device, "accessibility")?;
     out.parse::<Accessibility>()
         .context("Failed to parse accessibility service output")
 }
@@ -18,7 +18,7 @@ impl Accessibility {
             warn!("Found bound accessibility services: {:?}", services);
             sus.push(Suspicion {
                 level: SuspicionLevel::High,
-                description: format!("An accessibility service is bound"),
+                description: "An accessibility service is bound".to_string(),
             });
         }
         if let Some(services) = &self.enabled_services {

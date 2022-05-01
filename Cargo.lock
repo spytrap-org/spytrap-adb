@@ -408,6 +408,19 @@ dependencies = [
  "serde",
  "serde_yaml",
  "shell-escape",
+ "stalkerware-indicators",
+]
+
+[[package]]
+name = "stalkerware-indicators"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be9ef3be66a10f392916bd1ba6c16b25d68d5f83b3000183d0923d7301515b6f"
+dependencies = [
+ "anyhow",
+ "log",
+ "serde",
+ "serde_yaml",
 ]
 
 [[package]]

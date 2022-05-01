@@ -17,6 +17,7 @@ regex = "1.5.4"
 serde = { version = "1.0.130", features = ["derive"] }
 serde_yaml = "0.8.21"
 shell-escape = "0.1.5"
+stalkerware-indicators = "0.1"
 
 [dev-dependencies]
 maplit = "1.0.2"
