@@ -1,6 +1,12 @@
 # spytrap-adb
 
-Uses adb and usb debugging to scan for suspicious apps and configuration.
+Test a phone for stalkerware using adb and usb debugging to scan for suspicious
+apps and configuration.
+
+Based on [stalkerware-indicators] data provided by [Echap].
+
+[stalkerware-indicators]: https://github.com/AssoEchap/stalkerware-indicators
+[Echap]: https://github.com/AssoEchap
 
 ## Usage
 
@@ -73,6 +79,10 @@ The adb server is not running correctly
 ### Installing adb on Debian/Ubuntu
 
     apt install adb
+
+## Similar work
+
+- [MVT (Mobile Verification Toolkit)](https://github.com/mvt-project/mvt)
 
 ## License
 
