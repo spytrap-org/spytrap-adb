@@ -62,7 +62,7 @@ pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
     };
 
     let mut indent = 0;
-    for line in output.split('\n') {
+    for line in output.lines() {
         let trimmed_line = line.trim();
 
         match count_whitespace_prefix(line) {

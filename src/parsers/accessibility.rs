@@ -32,7 +32,7 @@ impl FromStr for Accessibility {
             .context("Failed to find `User state[` needle")?;
 
         let re = Regex::new(r"^\s*(.+):\{(.*)\}]?$").unwrap();
-        for line in s.split('\n') {
+        for line in s.lines() {
             debug!("Parsing line of accessibility output: {:?}", line);
             if let Some(cap) = re.captures(line) {
                 let key = &cap[1];

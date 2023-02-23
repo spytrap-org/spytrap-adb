@@ -17,7 +17,7 @@ pub fn list_packages(device: &Device) -> Result<Vec<Apk>> {
 
 fn parse_output(output: &str) -> Result<Vec<Apk>> {
     let mut pkgs = Vec::new();
-    for line in output.split('\n') {
+    for line in output.lines() {
         if line.is_empty() {
             continue;
         }
