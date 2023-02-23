@@ -24,8 +24,27 @@ jobs:
     - name: Test load ioc.yaml
       run: cargo run -- scan --rules stalkerware-indicators/ioc.yaml --test-load-only
 
+  windows_build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+
+  osx_build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+
   clippy:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Run clippy
       run: cargo clippy --verbose
