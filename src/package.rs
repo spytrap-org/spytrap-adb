@@ -16,25 +16,33 @@ pub fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
     parsers::package::parse_output(&output, package)
 }
 
-fn is_permission_suspcious(permission: &Permission) -> Option<SuspicionLevel> {
+fn is_permission_suspicious(permission: &Permission) -> Option<SuspicionLevel> {
+    // See https://developer.android.com/reference/android/Manifest.permission
     match permission.name.as_str() {
         // sus: high
         "ACTION_NOTIFICATION_LISTENER_SETTINGS" => Some(SuspicionLevel::High),
         "android.permission.ACTION_MANAGE_OVERLAY_PERMISSION" => Some(SuspicionLevel::High),
         "android.permission.BIND_ACCESSIBILITY_SERVICE" => Some(SuspicionLevel::High),
+        "android.permission.DISABLE_KEYGUARD" => Some(SuspicionLevel::High),
+        "android.permission.READ_SMS" => Some(SuspicionLevel::High),
+        "android.permission.READ_CALL_LOG" => Some(SuspicionLevel::High),
+        "android.permission.READ_CONTACTS" => Some(SuspicionLevel::High),
+        "android.permission.RECORD_AUDIO" => Some(SuspicionLevel::High),
+        "android.permission.SYSTEM_ALERT_WINDOW" => Some(SuspicionLevel::High),
         // sus: medium
         "android.permission.ACCESS_BACKGROUND_LOCATION" => Some(SuspicionLevel::Medium),
-        "android.permission.READ_SMS" => Some(SuspicionLevel::Medium),
         "android.permission.RECEIVE_SMS" => Some(SuspicionLevel::Medium),
+        "android.permission.ACCESS_BLOBS_ACROSS_USERS" => Some(SuspicionLevel::Medium),
+        "android.permission.ACCESS_NOTIFICATION_POLICY" => Some(SuspicionLevel::Medium),
+        "android.permission.ANSWER_PHONE_CALLS" => Some(SuspicionLevel::Medium),
+        "android.permission.READ_PHONE_STATE" => Some(SuspicionLevel::Medium),
         // sus: low
         "android.permission.ACCESS_COARSE_LOCATION" => Some(SuspicionLevel::Low),
         "android.permission.ACCESS_FINE_LOCATION" => Some(SuspicionLevel::Low),
         "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" => Some(SuspicionLevel::Low),
         "android.permission.CAMERA" => Some(SuspicionLevel::Low),
         "android.permission.QUERY_ALL_PACKAGES" => Some(SuspicionLevel::Low),
-        "android.permission.READ_CALL_LOG" => Some(SuspicionLevel::Low),
-        "android.permission.READ_CONTACTS" => Some(SuspicionLevel::Low),
-        "android.permission.RECORD_AUDIO" => Some(SuspicionLevel::Low),
+        "android.permission.INTERNET" => Some(SuspicionLevel::Low),
         "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" => Some(SuspicionLevel::Low),
         // none
         _ => None,
@@ -69,7 +77,7 @@ impl PackageInfo {
         for permission in &self.requested_permissions {
             // warn!("requested permission: {:?}", permission);
             // println!("permission {:?}", permission.name);
-            if let Some(level) = is_permission_suspcious(permission) {
+            if let Some(level) = is_permission_suspicious(permission) {
                 sus.push(Suspicion {
                     level,
                     description: format!(
@@ -83,7 +91,7 @@ impl PackageInfo {
         for permission in &self.install_permissions {
             // warn!("install permission: {:?}", permission);
             // println!("permission {:?}", permission.name);
-            if let Some(level) = is_permission_suspcious(permission) {
+            if let Some(level) = is_permission_suspicious(permission) {
                 sus.push(Suspicion {
                     level,
                     description: format!(
@@ -97,7 +105,7 @@ impl PackageInfo {
         for permission in &self.runtime_permissions {
             // warn!("runtime permission: {:?}", permission);
             // println!("permission {:?}", permission.name);
-            if let Some(level) = is_permission_suspcious(permission) {
+            if let Some(level) = is_permission_suspicious(permission) {
                 sus.push(Suspicion {
                     level,
                     description: format!(
