@@ -12,7 +12,7 @@ pub fn list_services(device: &Device) -> Result<HashSet<String>> {
         .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
 
     let mut services = HashSet::new();
-    for line in output.split('\n') {
+    for line in output.lines() {
         if line.is_empty() {
             continue;
         }
