@@ -5,7 +5,10 @@ use mozdevice::Device;
 use std::borrow::Cow;
 
 pub fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
-    let cmd = format!("dumpsys package {}", shell_escape::escape(Cow::Borrowed(package)));
+    let cmd = format!(
+        "dumpsys package {}",
+        shell_escape::escape(Cow::Borrowed(package))
+    );
     debug!("Executing {:?}", cmd);
     let output = device
         .execute_host_shell_command(&cmd)
@@ -50,13 +53,16 @@ impl PackageInfo {
                     level: SuspicionLevel::Medium,
                     description: format!("Package {:?} was manually installed", self.id),
                 });
-            },
+            }
             Some(installer) => {
                 sus.push(Suspicion {
                     level: SuspicionLevel::Medium,
-                    description: format!("Package {:?} was manually installed by an unknown installer: {:?}", self.id, installer),
+                    description: format!(
+                        "Package {:?} was manually installed by an unknown installer: {:?}",
+                        self.id, installer
+                    ),
                 });
-            },
+            }
             None => (),
         }
 
@@ -66,7 +72,10 @@ impl PackageInfo {
             if let Some(level) = is_permission_suspcious(permission) {
                 sus.push(Suspicion {
                     level,
-                    description: format!("Package {:?} has requested permission {:?}", self.id, permission),
+                    description: format!(
+                        "Package {:?} has requested permission {:?}",
+                        self.id, permission
+                    ),
                 });
             }
         }
@@ -77,7 +86,10 @@ impl PackageInfo {
             if let Some(level) = is_permission_suspcious(permission) {
                 sus.push(Suspicion {
                     level,
-                    description: format!("Package {:?} has install permission {:?}", self.id, permission),
+                    description: format!(
+                        "Package {:?} has install permission {:?}",
+                        self.id, permission
+                    ),
                 });
             }
         }
@@ -88,7 +100,10 @@ impl PackageInfo {
             if let Some(level) = is_permission_suspcious(permission) {
                 sus.push(Suspicion {
                     level,
-                    description: format!("Package {:?} has runtime permission {:?}", self.id, permission),
+                    description: format!(
+                        "Package {:?} has runtime permission {:?}",
+                        self.id, permission
+                    ),
                 });
             }
         }

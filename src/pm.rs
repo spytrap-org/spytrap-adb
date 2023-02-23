@@ -50,14 +50,31 @@ package:org.lineageos.overlay.customization.blacktheme
 ";
 
         let pkgs = parse_output(data).unwrap();
-        assert_eq!(&pkgs, &[
-            Apk { id: "org.jitsi.meet".to_string() },
-            Apk { id: "org.lineageos.overlay.accent.black".to_string() },
-            Apk { id: "com.android.cts.priv.ctsshim".to_string() },
-            Apk { id: "org.lineageos.overlay.accent.brown".to_string() },
-            Apk { id: "org.lineageos.overlay.accent.green".to_string() },
-            Apk { id: "com.android.internal.display.cutout.emulation.corner".to_string() },
-            Apk { id: "org.lineageos.overlay.customization.blacktheme".to_string() }
-        ]);
+        assert_eq!(
+            &pkgs,
+            &[
+                Apk {
+                    id: "org.jitsi.meet".to_string()
+                },
+                Apk {
+                    id: "org.lineageos.overlay.accent.black".to_string()
+                },
+                Apk {
+                    id: "com.android.cts.priv.ctsshim".to_string()
+                },
+                Apk {
+                    id: "org.lineageos.overlay.accent.brown".to_string()
+                },
+                Apk {
+                    id: "org.lineageos.overlay.accent.green".to_string()
+                },
+                Apk {
+                    id: "com.android.internal.display.cutout.emulation.corner".to_string()
+                },
+                Apk {
+                    id: "org.lineageos.overlay.customization.blacktheme".to_string()
+                }
+            ]
+        );
     }
 }

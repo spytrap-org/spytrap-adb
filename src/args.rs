@@ -1,11 +1,11 @@
-use clap::Parser;
+use clap::{ArgAction, Parser};
 
 #[derive(Debug, Parser)]
 pub struct Args {
     /// More verbose logs
-    #[clap(short, long, global = true, parse(from_occurrences))]
+    #[arg(short, long, global = true, action(ArgAction::Count))]
     pub verbose: u8,
-    #[clap(subcommand)]
+    #[command(subcommand)]
     pub subcommand: SubCommand,
 }
 
@@ -19,8 +19,8 @@ pub enum SubCommand {
 #[derive(Debug, Parser)]
 pub struct Scan {
     pub serial: Option<String>,
-    #[clap(long, default_value = "./ioc.yaml")]
+    #[arg(long, default_value = "./ioc.yaml")]
     pub rules: String,
-    #[clap(long)]
+    #[arg(long)]
     pub test_load_only: bool,
 }

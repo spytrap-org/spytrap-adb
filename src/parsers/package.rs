@@ -100,7 +100,12 @@ pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
                 if let Some(&"Packages:") = section_stack.first() {
                     trace!("package line: {:?}", line);
                     if let Some((key, value)) = trimmed_line.split_once('=') {
-                        trace!("discovered for package {:?}: key={:?}, value={:?}", package, key, value);
+                        trace!(
+                            "discovered for package {:?}: key={:?}, value={:?}",
+                            package,
+                            key,
+                            value
+                        );
                         info.fields.insert(key.to_string(), value.to_string());
                     }
                 }
@@ -529,46 +534,58 @@ mod tests {
     fn test_parse_permission_plain() {
         let line = "android.permission.ACCESS_FINE_LOCATION";
         let p = Permission::from_str(line).unwrap();
-        assert_eq!(p, Permission {
-            name: "android.permission.ACCESS_FINE_LOCATION".to_string(),
-            fields: BTreeMap::new(),
-        });
+        assert_eq!(
+            p,
+            Permission {
+                name: "android.permission.ACCESS_FINE_LOCATION".to_string(),
+                fields: BTreeMap::new(),
+            }
+        );
     }
 
     #[test]
     fn test_parse_permission_fields1() {
         let line = "android.permission.INTERNET: granted=true";
         let p = Permission::from_str(line).unwrap();
-        assert_eq!(p, Permission {
-            name: "android.permission.INTERNET".to_string(),
-            fields: btreemap![
-                "granted".to_string() => "true".to_string(),
-            ],
-        });
+        assert_eq!(
+            p,
+            Permission {
+                name: "android.permission.INTERNET".to_string(),
+                fields: btreemap![
+                    "granted".to_string() => "true".to_string(),
+                ],
+            }
+        );
     }
 
     #[test]
     fn test_parse_permission_fields2() {
         let line = "android.permission.ACCESS_BACKGROUND_LOCATION: restricted=true";
         let p = Permission::from_str(line).unwrap();
-        assert_eq!(p, Permission {
-            name: "android.permission.ACCESS_BACKGROUND_LOCATION".to_string(),
-            fields: btreemap![
-                "restricted".to_string() => "true".to_string(),
-            ],
-        });
+        assert_eq!(
+            p,
+            Permission {
+                name: "android.permission.ACCESS_BACKGROUND_LOCATION".to_string(),
+                fields: btreemap![
+                    "restricted".to_string() => "true".to_string(),
+                ],
+            }
+        );
     }
 
     #[test]
     fn test_parse_permission_flags() {
         let line = "android.permission.READ_CALL_LOG: granted=false, flags=[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]";
         let p = Permission::from_str(line).unwrap();
-        assert_eq!(p, Permission {
-            name: "android.permission.READ_CALL_LOG".to_string(),
-            fields: btreemap![
-                "granted".to_string() => "false".to_string(),
-                "flags".to_string() => "[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
-            ],
-        });
+        assert_eq!(
+            p,
+            Permission {
+                name: "android.permission.READ_CALL_LOG".to_string(),
+                fields: btreemap![
+                    "granted".to_string() => "false".to_string(),
+                    "flags".to_string() => "[ USER_FIXED|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]".to_string(),
+                ],
+            }
+        );
     }
 }

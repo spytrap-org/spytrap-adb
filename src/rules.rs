@@ -20,8 +20,8 @@ pub fn load_map_from_buf(buf: &[u8]) -> Result<HashMap<String, String>> {
 }
 
 pub fn load_map_from_file(path: &str) -> Result<HashMap<String, String>> {
-    let buf = fs::read(path)
-        .with_context(|| anyhow!("Failed to read appid rules file: {:?}", path))?;
+    let buf =
+        fs::read(path).with_context(|| anyhow!("Failed to read appid rules file: {:?}", path))?;
     load_map_from_buf(&buf)
 }
 
@@ -32,12 +32,14 @@ mod tests {
 
     #[test]
     fn test_parse_ioc_yaml() {
-        let map = load_map_from_buf(b"
+        let map = load_map_from_buf(
+            b"
 - name: Reptilicus
   names:
   - Reptilicus
   - CyberNanny
   - Vkur
+  type: stalkerware
   packages:
   - com.brot.storage.work
   - com.cycle.start.mess
@@ -84,6 +86,7 @@ mod tests {
 - name: Snoopza
   names:
   - Snoopza
+  type: stalkerware
   packages:
   - com.android.core.mngi
   - com.android.core.mngj
@@ -104,26 +107,31 @@ mod tests {
     - my.snoopza.com
     - my2.snoopza.com
     - api.snoopza.com
-").unwrap();
-        assert_eq!(map, hashmap![
-            "com.brot.storage.work".to_string() => "Reptilicus".to_string(),
-            "com.cycle.start.mess".to_string() => "Reptilicus".to_string(),
-            "com.thecybernanny.andapp".to_string() => "Reptilicus".to_string(),
-            "net.androidcoreapp.androidbackup".to_string() => "Reptilicus".to_string(),
-            "net.delphiboardlayer.androidcoreapp".to_string() => "Reptilicus".to_string(),
-            "net.reptilicus.clientapp".to_string() => "Reptilicus".to_string(),
-            "net.system_updater_abs341".to_string() => "Reptilicus".to_string(),
-            "net.vkurhandler".to_string() => "Reptilicus".to_string(),
-            "se.vkur.clientapp".to_string() => "Reptilicus".to_string(),
-            "yc.sysupd.client".to_string() => "Reptilicus".to_string(),
+",
+        )
+        .unwrap();
+        assert_eq!(
+            map,
+            hashmap![
+                "com.brot.storage.work".to_string() => "Reptilicus".to_string(),
+                "com.cycle.start.mess".to_string() => "Reptilicus".to_string(),
+                "com.thecybernanny.andapp".to_string() => "Reptilicus".to_string(),
+                "net.androidcoreapp.androidbackup".to_string() => "Reptilicus".to_string(),
+                "net.delphiboardlayer.androidcoreapp".to_string() => "Reptilicus".to_string(),
+                "net.reptilicus.clientapp".to_string() => "Reptilicus".to_string(),
+                "net.system_updater_abs341".to_string() => "Reptilicus".to_string(),
+                "net.vkurhandler".to_string() => "Reptilicus".to_string(),
+                "se.vkur.clientapp".to_string() => "Reptilicus".to_string(),
+                "yc.sysupd.client".to_string() => "Reptilicus".to_string(),
 
-            "com.android.core.mngi".to_string() => "Snoopza".to_string(),
-            "com.android.core.mngj".to_string() => "Snoopza".to_string(),
-            "com.android.core.mngk".to_string() => "Snoopza".to_string(),
-            "com.android.core.mngl".to_string() => "Snoopza".to_string(),
-            "com.android.core.mngn".to_string() => "Snoopza".to_string(),
-            "com.android.core.mngo".to_string() => "Snoopza".to_string(),
-            "com.android.core.mngp".to_string() => "Snoopza".to_string(),
-        ]);
+                "com.android.core.mngi".to_string() => "Snoopza".to_string(),
+                "com.android.core.mngj".to_string() => "Snoopza".to_string(),
+                "com.android.core.mngk".to_string() => "Snoopza".to_string(),
+                "com.android.core.mngl".to_string() => "Snoopza".to_string(),
+                "com.android.core.mngn".to_string() => "Snoopza".to_string(),
+                "com.android.core.mngo".to_string() => "Snoopza".to_string(),
+                "com.android.core.mngp".to_string() => "Snoopza".to_string(),
+            ]
+        );
     }
 }

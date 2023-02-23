@@ -27,7 +27,8 @@ impl FromStr for Accessibility {
     fn from_str(s: &str) -> Result<Self> {
         let mut out = Accessibility::default();
 
-        let (_, s) = s.split_once("User state[")
+        let (_, s) = s
+            .split_once("User state[")
             .context("Failed to find `User state[` needle")?;
 
         let re = Regex::new(r"^\s*(.+):\{(.*)\}]?$").unwrap();
@@ -44,7 +45,7 @@ impl FromStr for Accessibility {
                                 out.add_attribute(key, value);
                             }
                         }
-                    },
+                    }
                     "shortcut key" => out.shortcut_key = values_to_option(values),
                     "button" => out.button = values_to_option(values),
                     "button target" => out.button_target = values_to_option(values),
@@ -85,27 +86,30 @@ mod tests {
         init();
         let data = include_str!("../../test_data/dumpsys/accessibility/plain.txt");
         let a = data.parse::<Accessibility>().unwrap();
-        assert_eq!(a, Accessibility {
-            attributes: hashmap![
-                "id".to_string() => "0".to_string(),
-                "touchExplorationEnabled".to_string() => "false".to_string(),
-                "serviceHandlesDoubleTap".to_string() => "false".to_string(),
-                "requestMultiFingerGestures".to_string() => "false".to_string(),
-                "requestTwoFingerPassthrough".to_string() => "false".to_string(),
-                "displayMagnificationEnabled".to_string() => "false".to_string(),
-                "autoclickEnabled".to_string() => "false".to_string(),
-                "nonInteractiveUiTimeout".to_string() => "0".to_string(),
-                "interactiveUiTimeout".to_string() => "0".to_string(),
-                "installedServiceCount".to_string() => "0".to_string(),
-            ],
-            shortcut_key: None,
-            button: None,
-            button_target: Some("null".to_string()),
-            bound_services: None,
-            enabled_services: None,
-            binding_services: None,
-            crashed_services: None,
-        });
+        assert_eq!(
+            a,
+            Accessibility {
+                attributes: hashmap![
+                    "id".to_string() => "0".to_string(),
+                    "touchExplorationEnabled".to_string() => "false".to_string(),
+                    "serviceHandlesDoubleTap".to_string() => "false".to_string(),
+                    "requestMultiFingerGestures".to_string() => "false".to_string(),
+                    "requestTwoFingerPassthrough".to_string() => "false".to_string(),
+                    "displayMagnificationEnabled".to_string() => "false".to_string(),
+                    "autoclickEnabled".to_string() => "false".to_string(),
+                    "nonInteractiveUiTimeout".to_string() => "0".to_string(),
+                    "interactiveUiTimeout".to_string() => "0".to_string(),
+                    "installedServiceCount".to_string() => "0".to_string(),
+                ],
+                shortcut_key: None,
+                button: None,
+                button_target: Some("null".to_string()),
+                bound_services: None,
+                enabled_services: None,
+                binding_services: None,
+                crashed_services: None,
+            }
+        );
     }
 
     #[test]
@@ -113,26 +117,29 @@ mod tests {
         init();
         let data = include_str!("../../test_data/dumpsys/accessibility/plain2.txt");
         let a = data.parse::<Accessibility>().unwrap();
-        assert_eq!(a, Accessibility {
-            attributes: hashmap![
-                "id".to_string() => "0".to_string(),
-                "currentUser".to_string() => "true".to_string(),
-                "touchExplorationEnabled".to_string() => "false".to_string(),
-                "displayMagnificationEnabled".to_string() => "false".to_string(),
-                "navBarMagnificationEnabled".to_string() => "false".to_string(),
-                "autoclickEnabled".to_string() => "false".to_string(),
-                "nonInteractiveUiTimeout".to_string() => "0".to_string(),
-                "interactiveUiTimeout".to_string() => "0".to_string(),
-                "installedServiceCount".to_string() => "4".to_string(),
-            ],
-            shortcut_key: None,
-            button: None,
-            button_target: None,
-            bound_services: None,
-            enabled_services: None,
-            binding_services: None,
-            crashed_services: None,
-        });
+        assert_eq!(
+            a,
+            Accessibility {
+                attributes: hashmap![
+                    "id".to_string() => "0".to_string(),
+                    "currentUser".to_string() => "true".to_string(),
+                    "touchExplorationEnabled".to_string() => "false".to_string(),
+                    "displayMagnificationEnabled".to_string() => "false".to_string(),
+                    "navBarMagnificationEnabled".to_string() => "false".to_string(),
+                    "autoclickEnabled".to_string() => "false".to_string(),
+                    "nonInteractiveUiTimeout".to_string() => "0".to_string(),
+                    "interactiveUiTimeout".to_string() => "0".to_string(),
+                    "installedServiceCount".to_string() => "4".to_string(),
+                ],
+                shortcut_key: None,
+                button: None,
+                button_target: None,
+                bound_services: None,
+                enabled_services: None,
+                binding_services: None,
+                crashed_services: None,
+            }
+        );
     }
 
     #[test]

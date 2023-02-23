@@ -68,13 +68,14 @@ fn main() -> Result<()> {
             // TODO: maybe `cmd package list packages -f`
             info!("Comparing list of installed apps with known stalkerware ids");
 
-
-
-
             let installed_apps = pm::list_packages(&device)?;
             let mut progress = 0;
             for apps in installed_apps.chunks(100) {
-                info!("Scanning installed apps ({}/{})", progress, installed_apps.len());
+                info!(
+                    "Scanning installed apps ({}/{})",
+                    progress,
+                    installed_apps.len()
+                );
 
                 for pkg in apps {
                     progress += 1;
@@ -82,7 +83,10 @@ fn main() -> Result<()> {
                     // TODO: maybe fetch apk and inspect eg. cert
 
                     if let Some(name) = rules.get(&pkg.id) {
-                        let alert = format!("Found known stalkerware with rule: {:?} ({:?})", pkg.id, name);
+                        let alert = format!(
+                            "Found known stalkerware with rule: {:?} ({:?})",
+                            pkg.id, name
+                        );
                         warn!("Suspicious {:?}: {}", SuspicionLevel::High, alert);
                     }
 
