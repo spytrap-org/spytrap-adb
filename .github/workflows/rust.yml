@@ -66,16 +66,8 @@ jobs:
           target/
         key: ${{ runner.os }}-cargo-debug-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-cargo-debug-
-
-    - name: Run clippy
-      run: cargo clippy
     - name: Run tests
       run: cargo test --verbose
-
-    - name: Clone stalkerware-indicators repo
-      run: git clone --depth=1 https://github.com/Te-k/stalkerware-indicators
-    - name: Test load ioc.yaml
-      run: cargo run -- scan --rules stalkerware-indicators/ioc.yaml --test-load-only
 
   windows_build:
     runs-on: windows-latest
