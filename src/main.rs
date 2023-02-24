@@ -10,6 +10,8 @@ use spytrap_adb::package;
 use spytrap_adb::pm;
 use spytrap_adb::remote_clock;
 use spytrap_adb::rules;
+use std::env;
+use std::process::Command;
 
 fn human_option_str(x: Option<&String>) -> &str {
     if let Some(x) = x {
@@ -31,8 +33,13 @@ fn main() -> Result<()> {
 
     env_logger::init_from_env(Env::default().default_filter_or(logging));
 
-    // TODO: if adb is not running, it needs to be started
-    // doas adb start-server
+    if let Err(status) = if env::consts::OS == "openbsd" {
+        Command::new("doas").args(["adb", "start-server"]).status()
+    } else {
+        Command::new("adb").arg("start-server").status()
+    } {
+        error!("Unable to start adb: {:?}", status);
+    }
 
     let adb_host = Host::default();
 
