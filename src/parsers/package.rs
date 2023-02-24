@@ -39,17 +39,7 @@ impl FromStr for Permission {
 }
 
 fn count_whitespace_prefix(line: &str) -> usize {
-    let iter = line.chars();
-
-    let mut count = 0;
-    for c in iter {
-        if c != ' ' {
-            return count;
-        }
-        count += 1;
-    }
-
-    count
+    line.chars().take_while(|ch| *ch == ' ').count()
 }
 
 pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
@@ -62,7 +52,7 @@ pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
     };
 
     let mut indent = 0;
-    for line in output.split('\n') {
+    for line in output.lines() {
         let trimmed_line = line.trim();
 
         match count_whitespace_prefix(line) {

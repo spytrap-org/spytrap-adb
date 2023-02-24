@@ -6,14 +6,8 @@ pub fn load_map_from_buf(buf: &[u8]) -> Result<HashMap<String, String>> {
     let list = stalkerware_indicators::parse_from_buf(buf)?;
     let mut map = HashMap::new();
     for rule in list {
-        let name = if let Some(name) = rule.names.first() {
-            name
-        } else {
-            warn!("Entry has no names defined: {:?}", rule);
-            continue;
-        };
         for package in rule.packages {
-            map.insert(package, name.to_string());
+            map.insert(package, rule.name.to_string());
         }
     }
     Ok(map)

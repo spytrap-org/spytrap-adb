@@ -5,17 +5,70 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '0 9 * * 1'
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
+
+    - name: Set up cargo cache
+      uses: actions/cache@v3
+      continue-on-error: false
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-cargo-release-
+
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --release --verbose
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: bin
+        path: target/release/spytrap-adb
+
+  integration-test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v3
+      - name: Clone stalkerware-indicators repo
+        run: git clone --depth=1 https://github.com/Te-k/stalkerware-indicators
+      - name: Test load ioc.yaml
+        run: chmod +x bin/spytrap-adb && bin/spytrap-adb scan --rules stalkerware-indicators/ioc.yaml --test-load-only
+
+  unit-test:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up cargo cache
+      uses: actions/cache@v3
+      continue-on-error: false
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-debug-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-cargo-debug-
+
+    - name: Run clippy
+      run: cargo clippy
     - name: Run tests
       run: cargo test --verbose
 
@@ -48,3 +101,10 @@ jobs:
     - uses: actions/checkout@v3
     - name: Run clippy
       run: cargo clippy --verbose
+
+  fmt:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run cargo fmt
+      run: cargo fmt --all -- --check
