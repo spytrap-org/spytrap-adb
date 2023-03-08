@@ -10,10 +10,10 @@ pub struct Args {
         long,
         global = true,
         value_name = "choice",
-        env = "SPYTRAP_ADB_SERVER",
+        env = "SPYTRAP_START_ADB_SERVER",
         default_value = "auto"
     )]
-    pub adb_server: AdbServerChoice,
+    pub start_adb_server: AdbServerChoice,
     #[command(subcommand)]
     pub subcommand: SubCommand,
 }
