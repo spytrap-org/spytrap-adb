@@ -17,7 +17,7 @@ sudo adb start-server
 # list available devices
 ./spytrap-adb list
 # fetch rules for scanning
-git clone https://github.com/Te-k/stalkerware-indicators.git
+git clone https://github.com/AssoEchap/stalkerware-indicators.git
 # scan the first connected device
 ./spytrap-adb scan --rules stalkerware-indicators/ioc.yaml
 ```
