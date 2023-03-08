@@ -2,7 +2,7 @@ use clap::Parser;
 use env_logger::Env;
 use mozdevice::{AndroidStorageInput, Host};
 use spytrap_adb::accessibility;
-use spytrap_adb::args::{Args, SubCommand};
+use spytrap_adb::args::{self, Args, SubCommand};
 use spytrap_adb::dumpsys;
 use spytrap_adb::errors::*;
 use spytrap_adb::iocs::SuspicionLevel;
@@ -10,7 +10,6 @@ use spytrap_adb::package;
 use spytrap_adb::pm;
 use spytrap_adb::remote_clock;
 use spytrap_adb::rules;
-use std::env;
 use std::process::Command;
 
 fn human_option_str(x: Option<&String>) -> &str {
@@ -21,30 +20,10 @@ fn human_option_str(x: Option<&String>) -> &str {
     }
 }
 
-fn main() -> Result<()> {
-    let args = Args::parse();
-
-    let logging = match args.verbose {
-        0 => "info",
-        1 => "spytrap_adb=debug,info",
-        2 => "debug",
-        _ => "trace",
-    };
-
-    env_logger::init_from_env(Env::default().default_filter_or(logging));
-
-    if let Err(status) = if env::consts::OS == "openbsd" {
-        Command::new("doas").args(["adb", "start-server"]).status()
-    } else {
-        Command::new("adb").arg("start-server").status()
-    } {
-        error!("Unable to start adb: {:?}", status);
-    }
-
+fn run(args: Args) -> Result<()> {
     let adb_host = Host::default();
 
     match args.subcommand {
-        SubCommand::Monitor => bail!("This subcommand is not implemented yet"),
         SubCommand::Scan(scan) => {
             let rules = rules::load_map_from_file(&scan.rules).context("Failed to load rules")?;
             info!("Loaded {} rules from {:?}", rules.len(), scan.rules);
@@ -120,10 +99,11 @@ fn main() -> Result<()> {
 
             info!("Scan finished");
         }
-        SubCommand::List => {
+        SubCommand::List(_) => {
+            debug!("Listing devices from adb...");
             let devices = adb_host
                 .devices::<Vec<_>>()
-                .map_err(|e| anyhow!("Failed to list devices: {}", e))?;
+                .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
 
             for device in devices {
                 debug!("Found device: {:?}", device);
@@ -139,4 +119,30 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn main() -> Result<()> {
+    let args = Args::parse();
+
+    let logging = match args.verbose {
+        0 => "info",
+        1 => "spytrap_adb=debug,info",
+        2 => "debug",
+        _ => "trace",
+    };
+
+    env_logger::init_from_env(Env::default().default_filter_or(logging));
+
+    if args.adb_server != args::AdbServerChoice::Never {
+        debug!("Making sure adb server is running...");
+        let status = Command::new("adb")
+            .arg("start-server")
+            .status()
+            .context("Failed to start adb binary")?;
+        if !status.success() {
+            bail!("Failed to ensure adb server is running: exited with status={status:?}");
+        }
+    }
+
+    run(args)
 }
