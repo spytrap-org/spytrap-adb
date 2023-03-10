@@ -133,7 +133,7 @@ fn main() -> Result<()> {
 
     env_logger::init_from_env(Env::default().default_filter_or(logging));
 
-    if args.adb_server != args::AdbServerChoice::Never {
+    if args.start_adb_server != args::AdbServerChoice::Never {
         debug!("Making sure adb server is running...");
         let status = Command::new("adb")
             .arg("start-server")
