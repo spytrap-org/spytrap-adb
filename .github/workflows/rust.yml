@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
       - name: Clone stalkerware-indicators repo
-        run: git clone --depth=1 https://github.com/Te-k/stalkerware-indicators
+        run: git clone --depth=1 https://github.com/AssoEchap/stalkerware-indicators
       - name: Test load ioc.yaml
         run: chmod +x bin/spytrap-adb && bin/spytrap-adb scan --rules stalkerware-indicators/ioc.yaml --test-load-only
 
