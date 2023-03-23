@@ -10,6 +10,7 @@ use spytrap_adb::package;
 use spytrap_adb::pm;
 use spytrap_adb::remote_clock;
 use spytrap_adb::rules;
+use spytrap_adb::settings;
 use std::process::Command;
 
 fn human_option_str(x: Option<&String>) -> &str {
@@ -50,6 +51,13 @@ fn run(args: Args) -> Result<()> {
                 "Local time is {}, remote time is {}, drift={:#}",
                 local_time, remote_time, drift
             );
+
+            info!("Enumerating android settings");
+            for (_namespace, settings) in settings::dump(&device)? {
+                for sus in settings.audit() {
+                    warn!("Suspicious {:?}: {}", sus.level, sus.description);
+                }
+            }
 
             if !scan.skip_apps {
                 // TODO: maybe `cmd package list packages -f`
