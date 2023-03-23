@@ -28,7 +28,7 @@ git clone https://github.com/AssoEchap/stalkerware-indicators.git
 # install rustup
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # clone the repository
-git clone https://github.com/kpcyrd/spytrap-adb
+git clone https://github.com/spytrap-org/spytrap-adb
 # enter the directory
 cd spytrap-adb/
 # compile the project
