@@ -51,37 +51,39 @@ fn run(args: Args) -> Result<()> {
                 local_time, remote_time, drift
             );
 
-            // TODO: maybe `cmd package list packages -f`
-            info!("Comparing list of installed apps with known stalkerware ids");
+            if !scan.skip_apps {
+                // TODO: maybe `cmd package list packages -f`
+                info!("Comparing list of installed apps with known stalkerware ids");
 
-            let installed_apps = pm::list_packages(&device)?;
-            let mut progress = 0;
-            for apps in installed_apps.chunks(100) {
-                info!(
-                    "Scanning installed apps ({}/{})",
-                    progress,
-                    installed_apps.len()
-                );
+                let installed_apps = pm::list_packages(&device)?;
+                let mut progress = 0;
+                for apps in installed_apps.chunks(100) {
+                    info!(
+                        "Scanning installed apps ({}/{})",
+                        progress,
+                        installed_apps.len()
+                    );
 
-                for pkg in apps {
-                    progress += 1;
+                    for pkg in apps {
+                        progress += 1;
 
-                    // TODO: maybe fetch apk and inspect eg. cert
+                        // TODO: maybe fetch apk and inspect eg. cert
 
-                    if let Some(name) = rules.get(&pkg.id) {
-                        let alert = format!(
-                            "Found known stalkerware with rule: {:?} ({:?})",
-                            pkg.id, name
-                        );
-                        warn!("Suspicious {:?}: {}", SuspicionLevel::High, alert);
-                    }
+                        if let Some(name) = rules.get(&pkg.id) {
+                            let alert = format!(
+                                "Found known stalkerware with rule: {:?} ({:?})",
+                                pkg.id, name
+                            );
+                            warn!("Suspicious {:?}: {}", SuspicionLevel::High, alert);
+                        }
 
-                    // fetch infos about package
-                    let info = package::dump(&device, &pkg.id)?;
-                    trace!("package infos {:?}: {:#?}", pkg.id, info);
+                        // fetch infos about package
+                        let info = package::dump(&device, &pkg.id)?;
+                        trace!("package infos {:?}: {:#?}", pkg.id, info);
 
-                    for sus in info.audit() {
-                        warn!("Suspicious {:?}: {}", sus.level, sus.description);
+                        for sus in info.audit() {
+                            warn!("Suspicious {:?}: {}", sus.level, sus.description);
+                        }
                     }
                 }
             }

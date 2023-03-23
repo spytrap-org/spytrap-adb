@@ -39,6 +39,9 @@ pub struct Scan {
     pub rules: String,
     #[arg(long)]
     pub test_load_only: bool,
+    /// Do not scan apps for suspicious permissions
+    #[arg(long)]
+    pub skip_apps: bool,
 }
 
 /// List all available devices
