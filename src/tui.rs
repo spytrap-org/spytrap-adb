@@ -97,6 +97,16 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                 code: KeyCode::Esc,
                 modifiers: KeyModifiers::NONE,
                 ..
+            })
+            | Event::Key(KeyEvent {
+                code: KeyCode::Char('c'),
+                modifiers: KeyModifiers::CONTROL,
+                ..
+            })
+            | Event::Key(KeyEvent {
+                code: KeyCode::Char('q'),
+                modifiers: KeyModifiers::NONE,
+                ..
             }) => {
                 if app.report.take().is_none() {
                     println!("Exiting...");
