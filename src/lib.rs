@@ -8,3 +8,4 @@ pub mod parsers;
 pub mod pm;
 pub mod remote_clock;
 pub mod rules;
+pub mod settings;
