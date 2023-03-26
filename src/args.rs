@@ -15,7 +15,7 @@ pub struct Args {
     )]
     pub start_adb_server: AdbServerChoice,
     #[command(subcommand)]
-    pub subcommand: SubCommand,
+    pub subcommand: Option<SubCommand>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, clap::ValueEnum)]
