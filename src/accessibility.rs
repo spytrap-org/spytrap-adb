@@ -2,11 +2,11 @@ use crate::dumpsys;
 use crate::errors::*;
 use crate::iocs::{Suspicion, SuspicionLevel};
 use crate::parsers::accessibility::Accessibility;
-use mozdevice::Device;
+use forensic_adb::Device;
 
-pub fn dump(device: &Device) -> Result<Accessibility> {
+pub async fn dump(device: &Device) -> Result<Accessibility> {
     info!("Reading accessibility settings");
-    let out = dumpsys::dump_service(device, "accessibility")?;
+    let out = dumpsys::dump_service(device, "accessibility").await?;
     out.parse::<Accessibility>()
         .context("Failed to parse accessibility service output")
 }

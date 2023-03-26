@@ -45,6 +45,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d261e256854913907f67ed06efbc3338dfe6179796deefc1ff763fc1aee5535"
 
 [[package]]
+name = "bytes"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
+
+[[package]]
 name = "cassowary"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -240,6 +246,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "forensic-adb"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4be933fe577cf1bdbdcc16c7cd26bc44f101796b001090525e5afca9e1711bc3"
+dependencies = [
+ "log",
+ "once_cell",
+ "regex",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "unix_path",
+ "uuid",
+ "walkdir",
+]
+
+[[package]]
 name = "futures-core"
 version = "0.3.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -432,22 +455,6 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys 0.45.0",
-]
-
-[[package]]
-name = "mozdevice"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f01c1b180a91304d9498e47120ac70498909647fefcccf9adb64ed3d6f4bf06c"
-dependencies = [
- "log",
- "once_cell",
- "regex",
- "tempfile",
- "thiserror",
- "unix_path",
- "uuid",
- "walkdir",
 ]
 
 [[package]]
@@ -694,6 +701,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 
 [[package]]
+name = "socket2"
+version = "0.4.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64a4a911eed85daf18834cfaa86a79b7d266ff93ff5ba14005426219480ed662"
+dependencies = [
+ "libc",
+ "winapi",
+]
+
+[[package]]
 name = "spytrap-adb"
 version = "0.1.0"
 dependencies = [
@@ -702,9 +719,9 @@ dependencies = [
  "clap",
  "crossterm",
  "env_logger",
+ "forensic-adb",
  "log",
  "maplit",
- "mozdevice",
  "ratatui",
  "regex",
  "serde",
@@ -804,8 +821,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "03201d01c3c27a29c8a5cee5b55a93ddae1ccf6f08f65365c2c918f8c1b76f64"
 dependencies = [
  "autocfg",
+ "bytes",
+ "libc",
+ "memchr",
+ "mio",
  "num_cpus",
  "pin-project-lite",
+ "socket2",
  "tokio-macros",
  "windows-sys 0.45.0",
 ]

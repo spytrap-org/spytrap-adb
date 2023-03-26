@@ -1,5 +1,5 @@
 use crate::errors::*;
-use mozdevice::Device;
+use forensic_adb::Device;
 
 const CMD: &str = "pm list packages";
 
@@ -8,9 +8,10 @@ pub struct Apk {
     pub id: String,
 }
 
-pub fn list_packages(device: &Device) -> Result<Vec<Apk>> {
+pub async fn list_packages(device: &Device) -> Result<Vec<Apk>> {
     let output = device
         .execute_host_shell_command(CMD)
+        .await
         .with_context(|| anyhow!("Failed to run: {:?}", CMD))?;
     parse_output(&output)
 }

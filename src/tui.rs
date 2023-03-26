@@ -10,7 +10,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use mozdevice::{AndroidStorageInput, DeviceInfo, Host};
+use forensic_adb::{AndroidStorageInput, DeviceInfo, Host};
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Alignment, Constraint, Direction, Layout},
@@ -42,12 +42,13 @@ impl App {
         }
     }
 
-    pub fn init(&mut self) -> Result<()> {
+    pub async fn init(&mut self) -> Result<()> {
         let devices = self
             .adb_host
             .as_ref()
             .unwrap()
             .devices::<Vec<_>>()
+            .await
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
         self.devices = devices;
 
@@ -65,12 +66,13 @@ impl App {
         }
     }
 
-    pub fn refresh_devices(&mut self) -> Result<()> {
+    pub async fn refresh_devices(&mut self) -> Result<()> {
         let devices = self
             .adb_host
             .as_ref()
             .unwrap()
             .devices::<Vec<_>>()
+            .await
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
         self.devices = devices;
         if self.devices.get(self.cursor).is_none() {
@@ -134,11 +136,13 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     .take()
                     .unwrap()
                     .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
+                    .await
                     .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
 
                 let rules = rules::load_map_from_file("stalkerware-indicators/ioc.yaml")
                     .context("Failed to load rules")?;
-                let report = scan::run(&device, &rules, &scan::Settings { skip_apps: true })?;
+                let report =
+                    scan::run(&device, &rules, &scan::Settings { skip_apps: true }).await?;
                 app.report = Some(report);
 
                 app.adb_host = Some(device.host);
@@ -163,7 +167,7 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                 ..
             }) => {
                 // TODO: check if we're in device list or report view
-                app.refresh_devices()?;
+                app.refresh_devices().await?;
             }
             Event::Key(KeyEvent {
                 code: KeyCode::Char('l'),
