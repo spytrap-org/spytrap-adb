@@ -26,7 +26,7 @@ use tokio_stream::StreamExt;
 const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
 
 pub struct App {
-    adb_host: Option<Host>,
+    adb_host: Host,
     devices: Vec<DeviceInfo>,
     cursor: usize,
     report: Option<Vec<iocs::Suspicion>>,
@@ -35,7 +35,7 @@ pub struct App {
 impl App {
     pub fn new(adb_host: Host) -> Self {
         Self {
-            adb_host: Some(adb_host),
+            adb_host: adb_host,
             devices: Vec::new(),
             cursor: 0,
             report: None,
@@ -45,8 +45,6 @@ impl App {
     pub async fn init(&mut self) -> Result<()> {
         let devices = self
             .adb_host
-            .as_ref()
-            .unwrap()
             .devices::<Vec<_>>()
             .await
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
@@ -69,8 +67,6 @@ impl App {
     pub async fn refresh_devices(&mut self) -> Result<()> {
         let devices = self
             .adb_host
-            .as_ref()
-            .unwrap()
             .devices::<Vec<_>>()
             .await
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
@@ -130,8 +126,7 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
 
             let device = app
                 .adb_host
-                .take()
-                .unwrap()
+                .clone()
                 .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
                 .await
                 .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
@@ -140,8 +135,6 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
                 .context("Failed to load rules")?;
             let report = scan::run(&device, &rules, &scan::Settings { skip_apps: true }).await?;
             app.report = Some(report);
-
-            app.adb_host = Some(device.host);
         }
         Event::Key(KeyEvent {
             code: KeyCode::Up,

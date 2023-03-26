@@ -247,9 +247,9 @@ dependencies = [
 
 [[package]]
 name = "forensic-adb"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4be933fe577cf1bdbdcc16c7cd26bc44f101796b001090525e5afca9e1711bc3"
+checksum = "8201364949223d3232995c828ecaccd5e8e9b2eccd59189bb444462919bec12e"
 dependencies = [
  "log",
  "once_cell",
