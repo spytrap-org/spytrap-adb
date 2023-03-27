@@ -1,14 +1,15 @@
 use crate::errors::*;
-use mozdevice::Device;
+use forensic_adb::Device;
 use std::collections::HashSet;
 
 const CMD_LIST_SERVICES: &str = "dumpsys -l";
 
-pub fn list_services(device: &Device) -> Result<HashSet<String>> {
+pub async fn list_services(device: &Device) -> Result<HashSet<String>> {
     let cmd = CMD_LIST_SERVICES;
     debug!("Executing {:?}", cmd);
     let output = device
         .execute_host_shell_command(cmd)
+        .await
         .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
 
     let mut services = HashSet::new();
@@ -26,11 +27,12 @@ pub fn list_services(device: &Device) -> Result<HashSet<String>> {
     Ok(services)
 }
 
-pub fn dump_service(device: &Device, service: &str) -> Result<String> {
+pub async fn dump_service(device: &Device, service: &str) -> Result<String> {
     let cmd = format!("dumpsys {}", service);
     debug!("Executing {:?}", cmd);
     let output = device
         .execute_host_shell_command(&cmd)
+        .await
         .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
     Ok(output)
 }

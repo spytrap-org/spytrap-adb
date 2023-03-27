@@ -7,7 +7,7 @@ use crate::package;
 use crate::pm;
 use crate::remote_clock;
 use crate::settings;
-use mozdevice::Device;
+use forensic_adb::Device;
 use std::collections::HashMap;
 
 pub struct Settings {
@@ -22,7 +22,7 @@ impl From<&args::Scan> for Settings {
     }
 }
 
-pub fn run(
+pub async fn run(
     device: &Device,
     rules: &HashMap<String, String>,
     scan: &Settings,
@@ -30,21 +30,15 @@ pub fn run(
     let mut report = Vec::new();
     debug!("Using device: {:?}", device);
 
-    if device.is_rooted {
-        warn!("Device is rooted!");
-    } else {
-        info!("Device is not rooted");
-    }
-
     info!("Fetching remote clock");
-    let (local_time, remote_time, drift) = remote_clock::determine(device)?;
+    let (local_time, remote_time, drift) = remote_clock::determine(device).await?;
     info!(
         "Local time is {}, remote time is {}, drift={:#}",
         local_time, remote_time, drift
     );
 
     info!("Enumerating android settings");
-    for (_namespace, settings) in settings::dump(device)? {
+    for (_namespace, settings) in settings::dump(device).await? {
         for sus in settings.audit() {
             warn!("Suspicious {:?}: {}", sus.level, sus.description);
             report.push(sus);
@@ -55,7 +49,7 @@ pub fn run(
         // TODO: maybe `cmd package list packages -f`
         info!("Comparing list of installed apps with known stalkerware ids");
 
-        let installed_apps = pm::list_packages(device)?;
+        let installed_apps = pm::list_packages(device).await?;
         let mut progress = 0;
         for apps in installed_apps.chunks(100) {
             info!(
@@ -78,7 +72,7 @@ pub fn run(
                 }
 
                 // fetch infos about package
-                let info = package::dump(device, &pkg.id)?;
+                let info = package::dump(device, &pkg.id).await?;
                 trace!("package infos {:?}: {:#?}", pkg.id, info);
 
                 for sus in info.audit() {
@@ -90,11 +84,11 @@ pub fn run(
     }
 
     info!("Enumerating service list");
-    let services = dumpsys::list_services(device)?;
+    let services = dumpsys::list_services(device).await?;
 
     if services.contains("accessibility") {
         info!("Reading accessibility settings");
-        let accessibility = accessibility::dump(device)?;
+        let accessibility = accessibility::dump(device).await?;
         for sus in accessibility.audit() {
             warn!("Suspicious {:?}: {}", sus.level, sus.description);
             report.push(sus);

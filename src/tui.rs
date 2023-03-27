@@ -10,7 +10,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use mozdevice::{AndroidStorageInput, DeviceInfo, Host};
+use forensic_adb::{AndroidStorageInput, DeviceInfo, Host};
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Alignment, Constraint, Direction, Layout},
@@ -26,7 +26,7 @@ use tokio_stream::StreamExt;
 const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
 
 pub struct App {
-    adb_host: Option<Host>,
+    adb_host: Host,
     devices: Vec<DeviceInfo>,
     cursor: usize,
     report: Option<Vec<iocs::Suspicion>>,
@@ -35,19 +35,18 @@ pub struct App {
 impl App {
     pub fn new(adb_host: Host) -> Self {
         Self {
-            adb_host: Some(adb_host),
+            adb_host: adb_host,
             devices: Vec::new(),
             cursor: 0,
             report: None,
         }
     }
 
-    pub fn init(&mut self) -> Result<()> {
+    pub async fn init(&mut self) -> Result<()> {
         let devices = self
             .adb_host
-            .as_ref()
-            .unwrap()
             .devices::<Vec<_>>()
+            .await
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
         self.devices = devices;
 
@@ -65,12 +64,11 @@ impl App {
         }
     }
 
-    pub fn refresh_devices(&mut self) -> Result<()> {
+    pub async fn refresh_devices(&mut self) -> Result<()> {
         let devices = self
             .adb_host
-            .as_ref()
-            .unwrap()
             .devices::<Vec<_>>()
+            .await
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
         self.devices = devices;
         if self.devices.get(self.cursor).is_none() {
@@ -83,96 +81,113 @@ impl App {
     }
 }
 
+pub enum Action {
+    Shutdown,
+    Clear,
+}
+
+pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
+    match event {
+        Event::Key(KeyEvent {
+            code: KeyCode::Esc,
+            modifiers: KeyModifiers::NONE,
+            ..
+        })
+        | Event::Key(KeyEvent {
+            code: KeyCode::Char('c'),
+            modifiers: KeyModifiers::CONTROL,
+            ..
+        })
+        | Event::Key(KeyEvent {
+            code: KeyCode::Char('q'),
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            if app.report.take().is_none() {
+                println!("Exiting...");
+                return Ok(Some(Action::Shutdown));
+            }
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::Char('Q'),
+            modifiers: KeyModifiers::SHIFT,
+            ..
+        }) => {
+            println!("Exiting...");
+            return Ok(Some(Action::Shutdown));
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::Enter,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            let device = &app.devices[app.cursor];
+            // println!("{:?}", device);
+
+            let device = app
+                .adb_host
+                .clone()
+                .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
+                .await
+                .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
+
+            let rules = rules::load_map_from_file("stalkerware-indicators/ioc.yaml")
+                .context("Failed to load rules")?;
+            let report = scan::run(&device, &rules, &scan::Settings { skip_apps: true }).await?;
+            app.report = Some(report);
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::Up,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            app.key_up();
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::Down,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            app.key_down();
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::Char('r'),
+            modifiers: KeyModifiers::CONTROL,
+            ..
+        }) => {
+            // TODO: check if we're in device list or report view
+            app.refresh_devices().await?;
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::Char('l'),
+            modifiers: KeyModifiers::CONTROL,
+            ..
+        }) => {
+            return Ok(Some(Action::Clear));
+        }
+        _ => (),
+    }
+    Ok(None)
+}
+
 pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
     let mut stream = EventStream::new();
 
     loop {
         terminal.draw(|f| ui(f, app))?;
 
-        let Some(event) = stream.next().await else { break };
-        let event = event.context("Failed to read terminal input")?;
-
-        match event {
-            Event::Key(KeyEvent {
-                code: KeyCode::Esc,
-                modifiers: KeyModifiers::NONE,
-                ..
-            })
-            | Event::Key(KeyEvent {
-                code: KeyCode::Char('c'),
-                modifiers: KeyModifiers::CONTROL,
-                ..
-            })
-            | Event::Key(KeyEvent {
-                code: KeyCode::Char('q'),
-                modifiers: KeyModifiers::NONE,
-                ..
-            }) => {
-                if app.report.take().is_none() {
-                    println!("Exiting...");
-                    break;
+        tokio::select! {
+            event = stream.next() => {
+                let Some(event) = event else { break };
+                let event = event.context("Failed to read terminal input")?;
+                match handle_key(app, event).await? {
+                    Some(Action::Shutdown) => break,
+                    Some(Action::Clear) => {
+                        terminal.clear()?;
+                    },
+                    None => (),
                 }
             }
-            Event::Key(KeyEvent {
-                code: KeyCode::Char('Q'),
-                modifiers: KeyModifiers::SHIFT,
-                ..
-            }) => {
-                println!("Exiting...");
-                break;
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Enter,
-                modifiers: KeyModifiers::NONE,
-                ..
-            }) => {
-                let device = &app.devices[app.cursor];
-                // println!("{:?}", device);
-
-                let device = app
-                    .adb_host
-                    .take()
-                    .unwrap()
-                    .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
-                    .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
-
-                let rules = rules::load_map_from_file("stalkerware-indicators/ioc.yaml")
-                    .context("Failed to load rules")?;
-                let report = scan::run(&device, &rules, &scan::Settings { skip_apps: true })?;
-                app.report = Some(report);
-
-                app.adb_host = Some(device.host);
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Up,
-                modifiers: KeyModifiers::NONE,
-                ..
-            }) => {
-                app.key_up();
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Down,
-                modifiers: KeyModifiers::NONE,
-                ..
-            }) => {
-                app.key_down();
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Char('r'),
-                modifiers: KeyModifiers::CONTROL,
-                ..
-            }) => {
-                // TODO: check if we're in device list or report view
-                app.refresh_devices()?;
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Char('l'),
-                modifiers: KeyModifiers::CONTROL,
-                ..
-            }) => {
-                terminal.clear()?;
-            }
-            _ => (),
         }
     }
 

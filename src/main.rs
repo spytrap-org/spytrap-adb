@@ -1,6 +1,6 @@
 use clap::Parser;
 use env_logger::Env;
-use mozdevice::{AndroidStorageInput, Host};
+use forensic_adb::{AndroidStorageInput, Host};
 use spytrap_adb::args::{self, Args, SubCommand};
 use spytrap_adb::errors::*;
 use spytrap_adb::rules;
@@ -24,14 +24,16 @@ async fn run(args: Args) -> Result<()> {
 
             let device = adb_host
                 .device_or_default(scan.serial.as_ref(), AndroidStorageInput::Auto)
+                .await
                 .with_context(|| anyhow!("Failed to access device: {:?}", scan.serial))?;
 
-            scan::run(&device, &rules, &scan::Settings::from(&scan))?;
+            scan::run(&device, &rules, &scan::Settings::from(&scan)).await?;
         }
         Some(SubCommand::List(_)) => {
             debug!("Listing devices from adb...");
             let devices = adb_host
                 .devices::<Vec<_>>()
+                .await
                 .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
 
             for device in devices {
@@ -47,7 +49,7 @@ async fn run(args: Args) -> Result<()> {
         }
         None => {
             let mut app = tui::App::new(adb_host);
-            app.init()?;
+            app.init().await?;
             let mut terminal = tui::setup()?;
             let ret = tui::run(&mut terminal, &mut app).await;
             tui::cleanup(&mut terminal).ok();

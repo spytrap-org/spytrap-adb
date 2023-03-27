@@ -1,12 +1,13 @@
 use crate::errors::*;
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
-use mozdevice::Device;
+use forensic_adb::Device;
 
 const DATE_COMMAND: &str = "date -u '+%Y-%m-%d %T %N'";
 
-pub fn determine(device: &Device) -> Result<(DateTime<Utc>, DateTime<Utc>, Duration)> {
+pub async fn determine(device: &Device) -> Result<(DateTime<Utc>, DateTime<Utc>, Duration)> {
     let output = device
         .execute_host_shell_command(DATE_COMMAND)
+        .await
         .with_context(|| anyhow!("Failed to run date command: {:?}", DATE_COMMAND))?;
     let local_time = Utc::now();
     let remote_time = parse(output.trim()).context("Failed to parse remote time")?;

@@ -1,16 +1,17 @@
 use crate::errors::*;
 use crate::iocs::{Suspicion, SuspicionLevel};
 use crate::parsers::settings::Settings;
-use mozdevice::Device;
+use forensic_adb::Device;
 use std::collections::HashMap;
 
-pub fn dump(device: &Device) -> Result<HashMap<String, Settings>> {
+pub async fn dump(device: &Device) -> Result<HashMap<String, Settings>> {
     let mut out = HashMap::new();
     for namespace in ["system", "secure", "global"] {
         let cmd = format!("settings list {}", namespace);
         debug!("Executing {:?}", cmd);
         let output = device
             .execute_host_shell_command(&cmd)
+            .await
             .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
 
         let settings = output

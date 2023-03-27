@@ -1,10 +1,10 @@
 use crate::errors::*;
 use crate::iocs::{Suspicion, SuspicionLevel};
 use crate::parsers::{self, package::PackageInfo, package::Permission};
-use mozdevice::Device;
+use forensic_adb::Device;
 use std::borrow::Cow;
 
-pub fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
+pub async fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
     let cmd = format!(
         "dumpsys package {}",
         shell_escape::escape(Cow::Borrowed(package))
@@ -12,6 +12,7 @@ pub fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
     debug!("Executing {:?}", cmd);
     let output = device
         .execute_host_shell_command(&cmd)
+        .await
         .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
     parsers::package::parse_output(&output, package)
 }
