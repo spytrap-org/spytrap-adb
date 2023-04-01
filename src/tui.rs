@@ -35,7 +35,7 @@ pub struct App {
 impl App {
     pub fn new(adb_host: Host) -> Self {
         Self {
-            adb_host: adb_host,
+            adb_host,
             devices: Vec::new(),
             cursor: 0,
             report: None,
