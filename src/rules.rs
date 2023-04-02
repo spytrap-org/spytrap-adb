@@ -1,6 +1,7 @@
 use crate::errors::*;
 use std::collections::HashMap;
 use std::fs;
+use std::path::Path;
 
 pub fn load_map_from_buf(buf: &[u8]) -> Result<HashMap<String, String>> {
     let list = stalkerware_indicators::parse_from_buf(buf)?;
@@ -13,7 +14,8 @@ pub fn load_map_from_buf(buf: &[u8]) -> Result<HashMap<String, String>> {
     Ok(map)
 }
 
-pub fn load_map_from_file(path: &str) -> Result<HashMap<String, String>> {
+pub fn load_map_from_file<P: AsRef<Path>>(path: P) -> Result<HashMap<String, String>> {
+    let path = path.as_ref();
     let buf =
         fs::read(path).with_context(|| anyhow!("Failed to read appid rules file: {:?}", path))?;
     load_map_from_buf(&buf)

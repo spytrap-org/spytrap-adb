@@ -1,4 +1,5 @@
 use clap::{ArgAction, Parser};
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct Args {
@@ -36,8 +37,8 @@ pub enum SubCommand {
 #[derive(Debug, Parser)]
 pub struct Scan {
     pub serial: Option<String>,
-    #[arg(long, default_value = "./ioc.yaml")]
-    pub rules: String,
+    #[arg(long)]
+    pub rules: Option<PathBuf>,
     #[arg(long)]
     pub test_load_only: bool,
     /// Do not scan apps for suspicious permissions

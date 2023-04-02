@@ -8,6 +8,7 @@ use spytrap_adb::rules;
 use spytrap_adb::scan;
 use spytrap_adb::tui;
 use spytrap_adb::utils;
+use std::borrow::Cow;
 use std::process::Command;
 
 async fn run(args: Args) -> Result<()> {
@@ -15,8 +16,16 @@ async fn run(args: Args) -> Result<()> {
 
     match args.subcommand {
         Some(SubCommand::Scan(scan)) => {
-            let rules = rules::load_map_from_file(&scan.rules).context("Failed to load rules")?;
-            info!("Loaded {} rules from {:?}", rules.len(), scan.rules);
+            let rules_path = if let Some(path) = &scan.rules {
+                Cow::Borrowed(path)
+            } else {
+                let path = iocs::Repository::ioc_file_path()?;
+                Cow::Owned(path)
+            };
+
+            let rules =
+                rules::load_map_from_file(rules_path.as_ref()).context("Failed to load rules")?;
+            info!("Loaded {} rules from {:?}", rules.len(), rules_path);
 
             if scan.test_load_only {
                 info!("Rules loaded successfully");
