@@ -3,6 +3,7 @@ use env_logger::Env;
 use forensic_adb::{AndroidStorageInput, Host};
 use spytrap_adb::args::{self, Args, SubCommand};
 use spytrap_adb::errors::*;
+use spytrap_adb::iocs;
 use spytrap_adb::rules;
 use spytrap_adb::scan;
 use spytrap_adb::tui;
@@ -46,6 +47,12 @@ async fn run(args: Args) -> Result<()> {
                     utils::human_option_str(device.info.get("product")),
                 );
             }
+        }
+        Some(SubCommand::Update(_update)) => {
+            let repo = iocs::Repository::init().await?;
+            repo.ensure_remote()?;
+            repo.fetch()?;
+            repo.checkout()?;
         }
         None => {
             let mut app = tui::App::new(adb_host);

@@ -29,6 +29,7 @@ pub enum AdbServerChoice {
 pub enum SubCommand {
     Scan(Scan),
     List(List),
+    Update(Update),
 }
 
 /// Run a scan on a given device
@@ -47,3 +48,7 @@ pub struct Scan {
 /// List all available devices
 #[derive(Debug, Parser)]
 pub struct List {}
+
+/// Ensure a recent copy of stalkerware-indicators is present
+#[derive(Debug, Parser)]
+pub struct Update {}
