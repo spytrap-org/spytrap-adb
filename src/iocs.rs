@@ -1,9 +1,17 @@
 use crate::errors::*;
+use reqwest::StatusCode;
+use serde::{Deserialize, Serialize};
+use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
+use tokio::fs;
 
-const GIT_REPO_URL: &str = "https://github.com/AssoEchap/stalkerware-indicators.git";
-const GIT_REPO_REMOTE: &str = "origin";
-const GIT_REPO_BRANCH: &str = "master";
+// query the latest commit to detect if we need to update
+const IOC_GIT_REFS_URL: &str =
+    "https://api.github.com/repos/AssoEchap/stalkerware-indicators/branches";
+const IOC_GIT_BRANCH: &str = "master";
+const IOC_REFRESH_INTERVAL: i64 = 3 * 60; // Assume the cache is ok for 3h
+const IOC_DOWNLOAD_URL: &str =
+    "https://github.com/AssoEchap/stalkerware-indicators/raw/{{commit}}/ioc.yaml";
 
 #[derive(Debug, PartialEq)]
 pub struct Suspicion {
@@ -18,73 +26,261 @@ pub enum SuspicionLevel {
     Low,
 }
 
+#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
+pub struct UpdateState {
+    last_update_check: i64,
+    last_updated: i64,
+    git_commit: Option<String>,
+    etag: Option<String>,
+}
+
+#[derive(Debug, PartialEq, PartialOrd, Default, Clone, Copy)]
+pub enum CacheControl {
+    #[default]
+    Normal = 0,
+    InvalidateBackoff,
+    InvalidateGitCommit,
+    InvalidateEtag,
+}
+
+impl From<u8> for CacheControl {
+    fn from(num: u8) -> CacheControl {
+        match num {
+            0 => CacheControl::Normal,
+            1 => CacheControl::InvalidateBackoff,
+            2 => CacheControl::InvalidateGitCommit,
+            _ => CacheControl::InvalidateEtag,
+        }
+    }
+}
+
 pub struct Repository {
-    repo: git2::Repository,
+    update_state: Option<UpdateState>,
+    client: reqwest::Client,
 }
 
 impl Repository {
-    pub fn new(repo: git2::Repository) -> Self {
-        Self { repo }
-    }
-
     pub fn data_path() -> Result<PathBuf> {
         let dir = dirs::data_local_dir().context("Failed to find local data dir")?;
         let dir = dir.join("spytrap-adb");
         Ok(dir)
     }
 
-    pub fn repo_path() -> Result<PathBuf> {
-        Ok(Self::data_path()?.join("iocs"))
+    pub fn ioc_file_path() -> Result<PathBuf> {
+        Ok(Self::data_path()?.join("ioc.yaml"))
     }
 
-    pub fn ioc_file_path() -> Result<PathBuf> {
-        Ok(Self::repo_path()?.join("ioc.yaml"))
+    pub fn update_file_path() -> Result<PathBuf> {
+        Ok(Self::data_path()?.join("update.json"))
     }
 
     pub async fn init() -> Result<Self> {
-        let dir = Self::repo_path()?;
+        let dir = Self::data_path()?;
         Self::init_at(&dir).await
     }
 
     pub async fn init_at(path: &Path) -> Result<Self> {
         debug!("Opening repository at {path:?}...");
-        let repo = git2::Repository::init(path)
-            .with_context(|| anyhow!("Failed to open git repository at {path:?}"))?;
-        Ok(Self { repo })
+        fs::create_dir_all(path)
+            .await
+            .with_context(|| anyhow!("Failed to create directory at {path:?}"))?;
+
+        let update_file_path = Self::update_file_path()?;
+        let update_state = match fs::read(&update_file_path).await {
+            Ok(buf) => serde_json::from_slice::<UpdateState>(&buf).ok(),
+            Err(err) if err.kind() == ErrorKind::NotFound => None,
+            Err(err) => {
+                return Err(err)
+                    .with_context(|| anyhow!("Failed to read update file at {update_file_path:?}"))
+            }
+        };
+
+        static APP_USER_AGENT: &str =
+            concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
+
+        let client = reqwest::Client::builder()
+            .user_agent(APP_USER_AGENT)
+            .build()
+            .context("Failed to setup http client")?;
+        Ok(Self {
+            update_state,
+            client,
+        })
     }
 
-    pub fn ensure_remote(&self) -> Result<()> {
-        if !self
-            .repo
-            .remotes()?
-            .iter()
-            .any(|r| r == Some(GIT_REPO_REMOTE))
-        {
-            debug!("Adding `{GIT_REPO_REMOTE}` remote at {GIT_REPO_URL:?} to git repo...");
-            self.repo.remote(GIT_REPO_REMOTE, GIT_REPO_URL)
-                .with_context(|| anyhow!("Failed to add `{GIT_REPO_REMOTE}` remote for stalkerware-indicators repo at {GIT_REPO_URL:?}"))?;
+    fn ioc_download_url(commit: &GithubCommit) -> String {
+        IOC_DOWNLOAD_URL.replace("{{commit}}", &commit.sha)
+    }
+
+    pub async fn update(&mut self, cache_control: CacheControl) -> Result<()> {
+        debug!("Starting update check");
+
+        if cache_control < CacheControl::InvalidateBackoff {
+            if let Some(update_state) = &self.update_state {
+                let age = now() - update_state.last_update_check;
+                if age < IOC_REFRESH_INTERVAL {
+                    info!("IOC file is still very fresh ({age} seconds), not checking for updates");
+                    return Ok(());
+                }
+            }
         }
+
+        let commit = self
+            .current_github_commit(IOC_GIT_REFS_URL)
+            .await
+            .context("Failed to determine latest git commit for stalkerware-indicators")?;
+
+        if cache_control < CacheControl::InvalidateGitCommit {
+            if let Some(update_state) = &mut self.update_state {
+                if update_state.git_commit.as_ref() == Some(&commit.sha) {
+                    debug!(
+                        "We're still on most recent git commit, marking as fresh... (commit={:?})",
+                        commit.sha
+                    );
+                    update_state.last_update_check = now();
+                    self.write_state_file()
+                        .await
+                        .context("Failed to write update state file")?;
+                    return Ok(());
+                }
+            }
+        }
+
+        let ioc_download_url = Self::ioc_download_url(&commit);
+        info!("Downloading IOC file from {ioc_download_url:?}...");
+        let mut req = self.client.get(ioc_download_url);
+
+        if cache_control < CacheControl::InvalidateEtag {
+            if let Some(state) = &self.update_state {
+                if let Some(etag) = &state.etag {
+                    debug!("Adding etag to request: {etag:?}");
+                    req = req.header("If-None-Match", etag);
+                }
+            }
+        }
+
+        let req = req
+            .send()
+            .await
+            .context("Failed to send HTTP request")?
+            .error_for_status()?;
+
+        let status = req.status();
+        let headers = req.headers();
+        trace!("Received response from server: status={status:?}, headers={headers:?}");
+
+        if status == StatusCode::NOT_MODIFIED {
+            let update_state = self
+                .update_state
+                .as_mut()
+                .context("Server sent 304 but we don't have any existing update")?;
+            debug!("Server sent 304, marking update as fresh");
+            update_state.last_update_check = now();
+        } else if status == StatusCode::OK {
+            let mut update_state = self.write_update(req).await?;
+            update_state.git_commit = Some(commit.sha);
+            self.update_state = Some(update_state);
+        } else {
+            bail!("Server sent unexpected http status: {status:?}")
+        }
+
+        self.write_state_file()
+            .await
+            .context("Failed to write update state file")?;
+
+        debug!("Update check complete");
+
         Ok(())
     }
 
-    pub fn fetch(&self) -> Result<()> {
-        // TODO: this should do a shallow clone with depth=1
-        info!("Fetching updates from git remote...");
-        let mut remote = self.repo.find_remote(GIT_REPO_REMOTE)?;
-        remote.fetch(&[GIT_REPO_BRANCH], None, None)?;
+    async fn write_update(&mut self, req: reqwest::Response) -> Result<UpdateState> {
+        let etag = req.headers().get(reqwest::header::ETAG);
+        let etag = if let Some(etag) = etag {
+            debug!("Found etag in http response: {etag:?}");
+            let etag = etag.to_str().context("etag is invalid utf8")?;
+            Some(etag.to_string())
+        } else {
+            None
+        };
+
+        let body = req
+            .bytes()
+            .await
+            .context("Failed to download HTTP response")?;
+
+        let ioc_file_path = Self::ioc_file_path()?;
+        debug!(
+            "Writing IOC file to {ioc_file_path:?}... ({} bytes)",
+            body.len()
+        );
+        fs::write(&ioc_file_path, body)
+            .await
+            .with_context(|| anyhow!("Failed to write IOC file to {ioc_file_path:?}"))?;
+
+        let now = now();
+        let update_state = UpdateState {
+            last_update_check: now,
+            last_updated: now,
+            git_commit: None,
+            etag,
+        };
+        Ok(update_state)
+    }
+
+    async fn write_state_file(&self) -> Result<()> {
+        let update_file_path = Self::update_file_path()?;
+        let mut buf = serde_json::to_vec(&self.update_state)?;
+        buf.push(b'\n');
+        debug!("Writing update state file to {update_file_path:?}...");
+        fs::write(&update_file_path, &buf).await.with_context(|| {
+            anyhow!("Failed to write update state file at {update_file_path:?}")
+        })?;
         Ok(())
     }
 
-    pub fn checkout(&self) -> Result<()> {
-        info!("Checking out latest IOC list from git...");
-        let remote_branch = format!("{GIT_REPO_REMOTE}/{GIT_REPO_BRANCH}");
-        let object = self
-            .repo
-            .revparse_single(&remote_branch)
-            .with_context(|| anyhow!("Failed to resolve `{remote_branch}` branch"))?;
-        self.repo
-            .reset(&object, git2::ResetType::Hard, None)
-            .context("Failed to reset repository to latest upstream commit")?;
-        Ok(())
+    async fn current_github_commit(&self, url: &str) -> Result<GithubCommit> {
+        info!("Fetching git repository meta data: {url:?}...");
+        let req = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .context("Failed to send http request")?;
+
+        let status = req.status();
+        let headers = req.headers();
+        trace!("Received response from server: status={status:?}, headers={headers:?}");
+
+        let branches = req
+            .error_for_status()?
+            .json::<Vec<GithubBranch>>()
+            .await
+            .context("Failed to receive http response")?;
+
+        for branch in branches {
+            if branch.name == IOC_GIT_BRANCH {
+                let commit = branch.commit;
+                debug!("Found github commit for branch {IOC_GIT_BRANCH}: {commit:?}");
+                return Ok(commit);
+            }
+        }
+
+        bail!("Failed to find branch: {IOC_GIT_BRANCH:?}")
     }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GithubBranch {
+    name: String,
+    commit: GithubCommit,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GithubCommit {
+    sha: String,
+}
+
+pub fn now() -> i64 {
+    let now = chrono::offset::Utc::now();
+    now.timestamp()
 }

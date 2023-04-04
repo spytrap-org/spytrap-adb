@@ -57,11 +57,12 @@ async fn run(args: Args) -> Result<()> {
                 );
             }
         }
-        Some(SubCommand::Update(_update)) => {
-            let repo = iocs::Repository::init().await?;
-            repo.ensure_remote()?;
-            repo.fetch()?;
-            repo.checkout()?;
+        Some(SubCommand::Update(update)) => {
+            let mut repo = iocs::Repository::init().await?;
+            let cache_control = iocs::CacheControl::from(update.invalidate_cache);
+            repo.update(cache_control)
+                .await
+                .context("Failed to update stalkerware-indicators ioc.yaml")?;
         }
         None => {
             let mut app = tui::App::new(adb_host);
@@ -84,7 +85,7 @@ async fn main() -> Result<()> {
         let logging = match args.verbose {
             0 => "info",
             1 => "spytrap_adb=debug,info",
-            2 => "debug",
+            2 => "spytrap_adb=trace,debug",
             _ => "trace",
         };
 
