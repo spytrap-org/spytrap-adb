@@ -30,7 +30,7 @@ pub enum AdbServerChoice {
 pub enum SubCommand {
     Scan(Scan),
     List(List),
-    Update(Update),
+    Sync(SyncIoc),
 }
 
 /// Run a scan on a given device
@@ -52,7 +52,7 @@ pub struct List {}
 
 /// Ensure a recent copy of stalkerware-indicators is present
 #[derive(Debug, Parser)]
-pub struct Update {
+pub struct SyncIoc {
     /// Update even if the local cache is still fresh (use multiple times to force re-download)
     #[arg(short = 'u', long, action(ArgAction::Count))]
     pub invalidate_cache: u8,

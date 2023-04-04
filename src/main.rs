@@ -57,12 +57,12 @@ async fn run(args: Args) -> Result<()> {
                 );
             }
         }
-        Some(SubCommand::Update(update)) => {
+        Some(SubCommand::Sync(sync)) => {
             let mut repo = iocs::Repository::init().await?;
-            let cache_control = iocs::CacheControl::from(update.invalidate_cache);
+            let cache_control = iocs::CacheControl::from(sync.invalidate_cache);
             repo.update(cache_control)
                 .await
-                .context("Failed to update stalkerware-indicators ioc.yaml")?;
+                .context("Failed to sync stalkerware-indicators ioc.yaml")?;
         }
         None => {
             let mut app = tui::App::new(adb_host);
