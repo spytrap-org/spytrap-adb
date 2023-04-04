@@ -31,7 +31,6 @@ pub struct UpdateState {
     last_update_check: i64,
     last_updated: i64,
     git_commit: Option<String>,
-    etag: Option<String>,
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Default, Clone, Copy)]
@@ -40,7 +39,6 @@ pub enum CacheControl {
     Normal = 0,
     InvalidateBackoff,
     InvalidateGitCommit,
-    InvalidateEtag,
 }
 
 impl From<u8> for CacheControl {
@@ -48,8 +46,7 @@ impl From<u8> for CacheControl {
         match num {
             0 => CacheControl::Normal,
             1 => CacheControl::InvalidateBackoff,
-            2 => CacheControl::InvalidateGitCommit,
-            _ => CacheControl::InvalidateEtag,
+            _ => CacheControl::InvalidateGitCommit,
         }
     }
 }
@@ -148,18 +145,9 @@ impl Repository {
 
         let ioc_download_url = Self::ioc_download_url(&commit);
         info!("Downloading IOC file from {ioc_download_url:?}...");
-        let mut req = self.client.get(ioc_download_url);
-
-        if cache_control < CacheControl::InvalidateEtag {
-            if let Some(state) = &self.update_state {
-                if let Some(etag) = &state.etag {
-                    debug!("Adding etag to request: {etag:?}");
-                    req = req.header("If-None-Match", etag);
-                }
-            }
-        }
-
-        let req = req
+        let req = self
+            .client
+            .get(ioc_download_url)
             .send()
             .await
             .context("Failed to send HTTP request")?
@@ -169,20 +157,13 @@ impl Repository {
         let headers = req.headers();
         trace!("Received response from server: status={status:?}, headers={headers:?}");
 
-        if status == StatusCode::NOT_MODIFIED {
-            let update_state = self
-                .update_state
-                .as_mut()
-                .context("Server sent 304 but we don't have any existing update")?;
-            debug!("Server sent 304, marking update as fresh");
-            update_state.last_update_check = now();
-        } else if status == StatusCode::OK {
-            let mut update_state = self.write_update(req).await?;
-            update_state.git_commit = Some(commit.sha);
-            self.update_state = Some(update_state);
-        } else {
+        if status != StatusCode::OK {
             bail!("Server sent unexpected http status: {status:?}")
         }
+
+        let mut update_state = self.write_update(req).await?;
+        update_state.git_commit = Some(commit.sha);
+        self.update_state = Some(update_state);
 
         self.write_state_file()
             .await
@@ -194,15 +175,6 @@ impl Repository {
     }
 
     async fn write_update(&mut self, req: reqwest::Response) -> Result<UpdateState> {
-        let etag = req.headers().get(reqwest::header::ETAG);
-        let etag = if let Some(etag) = etag {
-            debug!("Found etag in http response: {etag:?}");
-            let etag = etag.to_str().context("etag is invalid utf8")?;
-            Some(etag.to_string())
-        } else {
-            None
-        };
-
         let body = req
             .bytes()
             .await
@@ -222,7 +194,6 @@ impl Repository {
             last_update_check: now,
             last_updated: now,
             git_commit: None,
-            etag,
         };
         Ok(update_state)
     }
