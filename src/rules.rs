@@ -1,9 +1,11 @@
 use crate::errors::*;
+use crate::utils;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-pub fn load_map_from_buf(buf: &[u8]) -> Result<HashMap<String, String>> {
+pub fn load_map_from_buf(buf: &[u8]) -> Result<(HashMap<String, String>, String)> {
+    let sha256 = utils::sha256(buf);
     let list = stalkerware_indicators::parse_from_buf(buf)?;
     let mut map = HashMap::new();
     for rule in list {
@@ -11,10 +13,11 @@ pub fn load_map_from_buf(buf: &[u8]) -> Result<HashMap<String, String>> {
             map.insert(package, rule.name.to_string());
         }
     }
-    Ok(map)
+
+    Ok((map, sha256))
 }
 
-pub fn load_map_from_file<P: AsRef<Path>>(path: P) -> Result<HashMap<String, String>> {
+pub fn load_map_from_file<P: AsRef<Path>>(path: P) -> Result<(HashMap<String, String>, String)> {
     let path = path.as_ref();
     let buf =
         fs::read(path).with_context(|| anyhow!("Failed to read appid rules file: {:?}", path))?;
@@ -28,7 +31,7 @@ mod tests {
 
     #[test]
     fn test_parse_ioc_yaml() {
-        let map = load_map_from_buf(
+        let (map, _) = load_map_from_buf(
             b"
 - name: Reptilicus
   names:

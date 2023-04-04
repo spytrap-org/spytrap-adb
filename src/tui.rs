@@ -132,7 +132,8 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
                 .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
 
             let repo = iocs::Repository::ioc_file_path()?;
-            let rules = rules::load_map_from_file(repo).context("Failed to load rules")?;
+            let (rules, _sha256) =
+                rules::load_map_from_file(repo).context("Failed to load rules")?;
             let report = scan::run(&device, &rules, &scan::Settings { skip_apps: true }).await?;
             app.report = Some(report);
         }

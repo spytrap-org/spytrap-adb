@@ -1,5 +1,5 @@
 use crate::errors::*;
-use reqwest::StatusCode;
+use crate::utils;
 use serde::{Deserialize, Serialize};
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
@@ -26,11 +26,12 @@ pub enum SuspicionLevel {
     Low,
 }
 
-#[derive(Debug, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct UpdateState {
-    last_update_check: i64,
-    last_updated: i64,
-    git_commit: Option<String>,
+    pub last_update_check: i64,
+    pub last_updated: i64,
+    pub git_commit: String,
+    pub sha256: String,
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Default, Clone, Copy)]
@@ -52,7 +53,7 @@ impl From<u8> for CacheControl {
 }
 
 pub struct Repository {
-    update_state: Option<UpdateState>,
+    pub update_state: Option<UpdateState>,
     client: reqwest::Client,
 }
 
@@ -114,7 +115,7 @@ impl Repository {
 
         if cache_control < CacheControl::InvalidateBackoff {
             if let Some(update_state) = &self.update_state {
-                let age = now() - update_state.last_update_check;
+                let age = utils::now() - update_state.last_update_check;
                 if age < IOC_REFRESH_INTERVAL {
                     info!("IOC file is still very fresh ({age} seconds), not checking for updates");
                     return Ok(());
@@ -129,12 +130,12 @@ impl Repository {
 
         if cache_control < CacheControl::InvalidateGitCommit {
             if let Some(update_state) = &mut self.update_state {
-                if update_state.git_commit.as_ref() == Some(&commit.sha) {
-                    debug!(
+                if update_state.git_commit == commit.sha {
+                    info!(
                         "We're still on most recent git commit, marking as fresh... (commit={:?})",
                         commit.sha
                     );
-                    update_state.last_update_check = now();
+                    update_state.last_update_check = utils::now();
                     self.write_state_file()
                         .await
                         .context("Failed to write update state file")?;
@@ -144,26 +145,15 @@ impl Repository {
         }
 
         let ioc_download_url = Self::ioc_download_url(&commit);
-        info!("Downloading IOC file from {ioc_download_url:?}...");
-        let req = self
-            .client
-            .get(ioc_download_url)
-            .send()
-            .await
-            .context("Failed to send HTTP request")?
-            .error_for_status()?;
+        let sha256 = self.download_ioc_database(&ioc_download_url).await?;
 
-        let status = req.status();
-        let headers = req.headers();
-        trace!("Received response from server: status={status:?}, headers={headers:?}");
-
-        if status != StatusCode::OK {
-            bail!("Server sent unexpected http status: {status:?}")
-        }
-
-        let mut update_state = self.write_update(req).await?;
-        update_state.git_commit = Some(commit.sha);
-        self.update_state = Some(update_state);
+        let now = utils::now();
+        self.update_state = Some(UpdateState {
+            last_update_check: now,
+            last_updated: now,
+            git_commit: commit.sha,
+            sha256,
+        });
 
         self.write_state_file()
             .await
@@ -174,8 +164,27 @@ impl Repository {
         Ok(())
     }
 
-    async fn write_update(&mut self, req: reqwest::Response) -> Result<UpdateState> {
-        let body = req
+    async fn http_get(&self, url: &str) -> Result<reqwest::Response> {
+        let req = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .context("Failed to send HTTP request")?;
+
+        let status = req.status();
+        let headers = req.headers();
+        trace!("Received response from server: status={status:?}, headers={headers:?}");
+
+        let req = req.error_for_status()?;
+        Ok(req)
+    }
+
+    pub async fn download_ioc_database(&mut self, url: &str) -> Result<String> {
+        info!("Downloading IOC file from {url:?}...");
+        let body = self
+            .http_get(url)
+            .await?
             .bytes()
             .await
             .context("Failed to download HTTP response")?;
@@ -185,17 +194,13 @@ impl Repository {
             "Writing IOC file to {ioc_file_path:?}... ({} bytes)",
             body.len()
         );
-        fs::write(&ioc_file_path, body)
+        fs::write(&ioc_file_path, &body)
             .await
             .with_context(|| anyhow!("Failed to write IOC file to {ioc_file_path:?}"))?;
 
-        let now = now();
-        let update_state = UpdateState {
-            last_update_check: now,
-            last_updated: now,
-            git_commit: None,
-        };
-        Ok(update_state)
+        let sha256 = utils::sha256(&body);
+
+        Ok(sha256)
     }
 
     async fn write_state_file(&self) -> Result<()> {
@@ -211,19 +216,9 @@ impl Repository {
 
     async fn current_github_commit(&self, url: &str) -> Result<GithubCommit> {
         info!("Fetching git repository meta data: {url:?}...");
-        let req = self
-            .client
-            .get(url)
-            .send()
-            .await
-            .context("Failed to send http request")?;
-
-        let status = req.status();
-        let headers = req.headers();
-        trace!("Received response from server: status={status:?}, headers={headers:?}");
-
-        let branches = req
-            .error_for_status()?
+        let branches = self
+            .http_get(url)
+            .await?
             .json::<Vec<GithubBranch>>()
             .await
             .context("Failed to receive http response")?;
@@ -249,9 +244,4 @@ pub struct GithubBranch {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GithubCommit {
     sha: String,
-}
-
-pub fn now() -> i64 {
-    let now = chrono::offset::Utc::now();
-    now.timestamp()
 }

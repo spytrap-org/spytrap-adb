@@ -23,9 +23,22 @@ async fn run(args: Args) -> Result<()> {
                 Cow::Owned(path)
             };
 
-            let rules =
+            let (rules, sha256) =
                 rules::load_map_from_file(rules_path.as_ref()).context("Failed to load rules")?;
-            info!("Loaded {} rules from {:?}", rules.len(), rules_path);
+            info!(
+                "Loaded {} rules from {rules_path:?} (sha256={sha256})",
+                rules.len()
+            );
+
+            let repo = iocs::Repository::init().await?;
+            if let Some(update_state) = &repo.update_state {
+                if update_state.sha256 == sha256 {
+                    info!(
+                        "Rules database was downloaded from commit={}",
+                        update_state.git_commit
+                    );
+                }
+            }
 
             if scan.test_load_only {
                 info!("Rules loaded successfully");
