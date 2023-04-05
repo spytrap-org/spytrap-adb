@@ -70,10 +70,9 @@ async fn run(args: Args) -> Result<()> {
                 );
             }
         }
-        Some(SubCommand::Sync(sync)) => {
+        Some(SubCommand::Sync(_sync)) => {
             let mut repo = iocs::Repository::init().await?;
-            let cache_control = iocs::CacheControl::from(sync.invalidate_cache);
-            repo.update(cache_control)
+            repo.sync_ioc_file()
                 .await
                 .context("Failed to sync stalkerware-indicators ioc.yaml")?;
         }

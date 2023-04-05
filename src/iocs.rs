@@ -34,24 +34,6 @@ pub struct UpdateState {
     pub sha256: String,
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Default, Clone, Copy)]
-pub enum CacheControl {
-    #[default]
-    Normal = 0,
-    InvalidateBackoff,
-    InvalidateGitCommit,
-}
-
-impl From<u8> for CacheControl {
-    fn from(num: u8) -> CacheControl {
-        match num {
-            0 => CacheControl::Normal,
-            1 => CacheControl::InvalidateBackoff,
-            _ => CacheControl::InvalidateGitCommit,
-        }
-    }
-}
-
 pub struct Repository {
     pub update_state: Option<UpdateState>,
     client: reqwest::Client,
@@ -110,37 +92,33 @@ impl Repository {
         IOC_DOWNLOAD_URL.replace("{{commit}}", &commit.sha)
     }
 
-    pub async fn update(&mut self, cache_control: CacheControl) -> Result<()> {
-        debug!("Starting update check");
-
-        if cache_control < CacheControl::InvalidateBackoff {
-            if let Some(update_state) = &self.update_state {
-                let age = utils::now() - update_state.last_update_check;
-                if age < IOC_REFRESH_INTERVAL {
-                    info!("IOC file is still very fresh ({age} seconds), not checking for updates");
-                    return Ok(());
-                }
-            }
+    pub fn is_update_check_due(&self) -> bool {
+        if let Some(update_state) = &self.update_state {
+            let age = utils::now() - update_state.last_update_check;
+            age >= IOC_REFRESH_INTERVAL
+        } else {
+            true
         }
+    }
 
+    pub async fn sync_ioc_file(&mut self) -> Result<()> {
+        debug!("Starting update check");
         let commit = self
             .current_github_commit(IOC_GIT_REFS_URL)
             .await
             .context("Failed to determine latest git commit for stalkerware-indicators")?;
 
-        if cache_control < CacheControl::InvalidateGitCommit {
-            if let Some(update_state) = &mut self.update_state {
-                if update_state.git_commit == commit.sha {
-                    info!(
-                        "We're still on most recent git commit, marking as fresh... (commit={:?})",
-                        commit.sha
-                    );
-                    update_state.last_update_check = utils::now();
-                    self.write_state_file()
-                        .await
-                        .context("Failed to write update state file")?;
-                    return Ok(());
-                }
+        if let Some(update_state) = &mut self.update_state {
+            if update_state.git_commit == commit.sha {
+                info!(
+                    "We're still on most recent git commit, marking as fresh... (commit={:?})",
+                    commit.sha
+                );
+                update_state.last_update_check = utils::now();
+                self.write_state_file()
+                    .await
+                    .context("Failed to write update state file")?;
+                return Ok(());
             }
         }
 

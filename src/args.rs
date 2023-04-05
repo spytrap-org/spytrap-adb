@@ -50,10 +50,6 @@ pub struct Scan {
 #[derive(Debug, Parser)]
 pub struct List {}
 
-/// Ensure a recent copy of stalkerware-indicators is present
+/// Download the latest version of stalkerware-indicators ioc.yaml
 #[derive(Debug, Parser)]
-pub struct SyncIoc {
-    /// Update even if the local cache is still fresh (use multiple times to force re-download)
-    #[arg(short = 'u', long, action(ArgAction::Count))]
-    pub invalidate_cache: u8,
-}
+pub struct SyncIoc {}
