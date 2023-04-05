@@ -110,15 +110,22 @@ impl Repository {
 
         if let Some(update_state) = &mut self.update_state {
             if update_state.git_commit == commit.sha {
-                info!(
-                    "We're still on most recent git commit, marking as fresh... (commit={:?})",
-                    commit.sha
-                );
-                update_state.last_update_check = utils::now();
-                self.write_state_file()
+                let path = Self::ioc_file_path()?;
+                let buf = fs::read(&path)
                     .await
-                    .context("Failed to write update state file")?;
-                return Ok(());
+                    .with_context(|| anyhow!("Failed to open ioc file at {path:?}"))?;
+
+                if update_state.sha256 == utils::sha256(&buf) {
+                    info!(
+                        "We're still on most recent git commit, marking as fresh... (commit={:?})",
+                        commit.sha
+                    );
+                    update_state.last_update_check = utils::now();
+                    self.write_state_file()
+                        .await
+                        .context("Failed to write update state file")?;
+                    return Ok(());
+                }
             }
         }
 
