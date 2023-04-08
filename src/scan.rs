@@ -18,9 +18,16 @@ pub enum ScanNotifier {
 }
 
 impl ScanNotifier {
-    pub async fn send(&mut self, sus: Suspicion) -> Result<()> {
+    pub async fn sus(&mut self, sus: Suspicion) -> Result<()> {
         if let ScanNotifier::Channel(tx) = self {
             tx.send(Message::Suspicion(sus)).await?;
+        }
+        Ok(())
+    }
+
+    pub async fn app(&mut self, name: String, sus: Suspicion) -> Result<()> {
+        if let ScanNotifier::Channel(tx) = self {
+            tx.send(Message::App { name, sus }).await?;
         }
         Ok(())
     }
@@ -57,7 +64,19 @@ pub async fn run(
     for (_namespace, settings) in settings::dump(device).await? {
         for sus in settings.audit() {
             warn!("Suspicious {:?}: {}", sus.level, sus.description);
-            report.send(sus).await?;
+            report.sus(sus).await?;
+        }
+    }
+
+    info!("Enumerating service list");
+    let services = dumpsys::list_services(device).await?;
+
+    if services.contains("accessibility") {
+        info!("Reading accessibility settings");
+        let accessibility = accessibility::dump(device).await?;
+        for sus in accessibility.audit() {
+            warn!("Suspicious {:?}: {}", sus.level, sus.description);
+            report.sus(sus).await?;
         }
     }
 
@@ -93,21 +112,9 @@ pub async fn run(
 
                 for sus in info.audit() {
                     warn!("Suspicious {:?}: {}", sus.level, sus.description);
-                    report.send(sus).await?;
+                    report.app(pkg.id.clone(), sus).await?;
                 }
             }
-        }
-    }
-
-    info!("Enumerating service list");
-    let services = dumpsys::list_services(device).await?;
-
-    if services.contains("accessibility") {
-        info!("Reading accessibility settings");
-        let accessibility = accessibility::dump(device).await?;
-        for sus in accessibility.audit() {
-            warn!("Suspicious {:?}: {}", sus.level, sus.description);
-            report.send(sus).await?;
         }
     }
 

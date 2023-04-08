@@ -19,6 +19,8 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame, Terminal,
 };
+use std::collections::BTreeMap;
+use std::fmt::Write;
 use std::io;
 use std::io::Stdout;
 use tokio::sync::mpsc;
@@ -30,6 +32,7 @@ const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
 pub enum Message {
     ScanEnded,
     Suspicion(iocs::Suspicion),
+    App { name: String, sus: iocs::Suspicion },
 }
 
 pub struct App {
@@ -38,7 +41,7 @@ pub struct App {
     events_rx: mpsc::Receiver<Message>,
     devices: Vec<DeviceInfo>,
     cursor: usize,
-    report: Option<Vec<iocs::Suspicion>>,
+    scan: Option<Scan>,
     cancel_scan: Option<mpsc::Sender<()>>,
 }
 
@@ -51,7 +54,7 @@ impl App {
             events_rx,
             devices: Vec::new(),
             cursor: 0,
-            report: None,
+            scan: None,
             cancel_scan: None,
         }
     }
@@ -95,6 +98,12 @@ impl App {
     }
 }
 
+#[derive(Debug, PartialEq, Default)]
+pub struct Scan {
+    findings: Vec<iocs::Suspicion>,
+    apps: BTreeMap<String, Vec<iocs::Suspicion>>,
+}
+
 pub enum Action {
     Shutdown,
     Clear,
@@ -116,7 +125,7 @@ pub async fn run_scan(
     scan::run(
         &device,
         &rules,
-        &mut scan::Settings { skip_apps: false },
+        &scan::Settings { skip_apps: false },
         &mut scan::ScanNotifier::Channel(events_tx),
     )
     .await?;
@@ -143,7 +152,7 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
         }) => {
             if let Some(tx) = app.cancel_scan.take() {
                 tx.send(()).await.ok();
-            } else if app.report.take().is_none() {
+            } else if app.scan.take().is_none() {
                 println!("Exiting...");
                 return Ok(Some(Action::Shutdown));
             }
@@ -178,7 +187,7 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
                     }
                 }
             });
-            app.report = Some(Vec::new());
+            app.scan = Some(Scan::default());
             app.cancel_scan = Some(cancel_tx);
         }
         Event::Key(KeyEvent {
@@ -241,8 +250,13 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                         app.cancel_scan.take();
                     }
                     Message::Suspicion(sus) => {
-                        if let Some(report) = &mut app.report {
-                            report.push(sus);
+                        if let Some(scan) = &mut app.scan {
+                            scan.findings.push(sus);
+                        }
+                    }
+                    Message::App { name, sus } => {
+                        if let Some(scan) = &mut app.scan {
+                            scan.apps.entry(name).or_default().push(sus);
                         }
                     }
                 }
@@ -288,14 +302,29 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
 
     f.render_widget(Block::default().style(white), chunks[1]);
 
-    let widget = if let Some(report) = &app.report {
-        let findings: Vec<ListItem> = report
-            .iter()
-            .map(|sus| ListItem::new(format!("{sus:?}")))
-            .collect();
+    let widget = if let Some(scan) = &app.scan {
+        let mut list = Vec::new();
+
+        for sus in &scan.findings {
+            list.push(ListItem::new(format!("{sus:?}")));
+        }
+
+        for (app, findings) in &scan.apps {
+            let mut details = String::new();
+            let high = findings
+                .iter()
+                .filter(|f| f.level == iocs::SuspicionLevel::High)
+                .count();
+            if high > 0 {
+                write!(details, "{} high, ", high).unwrap();
+            }
+            write!(details, "{} total", findings.len()).unwrap();
+
+            list.push(ListItem::new(format!("App {:?} ({})", app, details)));
+        }
 
         let title = Span::styled("Findings", white.add_modifier(Modifier::BOLD));
-        List::new(findings).block(
+        List::new(list).block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(white)

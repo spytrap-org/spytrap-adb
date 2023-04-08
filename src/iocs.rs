@@ -19,11 +19,11 @@ pub struct Suspicion {
     pub description: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum SuspicionLevel {
-    High,
-    Medium,
     Low,
+    Medium,
+    High,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
