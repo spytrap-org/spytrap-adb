@@ -1,4 +1,5 @@
 use clap::{ArgAction, Parser};
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct Args {
@@ -29,14 +30,15 @@ pub enum AdbServerChoice {
 pub enum SubCommand {
     Scan(Scan),
     List(List),
+    Sync(SyncIoc),
 }
 
 /// Run a scan on a given device
 #[derive(Debug, Parser)]
 pub struct Scan {
     pub serial: Option<String>,
-    #[arg(long, default_value = "./ioc.yaml")]
-    pub rules: String,
+    #[arg(long)]
+    pub rules: Option<PathBuf>,
     #[arg(long)]
     pub test_load_only: bool,
     /// Do not scan apps for suspicious permissions
@@ -47,3 +49,7 @@ pub struct Scan {
 /// List all available devices
 #[derive(Debug, Parser)]
 pub struct List {}
+
+/// Download the latest version of stalkerware-indicators ioc.yaml
+#[derive(Debug, Parser)]
+pub struct SyncIoc {}

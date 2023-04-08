@@ -3,10 +3,12 @@ use env_logger::Env;
 use forensic_adb::{AndroidStorageInput, Host};
 use spytrap_adb::args::{self, Args, SubCommand};
 use spytrap_adb::errors::*;
+use spytrap_adb::iocs;
 use spytrap_adb::rules;
 use spytrap_adb::scan;
 use spytrap_adb::tui;
 use spytrap_adb::utils;
+use std::borrow::Cow;
 use std::process::Command;
 
 async fn run(args: Args) -> Result<()> {
@@ -14,8 +16,29 @@ async fn run(args: Args) -> Result<()> {
 
     match args.subcommand {
         Some(SubCommand::Scan(scan)) => {
-            let rules = rules::load_map_from_file(&scan.rules).context("Failed to load rules")?;
-            info!("Loaded {} rules from {:?}", rules.len(), scan.rules);
+            let rules_path = if let Some(path) = &scan.rules {
+                Cow::Borrowed(path)
+            } else {
+                let path = iocs::Repository::ioc_file_path()?;
+                Cow::Owned(path)
+            };
+
+            let (rules, sha256) =
+                rules::load_map_from_file(rules_path.as_ref()).context("Failed to load rules")?;
+            info!(
+                "Loaded {} rules from {rules_path:?} (sha256={sha256})",
+                rules.len()
+            );
+
+            let repo = iocs::Repository::init().await?;
+            if let Some(update_state) = &repo.update_state {
+                if update_state.sha256 == sha256 {
+                    info!(
+                        "Rules database was downloaded from commit={}",
+                        update_state.git_commit
+                    );
+                }
+            }
 
             if scan.test_load_only {
                 info!("Rules loaded successfully");
@@ -47,6 +70,12 @@ async fn run(args: Args) -> Result<()> {
                 );
             }
         }
+        Some(SubCommand::Sync(_sync)) => {
+            let mut repo = iocs::Repository::init().await?;
+            repo.sync_ioc_file()
+                .await
+                .context("Failed to sync stalkerware-indicators ioc.yaml")?;
+        }
         None => {
             let mut app = tui::App::new(adb_host);
             app.init().await?;
@@ -68,7 +97,7 @@ async fn main() -> Result<()> {
         let logging = match args.verbose {
             0 => "info",
             1 => "spytrap_adb=debug,info",
-            2 => "debug",
+            2 => "spytrap_adb=trace,debug",
             _ => "trace",
         };
 

@@ -11,15 +11,13 @@ Based on [stalkerware-indicators] data provided by [Echap].
 ## Usage
 
 ```sh
-# start the adb server for usb debugging
-sudo adb start-server
 # enable usb debugging on the device and connect the android device to the computer
 # list available devices
 ./spytrap-adb list
-# fetch rules for scanning
-git clone https://github.com/AssoEchap/stalkerware-indicators.git
+# download ioc.yaml from https://github.com/AssoEchap/stalkerware-indicators
+./spytrap-adb update
 # scan the first connected device
-./spytrap-adb scan --rules stalkerware-indicators/ioc.yaml
+./spytrap-adb scan
 ```
 
 ## Building from source
@@ -40,8 +38,8 @@ cargo build --release --locked
 ## Example output
 
 ```
-% target/release/spytrap-adb scan --rules stalkerware-indicators/ioc.yaml
-[2021-12-19T21:26:41Z INFO  spytrap_adb] Loaded 130 rules from "stalkerware-indicators/ioc.yaml"
+% target/release/spytrap-adb scan
+[2021-12-19T21:26:41Z INFO  spytrap_adb] Loaded 130 rules from "/home/user/.local/share/spytrap-adb/ioc.yaml"
 [2021-12-19T21:26:41Z INFO  spytrap_adb] Device is not rooted
 [2021-12-19T21:26:41Z INFO  spytrap_adb] Fetching remote clock
 [2021-12-19T21:26:41Z INFO  spytrap_adb] Local time is 2021-12-19 21:26:41.847457823 UTC, remote time is 2021-12-19 21:26:42.318497288 UTC, drift=PT0.471039465S
