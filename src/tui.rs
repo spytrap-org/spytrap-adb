@@ -21,24 +21,38 @@ use ratatui::{
 };
 use std::io;
 use std::io::Stdout;
+use tokio::sync::mpsc;
 use tokio_stream::StreamExt;
 
 const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
 
+#[derive(Debug)]
+pub enum Message {
+    ScanEnded,
+    Suspicion(iocs::Suspicion),
+}
+
 pub struct App {
     adb_host: Host,
+    events_tx: mpsc::Sender<Message>,
+    events_rx: mpsc::Receiver<Message>,
     devices: Vec<DeviceInfo>,
     cursor: usize,
     report: Option<Vec<iocs::Suspicion>>,
+    cancel_scan: Option<mpsc::Sender<()>>,
 }
 
 impl App {
     pub fn new(adb_host: Host) -> Self {
+        let (events_tx, events_rx) = mpsc::channel(5);
         Self {
             adb_host,
+            events_tx,
+            events_rx,
             devices: Vec::new(),
             cursor: 0,
             report: None,
+            cancel_scan: None,
         }
     }
 
@@ -86,6 +100,30 @@ pub enum Action {
     Clear,
 }
 
+pub async fn run_scan(
+    adb_host: Host,
+    device: DeviceInfo,
+    events_tx: mpsc::Sender<Message>,
+) -> Result<()> {
+    let device = adb_host
+        .clone()
+        .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
+        .await
+        .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
+
+    let repo = iocs::Repository::ioc_file_path()?;
+    let (rules, _sha256) = rules::load_map_from_file(repo).context("Failed to load rules")?;
+    scan::run(
+        &device,
+        &rules,
+        &mut scan::Settings { skip_apps: false },
+        &mut scan::ScanNotifier::Channel(events_tx),
+    )
+    .await?;
+
+    Ok(())
+}
+
 pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
     match event {
         Event::Key(KeyEvent {
@@ -103,7 +141,9 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            if app.report.take().is_none() {
+            if let Some(tx) = app.cancel_scan.take() {
+                tx.send(()).await.ok();
+            } else if app.report.take().is_none() {
                 println!("Exiting...");
                 return Ok(Some(Action::Shutdown));
             }
@@ -121,21 +161,25 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            let device = &app.devices[app.cursor];
-            // println!("{:?}", device);
+            let adb_host = app.adb_host.clone();
+            let device = app.devices[app.cursor].clone();
+            let events_tx = app.events_tx.clone();
 
-            let device = app
-                .adb_host
-                .clone()
-                .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
-                .await
-                .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
-
-            let repo = iocs::Repository::ioc_file_path()?;
-            let (rules, _sha256) =
-                rules::load_map_from_file(repo).context("Failed to load rules")?;
-            let report = scan::run(&device, &rules, &scan::Settings { skip_apps: true }).await?;
-            app.report = Some(report);
+            let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
+            tokio::spawn(async move {
+                tokio::select! {
+                    _ = cancel_rx.recv() => {
+                        debug!("Scan has been canceled");
+                        events_tx.send(Message::ScanEnded).await.ok();
+                    }
+                    ret = run_scan(adb_host, device, events_tx.clone()) => {
+                        debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
+                        events_tx.send(Message::ScanEnded).await.ok();
+                    }
+                }
+            });
+            app.report = Some(Vec::new());
+            app.cancel_scan = Some(cancel_tx);
         }
         Event::Key(KeyEvent {
             code: KeyCode::Up,
@@ -189,6 +233,20 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     None => (),
                 }
             }
+            event = app.events_rx.recv() => {
+                let Some(event) = event else { break };
+                debug!("Received message from channel: event={event:?}");
+                match event {
+                    Message::ScanEnded => {
+                        app.cancel_scan.take();
+                    }
+                    Message::Suspicion(sus) => {
+                        if let Some(report) = &mut app.report {
+                            report.push(sus);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -211,6 +269,11 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
         .split(f.size());
 
     let text = Text::from(Spans::from(vec![
+        Span::raw(if app.cancel_scan.is_some() {
+            "scanning - "
+        } else {
+            "idle - "
+        }),
         Span::raw("Press "),
         Span::styled("ESC", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to exit - "),

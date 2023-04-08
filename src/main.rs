@@ -50,7 +50,13 @@ async fn run(args: Args) -> Result<()> {
                 .await
                 .with_context(|| anyhow!("Failed to access device: {:?}", scan.serial))?;
 
-            scan::run(&device, &rules, &scan::Settings::from(&scan)).await?;
+            scan::run(
+                &device,
+                &rules,
+                &scan::Settings::from(&scan),
+                &mut scan::ScanNotifier::Null,
+            )
+            .await?;
         }
         Some(SubCommand::List(_)) => {
             debug!("Listing devices from adb...");

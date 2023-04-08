@@ -7,8 +7,24 @@ use crate::package;
 use crate::pm;
 use crate::remote_clock;
 use crate::settings;
+use crate::tui::Message;
 use forensic_adb::Device;
 use std::collections::HashMap;
+use tokio::sync::mpsc;
+
+pub enum ScanNotifier {
+    Null,
+    Channel(mpsc::Sender<Message>),
+}
+
+impl ScanNotifier {
+    pub async fn send(&mut self, sus: Suspicion) -> Result<()> {
+        if let ScanNotifier::Channel(tx) = self {
+            tx.send(Message::Suspicion(sus)).await?;
+        }
+        Ok(())
+    }
+}
 
 pub struct Settings {
     pub skip_apps: bool,
@@ -26,8 +42,8 @@ pub async fn run(
     device: &Device,
     rules: &HashMap<String, String>,
     scan: &Settings,
-) -> Result<Vec<Suspicion>> {
-    let mut report = Vec::new();
+    report: &mut ScanNotifier,
+) -> Result<()> {
     debug!("Using device: {:?}", device);
 
     info!("Fetching remote clock");
@@ -41,7 +57,7 @@ pub async fn run(
     for (_namespace, settings) in settings::dump(device).await? {
         for sus in settings.audit() {
             warn!("Suspicious {:?}: {}", sus.level, sus.description);
-            report.push(sus);
+            report.send(sus).await?;
         }
     }
 
@@ -77,7 +93,7 @@ pub async fn run(
 
                 for sus in info.audit() {
                     warn!("Suspicious {:?}: {}", sus.level, sus.description);
-                    report.push(sus);
+                    report.send(sus).await?;
                 }
             }
         }
@@ -91,11 +107,11 @@ pub async fn run(
         let accessibility = accessibility::dump(device).await?;
         for sus in accessibility.audit() {
             warn!("Suspicious {:?}: {}", sus.level, sus.description);
-            report.push(sus);
+            report.send(sus).await?;
         }
     }
 
     info!("Scan finished");
 
-    Ok(report)
+    Ok(())
 }
