@@ -20,13 +20,16 @@ use ratatui::{
     Frame, Terminal,
 };
 use std::collections::BTreeMap;
-use std::fmt::Write;
 use std::io;
 use std::io::Stdout;
 use tokio::sync::mpsc;
 use tokio_stream::StreamExt;
 
 const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
+/// Number of items to navigate with page up/down keys
+const PAGE_MODIFIER: usize = 10;
+/// The number of lines used by the spytrap-adb UI around the scroll view
+const SCROLL_CHROME_HEIGHT: usize = 5;
 
 #[derive(Debug)]
 pub enum Message {
@@ -35,12 +38,21 @@ pub enum Message {
     App { name: String, sus: iocs::Suspicion },
 }
 
+#[derive(Debug, PartialEq, Default)]
+pub struct SavedCursor {
+    offset: usize,
+    cursor: usize,
+}
+
 pub struct App {
     adb_host: Host,
     events_tx: mpsc::Sender<Message>,
     events_rx: mpsc::Receiver<Message>,
     devices: Vec<DeviceInfo>,
+    offset: usize,
     cursor: usize,
+    /// the previous cursor positions before switching into a different scroll-view
+    cursor_backtrace: Vec<SavedCursor>,
     scan: Option<Scan>,
     cancel_scan: Option<mpsc::Sender<()>>,
 }
@@ -53,7 +65,9 @@ impl App {
             events_tx,
             events_rx,
             devices: Vec::new(),
+            offset: 0,
             cursor: 0,
+            cursor_backtrace: vec![],
             scan: None,
             cancel_scan: None,
         }
@@ -70,15 +84,48 @@ impl App {
         Ok(())
     }
 
-    pub fn key_up(&mut self) {
-        self.cursor = self.cursor.saturating_sub(1);
+    /// The number of visible lines in the current active view
+    pub fn view_length(&self) -> usize {
+        if let Some(scan) = &self.scan {
+            scan.findings.len() + scan.apps.len()
+        } else {
+            self.devices.len()
+        }
     }
 
-    pub fn key_down(&mut self) {
-        let max = self.devices.len().saturating_sub(1);
+    pub fn save_cursor(&mut self) {
+        self.cursor_backtrace.push(SavedCursor {
+            offset: self.offset,
+            cursor: self.cursor,
+        });
+        self.offset = 0;
+        self.cursor = 0;
+    }
+
+    pub fn key_up(&mut self) {
+        self.cursor = self.cursor.saturating_sub(1);
+        if self.cursor < self.offset {
+            self.offset = self.cursor;
+        }
+    }
+
+    pub fn key_down<B: Backend>(&mut self, terminal: &Terminal<B>) -> Result<()> {
+        let max = self.view_length().saturating_sub(1);
+
         if self.cursor < max {
             self.cursor += 1;
+            self.recalculate_scroll_offset(terminal)?;
         }
+
+        Ok(())
+    }
+
+    pub fn recalculate_scroll_offset<B: Backend>(&mut self, terminal: &Terminal<B>) -> Result<()> {
+        let scroll_height = terminal.size()?.height as usize - SCROLL_CHROME_HEIGHT;
+        if self.cursor - self.offset > scroll_height {
+            self.offset = self.cursor - scroll_height;
+        }
+        Ok(())
     }
 
     pub async fn refresh_devices(&mut self) -> Result<()> {
@@ -133,7 +180,11 @@ pub async fn run_scan(
     Ok(())
 }
 
-pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
+pub async fn handle_key<B: Backend>(
+    terminal: &Terminal<B>,
+    app: &mut App,
+    event: Event,
+) -> Result<Option<Action>> {
     match event {
         Event::Key(KeyEvent {
             code: KeyCode::Esc,
@@ -155,6 +206,10 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             } else if app.scan.take().is_none() {
                 println!("Exiting...");
                 return Ok(Some(Action::Shutdown));
+            } else {
+                let saved = app.cursor_backtrace.pop().unwrap_or_default();
+                app.offset = saved.offset;
+                app.cursor = saved.cursor;
             }
         }
         Event::Key(KeyEvent {
@@ -189,6 +244,7 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             });
             app.scan = Some(Scan::default());
             app.cancel_scan = Some(cancel_tx);
+            app.save_cursor();
         }
         Event::Key(KeyEvent {
             code: KeyCode::Up,
@@ -202,7 +258,25 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            app.key_down();
+            app.key_down(terminal)?;
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::PageUp,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            for _ in 0..PAGE_MODIFIER {
+                app.key_up();
+            }
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::PageDown,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            for _ in 0..PAGE_MODIFIER {
+                app.key_down(terminal)?;
+            }
         }
         Event::Key(KeyEvent {
             code: KeyCode::Char('r'),
@@ -219,6 +293,9 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
         }) => {
             return Ok(Some(Action::Clear));
         }
+        Event::Resize(_columns, _rows) => {
+            app.recalculate_scroll_offset(terminal)?;
+        }
         _ => (),
     }
     Ok(None)
@@ -234,7 +311,7 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
             event = stream.next() => {
                 let Some(event) = event else { break };
                 let event = event.context("Failed to read terminal input")?;
-                match handle_key(app, event).await? {
+                match handle_key(terminal, app, event).await? {
                     Some(Action::Shutdown) => break,
                     Some(Action::Clear) => {
                         terminal.clear()?;
@@ -267,6 +344,21 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
     Ok(())
 }
 
+fn cursor<'a, T: IntoIterator<Item = Span<'a>>>(msg: T, selected: bool) -> (Spans<'a>, Style) {
+    let mut style = Style::default();
+    if selected {
+        style = style.bg(DARK_GREY);
+    }
+
+    let mut row = vec![Span::styled(
+        if selected { " > " } else { "   " },
+        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+    )];
+    row.extend(msg);
+
+    (Spans::from(row), style)
+}
+
 pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
     let white = Style::default().fg(Color::White).bg(Color::Black);
 
@@ -291,9 +383,11 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
         Span::raw("Press "),
         Span::styled("ESC", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to exit - "),
-        Span::raw(env!("CARGO_PKG_NAME")),
-        Span::raw(" v"),
-        Span::raw(env!("CARGO_PKG_VERSION")),
+        Span::raw(concat!(
+            env!("CARGO_PKG_NAME"),
+            " v",
+            env!("CARGO_PKG_VERSION")
+        )),
     ]));
     let help_message = Paragraph::new(text)
         .style(white)
@@ -304,24 +398,44 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
 
     let widget = if let Some(scan) = &app.scan {
         let mut list = Vec::new();
+        let mut i = 0;
 
         for sus in &scan.findings {
-            list.push(ListItem::new(format!("{sus:?}")));
+            let selected = i == app.cursor;
+            let msg = format!("{sus:?}");
+            let (content, style) = cursor([Span::raw(msg)], selected);
+            list.push(ListItem::new(content).style(style));
+            i += 1;
         }
 
-        for (app, findings) in &scan.apps {
-            let mut details = String::new();
+        for (name, findings) in &scan.apps {
+            let selected = i == app.cursor;
+
+            let mut row = Vec::new();
+            row.push(Span::raw(format!("App {name:?} (")));
+
             let high = findings
                 .iter()
                 .filter(|f| f.level == iocs::SuspicionLevel::High)
                 .count();
             if high > 0 {
-                write!(details, "{} high, ", high).unwrap();
+                row.push(Span::styled(
+                    format!("{} high", high),
+                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                ));
+                row.push(Span::raw(", "));
             }
-            write!(details, "{} total", findings.len()).unwrap();
 
-            list.push(ListItem::new(format!("App {:?} ({})", app, details)));
+            row.push(Span::raw(format!("{} total)", findings.len())));
+
+            let (content, style) = cursor(row, selected);
+            list.push(ListItem::new(content).style(style));
+
+            i += 1;
         }
+
+        // scrolling
+        let list = &list[app.offset..];
 
         let title = Span::styled("Findings", white.add_modifier(Modifier::BOLD));
         List::new(list).block(
@@ -347,19 +461,7 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
                     utils::human_option_str(device.info.get("product")),
                 );
 
-                let content = Spans::from(vec![
-                    Span::styled(
-                        if selected { " > " } else { "   " },
-                        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                    ),
-                    Span::raw(msg),
-                ]);
-
-                let mut style = Style::default();
-                if selected {
-                    style = style.bg(DARK_GREY);
-                }
-
+                let (content, style) = cursor([Span::raw(msg)], selected);
                 ListItem::new(content).style(style)
             })
             .collect();
