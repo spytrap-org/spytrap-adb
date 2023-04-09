@@ -21,6 +21,7 @@ use ratatui::{
     Frame, Terminal,
 };
 use std::cmp::Ordering;
+use std::collections::BTreeSet;
 use std::io;
 use std::io::Stdout;
 use std::iter::Chain;
@@ -152,6 +153,7 @@ impl App {
 pub struct Scan {
     findings: Vec<iocs::Suspicion>,
     apps: IndexMap<String, AppInfos>,
+    expanded: BTreeSet<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Default)]
@@ -183,9 +185,8 @@ impl AppInfos {
 
 impl Ord for AppInfos {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.high
-            .len()
-            .cmp(&other.high.len())
+        Ordering::Equal
+            .then(self.high.len().cmp(&other.high.len()))
             .then(self.medium.len().cmp(&other.medium.len()))
             .then(self.low.len().cmp(&other.low.len()))
     }
@@ -271,26 +272,38 @@ pub async fn handle_key<B: Backend>(
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            let adb_host = app.adb_host.clone();
-            let device = app.devices[app.cursor].clone();
-            let events_tx = app.events_tx.clone();
-
-            let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
-            tokio::spawn(async move {
-                tokio::select! {
-                    _ = cancel_rx.recv() => {
-                        debug!("Scan has been canceled");
-                        events_tx.send(Message::ScanEnded).await.ok();
-                    }
-                    ret = run_scan(adb_host, device, events_tx.clone()) => {
-                        debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
-                        events_tx.send(Message::ScanEnded).await.ok();
+            if let Some(scan) = &mut app.scan {
+                if let Some(idx) = app.cursor.checked_sub(scan.findings.len()) {
+                    let (name, _appinfos) = scan.apps.get_index(idx).unwrap();
+                    // toggle the app from the `expanded` list
+                    if scan.expanded.contains(name) {
+                        scan.expanded.remove(name);
+                    } else {
+                        scan.expanded.insert(name.clone());
                     }
                 }
-            });
-            app.scan = Some(Scan::default());
-            app.cancel_scan = Some(cancel_tx);
-            app.save_cursor();
+            } else {
+                let adb_host = app.adb_host.clone();
+                let device = app.devices[app.cursor].clone();
+                let events_tx = app.events_tx.clone();
+
+                let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
+                tokio::spawn(async move {
+                    tokio::select! {
+                        _ = cancel_rx.recv() => {
+                            debug!("Scan has been canceled");
+                            events_tx.send(Message::ScanEnded).await.ok();
+                        }
+                        ret = run_scan(adb_host, device, events_tx.clone()) => {
+                            debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
+                            events_tx.send(Message::ScanEnded).await.ok();
+                        }
+                    }
+                });
+                app.scan = Some(Scan::default());
+                app.cancel_scan = Some(cancel_tx);
+                app.save_cursor();
+            }
         }
         Event::Key(KeyEvent {
             code: KeyCode::Up,
@@ -453,17 +466,7 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
 
         for sus in &scan.findings {
             let selected = i == app.cursor;
-            let mut row = Vec::new();
-            row.push(Span::styled(
-                match sus.level {
-                    iocs::SuspicionLevel::High => "high",
-                    iocs::SuspicionLevel::Medium => "medium",
-                    iocs::SuspicionLevel::Low => "low",
-                },
-                sus.level.terminal_color(),
-            ));
-            row.push(Span::raw(": "));
-            row.push(Span::raw(&sus.description));
+            let row = sus.to_terminal();
             let (content, style) = cursor(row, selected);
             list.push(ListItem::new(content).style(style));
             i += 1;
@@ -471,9 +474,14 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
 
         for (name, findings) in &scan.apps {
             let selected = i == app.cursor;
+            let is_expanded = scan.expanded.contains(name);
 
             let mut row = Vec::new();
-            row.push(Span::raw(format!("App {name:?} (")));
+            row.push(Span::styled(
+                if is_expanded { "[-]" } else { "[+]" },
+                Style::default().add_modifier(Modifier::BOLD),
+            ));
+            row.push(Span::raw(format!(" App {name:?} (")));
 
             let mut details = Vec::new();
             if !findings.high.is_empty() {
@@ -510,6 +518,18 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
             list.push(ListItem::new(content).style(style));
 
             i += 1;
+
+            // show app details if expanded
+            if is_expanded {
+                for sus in findings.iter() {
+                    let selected = i == app.cursor;
+                    let mut row = vec![Span::raw("    ")];
+                    row.extend(sus.to_terminal());
+                    let (content, style) = cursor(row, selected);
+                    list.push(ListItem::new(content).style(style));
+                    i += 1;
+                }
+            }
         }
 
         // scrolling

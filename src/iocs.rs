@@ -1,6 +1,7 @@
 use crate::errors::*;
 use crate::utils;
 use ratatui::style::{Color, Modifier, Style};
+use ratatui::text::Span;
 use serde::{Deserialize, Serialize};
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
@@ -18,6 +19,23 @@ const IOC_DOWNLOAD_URL: &str =
 pub struct Suspicion {
     pub level: SuspicionLevel,
     pub description: String,
+}
+
+impl Suspicion {
+    pub fn to_terminal(&self) -> Vec<Span> {
+        vec![
+            Span::styled(
+                match self.level {
+                    SuspicionLevel::High => "high",
+                    SuspicionLevel::Medium => "medium",
+                    SuspicionLevel::Low => "low",
+                },
+                self.level.terminal_color(),
+            ),
+            Span::raw(": "),
+            Span::raw(&self.description),
+        ]
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd)]
