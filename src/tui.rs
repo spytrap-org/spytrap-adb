@@ -11,6 +11,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use forensic_adb::{AndroidStorageInput, DeviceInfo, Host};
+use indexmap::IndexMap;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Alignment, Constraint, Direction, Layout},
@@ -19,7 +20,6 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame, Terminal,
 };
-use std::collections::BTreeMap;
 use std::io;
 use std::io::Stdout;
 use tokio::sync::mpsc;
@@ -148,7 +148,7 @@ impl App {
 #[derive(Debug, PartialEq, Default)]
 pub struct Scan {
     findings: Vec<iocs::Suspicion>,
-    apps: BTreeMap<String, Vec<iocs::Suspicion>>,
+    apps: IndexMap<String, Vec<iocs::Suspicion>>,
 }
 
 pub enum Action {
@@ -334,6 +334,11 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     Message::App { name, sus } => {
                         if let Some(scan) = &mut app.scan {
                             scan.apps.entry(name).or_default().push(sus);
+                            scan.apps.sort_by(|k1, v1, k2, v2| {
+                                v1.len().cmp(&v2.len())
+                                    .reverse()
+                                    .then(k1.cmp(k2))
+                            });
                         }
                     }
                 }
