@@ -20,8 +20,11 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame, Terminal,
 };
+use std::cmp::Ordering;
 use std::io;
 use std::io::Stdout;
+use std::iter::Chain;
+use std::slice::Iter;
 use tokio::sync::mpsc;
 use tokio_stream::StreamExt;
 
@@ -145,10 +148,53 @@ impl App {
     }
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, Default)]
 pub struct Scan {
     findings: Vec<iocs::Suspicion>,
-    apps: IndexMap<String, Vec<iocs::Suspicion>>,
+    apps: IndexMap<String, AppInfos>,
+}
+
+#[derive(Debug, PartialEq, Eq, Default)]
+pub struct AppInfos {
+    high: Vec<iocs::Suspicion>,
+    medium: Vec<iocs::Suspicion>,
+    low: Vec<iocs::Suspicion>,
+}
+
+impl AppInfos {
+    pub fn push(&mut self, item: iocs::Suspicion) {
+        match item.level {
+            iocs::SuspicionLevel::High => self.high.push(item),
+            iocs::SuspicionLevel::Medium => self.medium.push(item),
+            iocs::SuspicionLevel::Low => self.low.push(item),
+        }
+    }
+
+    pub fn iter(
+        &self,
+    ) -> Chain<Chain<Iter<'_, iocs::Suspicion>, Iter<'_, iocs::Suspicion>>, Iter<'_, iocs::Suspicion>>
+    {
+        self.high
+            .iter()
+            .chain(self.medium.iter())
+            .chain(self.low.iter())
+    }
+}
+
+impl Ord for AppInfos {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.high
+            .len()
+            .cmp(&other.high.len())
+            .then(self.medium.len().cmp(&other.medium.len()))
+            .then(self.low.len().cmp(&other.low.len()))
+    }
+}
+
+impl PartialOrd for AppInfos {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 pub enum Action {
@@ -335,7 +381,7 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                         if let Some(scan) = &mut app.scan {
                             scan.apps.entry(name).or_default().push(sus);
                             scan.apps.sort_by(|k1, v1, k2, v2| {
-                                v1.len().cmp(&v2.len())
+                                v1.cmp(v2)
                                     .reverse()
                                     .then(k1.cmp(k2))
                             });
@@ -407,8 +453,18 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
 
         for sus in &scan.findings {
             let selected = i == app.cursor;
-            let msg = format!("{sus:?}");
-            let (content, style) = cursor([Span::raw(msg)], selected);
+            let mut row = Vec::new();
+            row.push(Span::styled(
+                match sus.level {
+                    iocs::SuspicionLevel::High => "high",
+                    iocs::SuspicionLevel::Medium => "medium",
+                    iocs::SuspicionLevel::Low => "low",
+                },
+                sus.level.terminal_color(),
+            ));
+            row.push(Span::raw(": "));
+            row.push(Span::raw(&sus.description));
+            let (content, style) = cursor(row, selected);
             list.push(ListItem::new(content).style(style));
             i += 1;
         }
@@ -419,19 +475,36 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
             let mut row = Vec::new();
             row.push(Span::raw(format!("App {name:?} (")));
 
-            let high = findings
-                .iter()
-                .filter(|f| f.level == iocs::SuspicionLevel::High)
-                .count();
-            if high > 0 {
-                row.push(Span::styled(
-                    format!("{} high", high),
-                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+            let mut details = Vec::new();
+            if !findings.high.is_empty() {
+                details.push(Span::styled(
+                    format!("{} high", findings.high.len()),
+                    iocs::SuspicionLevel::High.terminal_color(),
                 ));
-                row.push(Span::raw(", "));
             }
 
-            row.push(Span::raw(format!("{} total)", findings.len())));
+            if !findings.medium.is_empty() {
+                details.push(Span::styled(
+                    format!("{} medium", findings.medium.len()),
+                    iocs::SuspicionLevel::Medium.terminal_color(),
+                ));
+            }
+
+            if !findings.low.is_empty() {
+                details.push(Span::styled(
+                    format!("{} low", findings.low.len()),
+                    iocs::SuspicionLevel::Low.terminal_color(),
+                ));
+            }
+
+            for (i, value) in details.into_iter().enumerate() {
+                if i > 0 {
+                    row.push(Span::raw(", "));
+                }
+                row.push(value);
+            }
+
+            row.push(Span::raw(")"));
 
             let (content, style) = cursor(row, selected);
             list.push(ListItem::new(content).style(style));

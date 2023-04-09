@@ -1,5 +1,6 @@
 use crate::errors::*;
 use crate::utils;
+use ratatui::style::{Color, Modifier, Style};
 use serde::{Deserialize, Serialize};
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
@@ -13,17 +14,29 @@ const IOC_REFRESH_INTERVAL: i64 = 3 * 60; // Assume the cache is ok for 3h
 const IOC_DOWNLOAD_URL: &str =
     "https://github.com/AssoEchap/stalkerware-indicators/raw/{{commit}}/ioc.yaml";
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Suspicion {
     pub level: SuspicionLevel,
     pub description: String,
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, PartialOrd)]
 pub enum SuspicionLevel {
     Low,
     Medium,
     High,
+}
+
+impl SuspicionLevel {
+    pub fn terminal_color(&self) -> Style {
+        match self {
+            SuspicionLevel::High => Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+            SuspicionLevel::Medium => Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+            SuspicionLevel::Low => Style::default().add_modifier(Modifier::BOLD),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
