@@ -91,7 +91,19 @@ impl App {
     /// The number of visible lines in the current active view
     pub fn view_length(&self) -> usize {
         if let Some(scan) = &self.scan {
-            scan.findings.len() + scan.apps.len()
+            scan.findings.len()
+                + scan.apps.len()
+                + scan
+                    .apps
+                    .iter()
+                    .map(|(name, values)| {
+                        if scan.expanded.contains(name) {
+                            values.len()
+                        } else {
+                            0
+                        }
+                    })
+                    .sum::<usize>()
         } else {
             self.devices.len()
         }
@@ -170,6 +182,14 @@ impl AppInfos {
             iocs::SuspicionLevel::Medium => self.medium.push(item),
             iocs::SuspicionLevel::Low => self.low.push(item),
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.high.is_empty() && self.medium.is_empty() && self.low.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.high.len() + self.medium.len() + self.low.len()
     }
 
     pub fn iter(
@@ -273,7 +293,24 @@ pub async fn handle_key<B: Backend>(
             ..
         }) => {
             if let Some(scan) = &mut app.scan {
-                if let Some(idx) = app.cursor.checked_sub(scan.findings.len()) {
+                if let Some(mut idx) = app.cursor.checked_sub(scan.findings.len()) {
+                    let mut offset = 0;
+                    for (i, (name, appinfos)) in scan.apps.iter().enumerate() {
+                        let height = if scan.expanded.contains(name) {
+                            appinfos.len() + 1
+                        } else {
+                            1
+                        };
+
+                        if offset + height > idx {
+                            idx = i;
+                            app.cursor = offset + scan.findings.len();
+                            break;
+                        } else {
+                            offset += height;
+                        }
+                    }
+
                     let (name, _appinfos) = scan.apps.get_index(idx).unwrap();
                     // toggle the app from the `expanded` list
                     if scan.expanded.contains(name) {
