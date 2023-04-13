@@ -51,13 +51,13 @@ impl PackageInfo {
         match self.installer_package_name() {
             Some("com.android.packageinstaller") => {
                 sus.push(Suspicion {
-                    level: SuspicionLevel::Medium,
+                    level: SuspicionLevel::High,
                     description: format!("Package {:?} was manually installed", self.id),
                 });
             }
             Some(installer) => {
                 sus.push(Suspicion {
-                    level: SuspicionLevel::Medium,
+                    level: SuspicionLevel::High,
                     description: format!(
                         "Package {:?} was manually installed by an unknown installer: {:?}",
                         self.id, installer
@@ -128,7 +128,7 @@ mod tests {
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
             Suspicion {
-                level: SuspicionLevel::Medium,
+                level: SuspicionLevel::High,
                 description: "Package \"com.wifi0\" was manually installed".to_string(),
             },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"com.wifi0\" has requested permission Permission { name: \"android.permission.ACCESS_FINE_LOCATION\", fields: {} }".to_string() },
@@ -177,7 +177,7 @@ mod tests {
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
             Suspicion {
-                level: SuspicionLevel::Medium,
+                level: SuspicionLevel::High,
                 description: "Package \"org.fdroid.fdroid\" was manually installed".to_string(),
             },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"org.fdroid.fdroid\" has requested permission Permission { name: \"android.permission.ACCESS_COARSE_LOCATION\", fields: {} }".to_string() },
@@ -194,7 +194,7 @@ mod tests {
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
             Suspicion {
-                level: SuspicionLevel::Medium,
+                level: SuspicionLevel::High,
                 description: "Package \"com.android.gpstest.osmdroid\" was manually installed".to_string(),
             },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"com.android.gpstest.osmdroid\" has requested permission Permission { name: \"android.permission.ACCESS_FINE_LOCATION\", fields: {} }".to_string() },
@@ -213,7 +213,7 @@ mod tests {
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
             Suspicion {
-                level: SuspicionLevel::Medium,
+                level: SuspicionLevel::High,
                 description: "Package \"org.jitsi.meet\" was manually installed".to_string(),
             },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"org.jitsi.meet\" has requested permission Permission { name: \"android.permission.CAMERA\", fields: {} }".to_string() },

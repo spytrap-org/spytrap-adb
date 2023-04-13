@@ -11,6 +11,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use forensic_adb::{AndroidStorageInput, DeviceInfo, Host};
+use indexmap::IndexMap;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Alignment, Constraint, Direction, Layout},
@@ -19,26 +20,60 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame, Terminal,
 };
+use std::cmp::Ordering;
+use std::collections::BTreeSet;
 use std::io;
 use std::io::Stdout;
+use std::iter::Chain;
+use std::slice::Iter;
+use tokio::sync::mpsc;
 use tokio_stream::StreamExt;
 
 const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
+/// Number of items to navigate with page up/down keys
+const PAGE_MODIFIER: usize = 10;
+/// The number of lines used by the spytrap-adb UI around the scroll view
+const SCROLL_CHROME_HEIGHT: usize = 5;
+
+#[derive(Debug)]
+pub enum Message {
+    ScanEnded,
+    Suspicion(iocs::Suspicion),
+    App { name: String, sus: iocs::Suspicion },
+}
+
+#[derive(Debug, PartialEq, Default)]
+pub struct SavedCursor {
+    offset: usize,
+    cursor: usize,
+}
 
 pub struct App {
     adb_host: Host,
+    events_tx: mpsc::Sender<Message>,
+    events_rx: mpsc::Receiver<Message>,
     devices: Vec<DeviceInfo>,
+    offset: usize,
     cursor: usize,
-    report: Option<Vec<iocs::Suspicion>>,
+    /// the previous cursor positions before switching into a different scroll-view
+    cursor_backtrace: Vec<SavedCursor>,
+    scan: Option<Scan>,
+    cancel_scan: Option<mpsc::Sender<()>>,
 }
 
 impl App {
     pub fn new(adb_host: Host) -> Self {
+        let (events_tx, events_rx) = mpsc::channel(5);
         Self {
             adb_host,
+            events_tx,
+            events_rx,
             devices: Vec::new(),
+            offset: 0,
             cursor: 0,
-            report: None,
+            cursor_backtrace: vec![],
+            scan: None,
+            cancel_scan: None,
         }
     }
 
@@ -53,15 +88,60 @@ impl App {
         Ok(())
     }
 
-    pub fn key_up(&mut self) {
-        self.cursor = self.cursor.saturating_sub(1);
+    /// The number of visible lines in the current active view
+    pub fn view_length(&self) -> usize {
+        if let Some(scan) = &self.scan {
+            scan.findings.len()
+                + scan.apps.len()
+                + scan
+                    .apps
+                    .iter()
+                    .map(|(name, values)| {
+                        if scan.expanded.contains(name) {
+                            values.len()
+                        } else {
+                            0
+                        }
+                    })
+                    .sum::<usize>()
+        } else {
+            self.devices.len()
+        }
     }
 
-    pub fn key_down(&mut self) {
-        let max = self.devices.len().saturating_sub(1);
+    pub fn save_cursor(&mut self) {
+        self.cursor_backtrace.push(SavedCursor {
+            offset: self.offset,
+            cursor: self.cursor,
+        });
+        self.offset = 0;
+        self.cursor = 0;
+    }
+
+    pub fn key_up(&mut self) {
+        self.cursor = self.cursor.saturating_sub(1);
+        if self.cursor < self.offset {
+            self.offset = self.cursor;
+        }
+    }
+
+    pub fn key_down<B: Backend>(&mut self, terminal: &Terminal<B>) -> Result<()> {
+        let max = self.view_length().saturating_sub(1);
+
         if self.cursor < max {
             self.cursor += 1;
+            self.recalculate_scroll_offset(terminal)?;
         }
+
+        Ok(())
+    }
+
+    pub fn recalculate_scroll_offset<B: Backend>(&mut self, terminal: &Terminal<B>) -> Result<()> {
+        let scroll_height = terminal.size()?.height as usize - SCROLL_CHROME_HEIGHT;
+        if self.cursor - self.offset > scroll_height {
+            self.offset = self.cursor - scroll_height;
+        }
+        Ok(())
     }
 
     pub async fn refresh_devices(&mut self) -> Result<()> {
@@ -81,12 +161,97 @@ impl App {
     }
 }
 
+#[derive(Debug, Default)]
+pub struct Scan {
+    findings: Vec<iocs::Suspicion>,
+    apps: IndexMap<String, AppInfos>,
+    expanded: BTreeSet<String>,
+}
+
+#[derive(Debug, PartialEq, Eq, Default)]
+pub struct AppInfos {
+    high: Vec<iocs::Suspicion>,
+    medium: Vec<iocs::Suspicion>,
+    low: Vec<iocs::Suspicion>,
+}
+
+impl AppInfos {
+    pub fn push(&mut self, item: iocs::Suspicion) {
+        match item.level {
+            iocs::SuspicionLevel::High => self.high.push(item),
+            iocs::SuspicionLevel::Medium => self.medium.push(item),
+            iocs::SuspicionLevel::Low => self.low.push(item),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.high.is_empty() && self.medium.is_empty() && self.low.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.high.len() + self.medium.len() + self.low.len()
+    }
+
+    pub fn iter(
+        &self,
+    ) -> Chain<Chain<Iter<'_, iocs::Suspicion>, Iter<'_, iocs::Suspicion>>, Iter<'_, iocs::Suspicion>>
+    {
+        self.high
+            .iter()
+            .chain(self.medium.iter())
+            .chain(self.low.iter())
+    }
+}
+
+impl Ord for AppInfos {
+    fn cmp(&self, other: &Self) -> Ordering {
+        Ordering::Equal
+            .then(self.high.len().cmp(&other.high.len()))
+            .then(self.medium.len().cmp(&other.medium.len()))
+            .then(self.low.len().cmp(&other.low.len()))
+    }
+}
+
+impl PartialOrd for AppInfos {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 pub enum Action {
     Shutdown,
     Clear,
 }
 
-pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
+pub async fn run_scan(
+    adb_host: Host,
+    device: DeviceInfo,
+    events_tx: mpsc::Sender<Message>,
+) -> Result<()> {
+    let device = adb_host
+        .clone()
+        .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
+        .await
+        .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
+
+    let repo = iocs::Repository::ioc_file_path()?;
+    let (rules, _sha256) = rules::load_map_from_file(repo).context("Failed to load rules")?;
+    scan::run(
+        &device,
+        &rules,
+        &scan::Settings { skip_apps: false },
+        &mut scan::ScanNotifier::Channel(events_tx),
+    )
+    .await?;
+
+    Ok(())
+}
+
+pub async fn handle_key<B: Backend>(
+    terminal: &Terminal<B>,
+    app: &mut App,
+    event: Event,
+) -> Result<Option<Action>> {
     match event {
         Event::Key(KeyEvent {
             code: KeyCode::Esc,
@@ -103,9 +268,15 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            if app.report.take().is_none() {
+            if let Some(tx) = app.cancel_scan.take() {
+                tx.send(()).await.ok();
+            } else if app.scan.take().is_none() {
                 println!("Exiting...");
                 return Ok(Some(Action::Shutdown));
+            } else {
+                let saved = app.cursor_backtrace.pop().unwrap_or_default();
+                app.offset = saved.offset;
+                app.cursor = saved.cursor;
             }
         }
         Event::Key(KeyEvent {
@@ -121,21 +292,55 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            let device = &app.devices[app.cursor];
-            // println!("{:?}", device);
+            if let Some(scan) = &mut app.scan {
+                if let Some(mut idx) = app.cursor.checked_sub(scan.findings.len()) {
+                    let mut offset = 0;
+                    for (i, (name, appinfos)) in scan.apps.iter().enumerate() {
+                        let height = if scan.expanded.contains(name) {
+                            appinfos.len() + 1
+                        } else {
+                            1
+                        };
 
-            let device = app
-                .adb_host
-                .clone()
-                .device_or_default(Some(&device.serial), AndroidStorageInput::Auto)
-                .await
-                .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
+                        if offset + height > idx {
+                            idx = i;
+                            app.cursor = offset + scan.findings.len();
+                            break;
+                        } else {
+                            offset += height;
+                        }
+                    }
 
-            let repo = iocs::Repository::ioc_file_path()?;
-            let (rules, _sha256) =
-                rules::load_map_from_file(repo).context("Failed to load rules")?;
-            let report = scan::run(&device, &rules, &scan::Settings { skip_apps: true }).await?;
-            app.report = Some(report);
+                    let (name, _appinfos) = scan.apps.get_index(idx).unwrap();
+                    // toggle the app from the `expanded` list
+                    if scan.expanded.contains(name) {
+                        scan.expanded.remove(name);
+                    } else {
+                        scan.expanded.insert(name.clone());
+                    }
+                }
+            } else {
+                let adb_host = app.adb_host.clone();
+                let device = app.devices[app.cursor].clone();
+                let events_tx = app.events_tx.clone();
+
+                let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
+                tokio::spawn(async move {
+                    tokio::select! {
+                        _ = cancel_rx.recv() => {
+                            debug!("Scan has been canceled");
+                            events_tx.send(Message::ScanEnded).await.ok();
+                        }
+                        ret = run_scan(adb_host, device, events_tx.clone()) => {
+                            debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
+                            events_tx.send(Message::ScanEnded).await.ok();
+                        }
+                    }
+                });
+                app.scan = Some(Scan::default());
+                app.cancel_scan = Some(cancel_tx);
+                app.save_cursor();
+            }
         }
         Event::Key(KeyEvent {
             code: KeyCode::Up,
@@ -149,7 +354,25 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            app.key_down();
+            app.key_down(terminal)?;
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::PageUp,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            for _ in 0..PAGE_MODIFIER {
+                app.key_up();
+            }
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::PageDown,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            for _ in 0..PAGE_MODIFIER {
+                app.key_down(terminal)?;
+            }
         }
         Event::Key(KeyEvent {
             code: KeyCode::Char('r'),
@@ -166,6 +389,9 @@ pub async fn handle_key(app: &mut App, event: Event) -> Result<Option<Action>> {
         }) => {
             return Ok(Some(Action::Clear));
         }
+        Event::Resize(_columns, _rows) => {
+            app.recalculate_scroll_offset(terminal)?;
+        }
         _ => (),
     }
     Ok(None)
@@ -181,7 +407,7 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
             event = stream.next() => {
                 let Some(event) = event else { break };
                 let event = event.context("Failed to read terminal input")?;
-                match handle_key(app, event).await? {
+                match handle_key(terminal, app, event).await? {
                     Some(Action::Shutdown) => break,
                     Some(Action::Clear) => {
                         terminal.clear()?;
@@ -189,10 +415,49 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     None => (),
                 }
             }
+            event = app.events_rx.recv() => {
+                let Some(event) = event else { break };
+                debug!("Received message from channel: event={event:?}");
+                match event {
+                    Message::ScanEnded => {
+                        app.cancel_scan.take();
+                    }
+                    Message::Suspicion(sus) => {
+                        if let Some(scan) = &mut app.scan {
+                            scan.findings.push(sus);
+                        }
+                    }
+                    Message::App { name, sus } => {
+                        if let Some(scan) = &mut app.scan {
+                            scan.apps.entry(name).or_default().push(sus);
+                            scan.apps.sort_by(|k1, v1, k2, v2| {
+                                v1.cmp(v2)
+                                    .reverse()
+                                    .then(k1.cmp(k2))
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
 
     Ok(())
+}
+
+fn cursor<'a, T: IntoIterator<Item = Span<'a>>>(msg: T, selected: bool) -> (Spans<'a>, Style) {
+    let mut style = Style::default();
+    if selected {
+        style = style.bg(DARK_GREY);
+    }
+
+    let mut row = vec![Span::styled(
+        if selected { " > " } else { "   " },
+        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+    )];
+    row.extend(msg);
+
+    (Spans::from(row), style)
 }
 
 pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
@@ -211,12 +476,19 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
         .split(f.size());
 
     let text = Text::from(Spans::from(vec![
+        Span::raw(if app.cancel_scan.is_some() {
+            "scanning - "
+        } else {
+            "idle - "
+        }),
         Span::raw("Press "),
         Span::styled("ESC", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to exit - "),
-        Span::raw(env!("CARGO_PKG_NAME")),
-        Span::raw(" v"),
-        Span::raw(env!("CARGO_PKG_VERSION")),
+        Span::raw(concat!(
+            env!("CARGO_PKG_NAME"),
+            " v",
+            env!("CARGO_PKG_VERSION")
+        )),
     ]));
     let help_message = Paragraph::new(text)
         .style(white)
@@ -225,14 +497,83 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
 
     f.render_widget(Block::default().style(white), chunks[1]);
 
-    let widget = if let Some(report) = &app.report {
-        let findings: Vec<ListItem> = report
-            .iter()
-            .map(|sus| ListItem::new(format!("{sus:?}")))
-            .collect();
+    let widget = if let Some(scan) = &app.scan {
+        let mut list = Vec::new();
+        let mut i = 0;
+
+        for sus in &scan.findings {
+            let selected = i == app.cursor;
+            let row = sus.to_terminal();
+            let (content, style) = cursor(row, selected);
+            list.push(ListItem::new(content).style(style));
+            i += 1;
+        }
+
+        for (name, findings) in &scan.apps {
+            let selected = i == app.cursor;
+            let is_expanded = scan.expanded.contains(name);
+
+            let mut row = Vec::new();
+            row.push(Span::styled(
+                if is_expanded { "[-]" } else { "[+]" },
+                Style::default().add_modifier(Modifier::BOLD),
+            ));
+            row.push(Span::raw(format!(" App {name:?} (")));
+
+            let mut details = Vec::new();
+            if !findings.high.is_empty() {
+                details.push(Span::styled(
+                    format!("{} high", findings.high.len()),
+                    iocs::SuspicionLevel::High.terminal_color(),
+                ));
+            }
+
+            if !findings.medium.is_empty() {
+                details.push(Span::styled(
+                    format!("{} medium", findings.medium.len()),
+                    iocs::SuspicionLevel::Medium.terminal_color(),
+                ));
+            }
+
+            if !findings.low.is_empty() {
+                details.push(Span::styled(
+                    format!("{} low", findings.low.len()),
+                    iocs::SuspicionLevel::Low.terminal_color(),
+                ));
+            }
+
+            for (i, value) in details.into_iter().enumerate() {
+                if i > 0 {
+                    row.push(Span::raw(", "));
+                }
+                row.push(value);
+            }
+
+            row.push(Span::raw(")"));
+
+            let (content, style) = cursor(row, selected);
+            list.push(ListItem::new(content).style(style));
+
+            i += 1;
+
+            // show app details if expanded
+            if is_expanded {
+                for sus in findings.iter() {
+                    let selected = i == app.cursor;
+                    let mut row = vec![Span::raw("    ")];
+                    row.extend(sus.to_terminal());
+                    let (content, style) = cursor(row, selected);
+                    list.push(ListItem::new(content).style(style));
+                    i += 1;
+                }
+            }
+        }
+
+        // scrolling
+        let list = &list[app.offset..];
 
         let title = Span::styled("Findings", white.add_modifier(Modifier::BOLD));
-        List::new(findings).block(
+        List::new(list).block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(white)
@@ -255,19 +596,7 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
                     utils::human_option_str(device.info.get("product")),
                 );
 
-                let content = Spans::from(vec![
-                    Span::styled(
-                        if selected { " > " } else { "   " },
-                        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                    ),
-                    Span::raw(msg),
-                ]);
-
-                let mut style = Style::default();
-                if selected {
-                    style = style.bg(DARK_GREY);
-                }
-
+                let (content, style) = cursor([Span::raw(msg)], selected);
                 ListItem::new(content).style(style)
             })
             .collect();

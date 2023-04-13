@@ -8,6 +8,10 @@ Based on [stalkerware-indicators] data provided by [Echap].
 [stalkerware-indicators]: https://github.com/AssoEchap/stalkerware-indicators
 [Echap]: https://github.com/AssoEchap
 
+[![](.github/screenshot-device-list.png)](.github/screenshot-device-list.png)
+
+[![](.github/screenshot-findings-list.png)](.github/screenshot-findings-list.png)
+
 ## Usage
 
 ```sh
