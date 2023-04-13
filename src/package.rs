@@ -27,6 +27,7 @@ fn is_permission_suspcious(permission: &Permission) -> Option<SuspicionLevel> {
         "android.permission.ACCESS_BACKGROUND_LOCATION" => Some(SuspicionLevel::Medium),
         "android.permission.READ_SMS" => Some(SuspicionLevel::Medium),
         "android.permission.RECEIVE_SMS" => Some(SuspicionLevel::Medium),
+        "android.permission.BIND_DEVICE_ADMIN" => Some(SuspicionLevel::Medium),
         // sus: low
         "android.permission.ACCESS_COARSE_LOCATION" => Some(SuspicionLevel::Low),
         "android.permission.ACCESS_FINE_LOCATION" => Some(SuspicionLevel::Low),
