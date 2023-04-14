@@ -14,12 +14,21 @@ Based on [stalkerware-indicators] data provided by [Echap].
 
 ## Usage
 
+There's an interactive UI when running the command with no arguments:
+
 ```sh
-# enable usb debugging on the device and connect the android device to the computer
+./spytrap-adb
+```
+
+Enable usb debugging on the device and connect the android device to the computer.
+
+You can also invoke some commands directly for non-interactive use:
+
+```sh
 # list available devices
 ./spytrap-adb list
 # download ioc.yaml from https://github.com/AssoEchap/stalkerware-indicators
-./spytrap-adb update
+./spytrap-adb download-iocs
 # scan the first connected device
 ./spytrap-adb scan
 ```

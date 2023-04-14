@@ -76,11 +76,11 @@ async fn run(args: Args) -> Result<()> {
                 );
             }
         }
-        Some(SubCommand::Sync(_sync)) => {
+        Some(SubCommand::DownloadIocs(_sync)) => {
             let mut repo = iocs::Repository::init().await?;
-            repo.sync_ioc_file()
+            repo.download_iocs_file()
                 .await
-                .context("Failed to sync stalkerware-indicators ioc.yaml")?;
+                .context("Failed to download stalkerware-indicators ioc.yaml")?;
         }
         None => {
             let mut app = tui::App::new(adb_host);
