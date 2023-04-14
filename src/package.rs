@@ -27,6 +27,7 @@ fn is_permission_suspcious(permission: &Permission) -> Option<SuspicionLevel> {
         "android.permission.ACCESS_BACKGROUND_LOCATION" => Some(SuspicionLevel::Medium),
         "android.permission.READ_SMS" => Some(SuspicionLevel::Medium),
         "android.permission.RECEIVE_SMS" => Some(SuspicionLevel::Medium),
+        "android.permission.BIND_DEVICE_ADMIN" => Some(SuspicionLevel::Medium),
         // sus: low
         "android.permission.ACCESS_COARSE_LOCATION" => Some(SuspicionLevel::Low),
         "android.permission.ACCESS_FINE_LOCATION" => Some(SuspicionLevel::Low),
@@ -37,6 +38,7 @@ fn is_permission_suspcious(permission: &Permission) -> Option<SuspicionLevel> {
         "android.permission.READ_CONTACTS" => Some(SuspicionLevel::Low),
         "android.permission.RECORD_AUDIO" => Some(SuspicionLevel::Low),
         "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" => Some(SuspicionLevel::Low),
+        "android.permission.MODIFY_AUDIO_SETTINGS" => Some(SuspicionLevel::Low),
         // none
         _ => None,
     }
@@ -212,12 +214,11 @@ mod tests {
         let pkginfo = parsers::package::parse_output(data, "org.jitsi.meet").unwrap();
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
-            Suspicion {
-                level: SuspicionLevel::High,
-                description: "Package \"org.jitsi.meet\" was manually installed".to_string(),
-            },
+            Suspicion { level: SuspicionLevel::High, description: "Package \"org.jitsi.meet\" was manually installed".to_string() },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"org.jitsi.meet\" has requested permission Permission { name: \"android.permission.CAMERA\", fields: {} }".to_string() },
+            Suspicion { level: SuspicionLevel::Low, description: "Package \"org.jitsi.meet\" has requested permission Permission { name: \"android.permission.MODIFY_AUDIO_SETTINGS\", fields: {} }".to_string() },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"org.jitsi.meet\" has requested permission Permission { name: \"android.permission.RECORD_AUDIO\", fields: {} }".to_string() },
+            Suspicion { level: SuspicionLevel::Low, description: "Package \"org.jitsi.meet\" has install permission Permission { name: \"android.permission.MODIFY_AUDIO_SETTINGS\", fields: {\"granted\": \"true\"} }".to_string() },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"org.jitsi.meet\" has runtime permission Permission { name: \"android.permission.CAMERA\", fields: {\"flags\": \"[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]\", \"granted\": \"false\"} }".to_string() },
             Suspicion { level: SuspicionLevel::Low, description: "Package \"org.jitsi.meet\" has runtime permission Permission { name: \"android.permission.RECORD_AUDIO\", fields: {\"flags\": \"[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]\", \"granted\": \"true\"} }".to_string() },
         ]);
