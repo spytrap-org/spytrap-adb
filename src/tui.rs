@@ -320,26 +320,28 @@ pub async fn handle_key<B: Backend>(
                     }
                 }
             } else {
-                let adb_host = app.adb_host.clone();
-                let device = app.devices[app.cursor].clone();
-                let events_tx = app.events_tx.clone();
+                if let Some(device) = app.devices.get(app.cursor) {
+                    let adb_host = app.adb_host.clone();
+                    let device = device.clone();
+                    let events_tx = app.events_tx.clone();
 
-                let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
-                tokio::spawn(async move {
-                    tokio::select! {
-                        _ = cancel_rx.recv() => {
-                            debug!("Scan has been canceled");
-                            events_tx.send(Message::ScanEnded).await.ok();
+                    let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
+                    tokio::spawn(async move {
+                        tokio::select! {
+                            _ = cancel_rx.recv() => {
+                                debug!("Scan has been canceled");
+                                events_tx.send(Message::ScanEnded).await.ok();
+                            }
+                            ret = run_scan(adb_host, device, events_tx.clone()) => {
+                                debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
+                                events_tx.send(Message::ScanEnded).await.ok();
+                            }
                         }
-                        ret = run_scan(adb_host, device, events_tx.clone()) => {
-                            debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
-                            events_tx.send(Message::ScanEnded).await.ok();
-                        }
-                    }
-                });
-                app.scan = Some(Scan::default());
-                app.cancel_scan = Some(cancel_tx);
-                app.save_cursor();
+                    });
+                    app.scan = Some(Scan::default());
+                    app.cancel_scan = Some(cancel_tx);
+                    app.save_cursor();
+                }
             }
         }
         Event::Key(KeyEvent {
