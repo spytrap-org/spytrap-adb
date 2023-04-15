@@ -1,5 +1,5 @@
 use crate::errors::*;
-use crate::iocs;
+use crate::ioc::{Repository, Suspicion, SuspicionLevel};
 use crate::rules;
 use crate::scan;
 use crate::utils;
@@ -38,8 +38,8 @@ const SCROLL_CHROME_HEIGHT: usize = 5;
 #[derive(Debug)]
 pub enum Message {
     ScanEnded,
-    Suspicion(iocs::Suspicion),
-    App { name: String, sus: iocs::Suspicion },
+    Suspicion(Suspicion),
+    App { name: String, sus: Suspicion },
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -163,24 +163,24 @@ impl App {
 
 #[derive(Debug, Default)]
 pub struct Scan {
-    findings: Vec<iocs::Suspicion>,
+    findings: Vec<Suspicion>,
     apps: IndexMap<String, AppInfos>,
     expanded: BTreeSet<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Default)]
 pub struct AppInfos {
-    high: Vec<iocs::Suspicion>,
-    medium: Vec<iocs::Suspicion>,
-    low: Vec<iocs::Suspicion>,
+    high: Vec<Suspicion>,
+    medium: Vec<Suspicion>,
+    low: Vec<Suspicion>,
 }
 
 impl AppInfos {
-    pub fn push(&mut self, item: iocs::Suspicion) {
+    pub fn push(&mut self, item: Suspicion) {
         match item.level {
-            iocs::SuspicionLevel::High => self.high.push(item),
-            iocs::SuspicionLevel::Medium => self.medium.push(item),
-            iocs::SuspicionLevel::Low => self.low.push(item),
+            SuspicionLevel::High => self.high.push(item),
+            SuspicionLevel::Medium => self.medium.push(item),
+            SuspicionLevel::Low => self.low.push(item),
         }
     }
 
@@ -194,8 +194,7 @@ impl AppInfos {
 
     pub fn iter(
         &self,
-    ) -> Chain<Chain<Iter<'_, iocs::Suspicion>, Iter<'_, iocs::Suspicion>>, Iter<'_, iocs::Suspicion>>
-    {
+    ) -> Chain<Chain<Iter<'_, Suspicion>, Iter<'_, Suspicion>>, Iter<'_, Suspicion>> {
         self.high
             .iter()
             .chain(self.medium.iter())
@@ -234,7 +233,7 @@ pub async fn run_scan(
         .await
         .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
 
-    let repo = iocs::Repository::ioc_file_path()?;
+    let repo = Repository::ioc_file_path()?;
     let (rules, _sha256) = rules::load_map_from_file(repo).context("Failed to load rules")?;
     scan::run(
         &device,
@@ -319,29 +318,27 @@ pub async fn handle_key<B: Backend>(
                         scan.expanded.insert(name.clone());
                     }
                 }
-            } else {
-                if let Some(device) = app.devices.get(app.cursor) {
-                    let adb_host = app.adb_host.clone();
-                    let device = device.clone();
-                    let events_tx = app.events_tx.clone();
+            } else if let Some(device) = app.devices.get(app.cursor) {
+                let adb_host = app.adb_host.clone();
+                let device = device.clone();
+                let events_tx = app.events_tx.clone();
 
-                    let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
-                    tokio::spawn(async move {
-                        tokio::select! {
-                            _ = cancel_rx.recv() => {
-                                debug!("Scan has been canceled");
-                                events_tx.send(Message::ScanEnded).await.ok();
-                            }
-                            ret = run_scan(adb_host, device, events_tx.clone()) => {
-                                debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
-                                events_tx.send(Message::ScanEnded).await.ok();
-                            }
+                let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
+                tokio::spawn(async move {
+                    tokio::select! {
+                        _ = cancel_rx.recv() => {
+                            debug!("Scan has been canceled");
+                            events_tx.send(Message::ScanEnded).await.ok();
                         }
-                    });
-                    app.scan = Some(Scan::default());
-                    app.cancel_scan = Some(cancel_tx);
-                    app.save_cursor();
-                }
+                        ret = run_scan(adb_host, device, events_tx.clone()) => {
+                            debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
+                            events_tx.send(Message::ScanEnded).await.ok();
+                        }
+                    }
+                });
+                app.scan = Some(Scan::default());
+                app.cancel_scan = Some(cancel_tx);
+                app.save_cursor();
             }
         }
         Event::Key(KeyEvent {
@@ -526,21 +523,21 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
             if !findings.high.is_empty() {
                 details.push(Span::styled(
                     format!("{} high", findings.high.len()),
-                    iocs::SuspicionLevel::High.terminal_color(),
+                    SuspicionLevel::High.terminal_color(),
                 ));
             }
 
             if !findings.medium.is_empty() {
                 details.push(Span::styled(
                     format!("{} medium", findings.medium.len()),
-                    iocs::SuspicionLevel::Medium.terminal_color(),
+                    SuspicionLevel::Medium.terminal_color(),
                 ));
             }
 
             if !findings.low.is_empty() {
                 details.push(Span::styled(
                     format!("{} low", findings.low.len()),
-                    iocs::SuspicionLevel::Low.terminal_color(),
+                    SuspicionLevel::Low.terminal_color(),
                 ));
             }
 

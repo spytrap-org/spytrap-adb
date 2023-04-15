@@ -132,7 +132,7 @@ impl Repository {
         }
     }
 
-    pub async fn download_iocs_file(&mut self) -> Result<()> {
+    pub async fn download_ioc_file(&mut self) -> Result<()> {
         let commit = self
             .current_github_commit(IOC_GIT_REFS_URL)
             .await

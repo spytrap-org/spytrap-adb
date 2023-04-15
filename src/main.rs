@@ -3,7 +3,7 @@ use env_logger::Env;
 use forensic_adb::{AndroidStorageInput, Host};
 use spytrap_adb::args::{self, Args, SubCommand};
 use spytrap_adb::errors::*;
-use spytrap_adb::iocs;
+use spytrap_adb::ioc;
 use spytrap_adb::rules;
 use spytrap_adb::scan;
 use spytrap_adb::tui;
@@ -19,7 +19,7 @@ async fn run(args: Args) -> Result<()> {
             let rules_path = if let Some(path) = &scan.rules {
                 Cow::Borrowed(path)
             } else {
-                let path = iocs::Repository::ioc_file_path()?;
+                let path = ioc::Repository::ioc_file_path()?;
                 Cow::Owned(path)
             };
 
@@ -30,7 +30,7 @@ async fn run(args: Args) -> Result<()> {
                 rules.len()
             );
 
-            let repo = iocs::Repository::init().await?;
+            let repo = ioc::Repository::init().await?;
             if let Some(update_state) = &repo.update_state {
                 if update_state.sha256 == sha256 {
                     info!(
@@ -76,9 +76,9 @@ async fn run(args: Args) -> Result<()> {
                 );
             }
         }
-        Some(SubCommand::DownloadIocs(_sync)) => {
-            let mut repo = iocs::Repository::init().await?;
-            repo.download_iocs_file()
+        Some(SubCommand::DownloadIoc(_download)) => {
+            let mut repo = ioc::Repository::init().await?;
+            repo.download_ioc_file()
                 .await
                 .context("Failed to download stalkerware-indicators ioc.yaml")?;
         }

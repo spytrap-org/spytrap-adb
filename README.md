@@ -27,8 +27,8 @@ You can also invoke some commands directly for non-interactive use:
 ```sh
 # list available devices
 ./spytrap-adb list
-# download ioc.yaml from https://github.com/AssoEchap/stalkerware-indicators
-./spytrap-adb download-iocs
+# download indicators of compromise from https://github.com/AssoEchap/stalkerware-indicators
+./spytrap-adb download-ioc
 # scan the first connected device
 ./spytrap-adb scan
 ```
