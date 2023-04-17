@@ -1,5 +1,5 @@
 use crate::errors::*;
-use crate::iocs::{Suspicion, SuspicionLevel};
+use crate::ioc::{Suspicion, SuspicionLevel};
 use crate::parsers::settings::Settings;
 use forensic_adb::Device;
 use std::collections::HashMap;

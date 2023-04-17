@@ -132,8 +132,7 @@ impl Repository {
         }
     }
 
-    pub async fn sync_ioc_file(&mut self) -> Result<()> {
-        debug!("Starting update check");
+    pub async fn download_ioc_file(&mut self) -> Result<()> {
         let commit = self
             .current_github_commit(IOC_GIT_REFS_URL)
             .await
@@ -174,8 +173,6 @@ impl Repository {
         self.write_state_file()
             .await
             .context("Failed to write update state file")?;
-
-        debug!("Update check complete");
 
         Ok(())
     }

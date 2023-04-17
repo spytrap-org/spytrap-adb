@@ -30,7 +30,7 @@ pub enum AdbServerChoice {
 pub enum SubCommand {
     Scan(Scan),
     List(List),
-    Sync(SyncIoc),
+    DownloadIoc(DownloadIoc),
 }
 
 /// Run a scan on a given device
@@ -52,4 +52,4 @@ pub struct List {}
 
 /// Download the latest version of stalkerware-indicators ioc.yaml
 #[derive(Debug, Parser)]
-pub struct SyncIoc {}
+pub struct DownloadIoc {}

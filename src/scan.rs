@@ -2,7 +2,7 @@ use crate::accessibility;
 use crate::args;
 use crate::dumpsys;
 use crate::errors::*;
-use crate::iocs::{Suspicion, SuspicionLevel};
+use crate::ioc::{Suspicion, SuspicionLevel};
 use crate::package;
 use crate::pm;
 use crate::remote_clock;
