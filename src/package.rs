@@ -51,6 +51,7 @@ impl PackageInfo {
         let mut sus = Vec::new();
 
         match self.installer_package_name() {
+            Some("com.android.vending") => (),
             Some("com.android.packageinstaller") => {
                 sus.push(Suspicion {
                     level: SuspicionLevel::High,
