@@ -150,7 +150,7 @@ impl App {
         }
     }
 
-    pub fn save_cursor(&mut self) {
+    pub async fn save_cursor(&mut self) -> Result<()> {
         self.cursor_backtrace.push(SavedCursor {
             offset: self.offset,
             cursor: self.cursor,
@@ -158,6 +158,8 @@ impl App {
         });
         self.offset = 0;
         self.cursor = 0;
+        self.stop_timer().await?;
+        Ok(())
     }
 
     pub fn key_up(&mut self) {
@@ -328,6 +330,8 @@ pub async fn handle_key<B: Backend>(
                 app.cursor = saved.cursor;
                 if let Some(interval) = saved.interval {
                     app.start_timer(interval).await?;
+                } else {
+                    app.stop_timer().await?;
                 }
             }
         }
@@ -391,7 +395,7 @@ pub async fn handle_key<B: Backend>(
                 });
                 app.scan = Some(Scan::default());
                 app.cancel_scan = Some(cancel_tx);
-                app.save_cursor();
+                app.save_cursor().await?;
                 app.start_timer(SCAN_ACTIVITY_TICK_INTERVAL).await?;
             }
         }
