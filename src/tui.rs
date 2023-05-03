@@ -26,7 +26,10 @@ use std::io;
 use std::io::Stdout;
 use std::iter::Chain;
 use std::slice::Iter;
+use std::time::Duration;
 use tokio::sync::mpsc;
+use tokio::task::JoinSet;
+use tokio::time;
 use tokio_stream::StreamExt;
 
 const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
@@ -35,23 +38,45 @@ const PAGE_MODIFIER: usize = 10;
 /// The number of lines used by the spytrap-adb UI around the scroll view
 const SCROLL_CHROME_HEIGHT: usize = 5;
 
+const DEVICE_REFRESH_INTERVAL: Duration = Duration::from_secs(1);
+const SCAN_ACTIVITY_TICK_INTERVAL: Duration = Duration::from_millis(100);
+const ACTIVITY: &[&str] = &[".", "o", "O", "°", " ", " ", "°", "O", "o", ".", " ", " "];
+
 #[derive(Debug)]
 pub enum Message {
     ScanEnded,
     Suspicion(Suspicion),
+    Tick,
     App { name: String, sus: Suspicion },
+}
+
+#[derive(Debug)]
+pub enum TimerCmd {
+    Start(Duration),
+    Stop,
+}
+
+impl TimerCmd {
+    pub async fn recv(rx: &mut mpsc::Receiver<TimerCmd>) -> Result<TimerCmd> {
+        let cmd = rx.recv().await.context("Channel has closed")?;
+        Ok(cmd)
+    }
 }
 
 #[derive(Debug, PartialEq, Default)]
 pub struct SavedCursor {
     offset: usize,
     cursor: usize,
+    interval: Option<Duration>,
 }
 
 pub struct App {
     adb_host: Host,
     events_tx: mpsc::Sender<Message>,
     events_rx: mpsc::Receiver<Message>,
+    timer_tx: mpsc::Sender<TimerCmd>,
+    timer_rx: Option<mpsc::Receiver<TimerCmd>>,
+    current_timer: Option<Duration>,
     devices: Vec<DeviceInfo>,
     offset: usize,
     cursor: usize,
@@ -64,10 +89,14 @@ pub struct App {
 impl App {
     pub fn new(adb_host: Host) -> Self {
         let (events_tx, events_rx) = mpsc::channel(5);
+        let (timer_tx, timer_rx) = mpsc::channel(5);
         Self {
             adb_host,
             events_tx,
             events_rx,
+            timer_tx,
+            timer_rx: Some(timer_rx),
+            current_timer: None,
             devices: Vec::new(),
             offset: 0,
             cursor: 0,
@@ -84,7 +113,19 @@ impl App {
             .await
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
         self.devices = devices;
+        self.start_timer(DEVICE_REFRESH_INTERVAL).await?;
+        Ok(())
+    }
 
+    async fn start_timer(&mut self, interval: Duration) -> Result<()> {
+        self.timer_tx.send(TimerCmd::Start(interval)).await?;
+        self.current_timer = Some(interval);
+        Ok(())
+    }
+
+    async fn stop_timer(&mut self) -> Result<()> {
+        self.timer_tx.send(TimerCmd::Stop).await?;
+        self.current_timer = None;
         Ok(())
     }
 
@@ -113,6 +154,7 @@ impl App {
         self.cursor_backtrace.push(SavedCursor {
             offset: self.offset,
             cursor: self.cursor,
+            interval: self.current_timer,
         });
         self.offset = 0;
         self.cursor = 0;
@@ -166,6 +208,14 @@ pub struct Scan {
     findings: Vec<Suspicion>,
     apps: IndexMap<String, AppInfos>,
     expanded: BTreeSet<String>,
+    activity_spinner: usize,
+}
+
+impl Scan {
+    pub fn activity_tick(&mut self) {
+        self.activity_spinner += 1;
+        self.activity_spinner %= ACTIVITY.len();
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Default)]
@@ -276,6 +326,9 @@ pub async fn handle_key<B: Backend>(
                 let saved = app.cursor_backtrace.pop().unwrap_or_default();
                 app.offset = saved.offset;
                 app.cursor = saved.cursor;
+                if let Some(interval) = saved.interval {
+                    app.start_timer(interval).await?;
+                }
             }
         }
         Event::Key(KeyEvent {
@@ -339,6 +392,7 @@ pub async fn handle_key<B: Backend>(
                 app.scan = Some(Scan::default());
                 app.cancel_scan = Some(cancel_tx);
                 app.save_cursor();
+                app.start_timer(SCAN_ACTIVITY_TICK_INTERVAL).await?;
             }
         }
         Event::Key(KeyEvent {
@@ -396,9 +450,44 @@ pub async fn handle_key<B: Backend>(
     Ok(None)
 }
 
+async fn run_timer(mut rx: mpsc::Receiver<TimerCmd>, tx: mpsc::Sender<Message>) -> Result<()> {
+    let mut next_interval = None;
+    loop {
+        let interval = if let Some(interval) = next_interval.take() {
+            interval
+        } else {
+            match TimerCmd::recv(&mut rx).await? {
+                TimerCmd::Start(time) => time,
+                TimerCmd::Stop => continue,
+            }
+        };
+        let mut timer = time::interval(interval);
+        loop {
+            tokio::select! {
+                cmd = TimerCmd::recv(&mut rx) => {
+                    match cmd? {
+                        TimerCmd::Start(time) => {
+                            next_interval = Some(time);
+                            break;
+                        }
+                        TimerCmd::Stop => break,
+                    }
+                }
+                _ = timer.tick() => {
+                    tx.send(Message::Tick).await?;
+                }
+            }
+        }
+    }
+}
+
 pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
     let mut stream = EventStream::new();
 
+    let mut tasks = JoinSet::new();
+
+    let timer_rx = app.timer_rx.take().context("Timer already started")?;
+    tasks.spawn(run_timer(timer_rx, app.events_tx.clone()));
     loop {
         terminal.draw(|f| ui(f, app))?;
 
@@ -420,6 +509,7 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                 match event {
                     Message::ScanEnded => {
                         app.cancel_scan.take();
+                        app.stop_timer().await?;
                     }
                     Message::Suspicion(sus) => {
                         if let Some(scan) = &mut app.scan {
@@ -436,7 +526,17 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                             });
                         }
                     }
+                    Message::Tick => {
+                        if let Some(scan) = &mut app.scan {
+                            scan.activity_tick();
+                        } else {
+                            app.refresh_devices().await?;
+                        }
+                    }
                 }
+            }
+            res = tasks.join_next() => {
+                bail!("Task has crashed: {res:?}");
             }
         }
     }
@@ -474,12 +574,23 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
         )
         .split(f.size());
 
-    let text = Text::from(Spans::from(vec![
-        Span::raw(if app.cancel_scan.is_some() {
-            "scanning - "
-        } else {
-            "idle - "
-        }),
+    let mut text = Vec::new();
+
+    if app.cancel_scan.is_some() {
+        if let Some(scan) = &app.scan {
+            text.push(Span::styled(
+                ACTIVITY[scan.activity_spinner],
+                Style::default()
+                    .fg(Color::LightGreen)
+                    .add_modifier(Modifier::BOLD),
+            ));
+        }
+        text.push(Span::raw(" scanning - "));
+    } else {
+        text.push(Span::raw("idle - "));
+    };
+
+    text.extend([
         Span::raw("Press "),
         Span::styled("ESC", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to exit - "),
@@ -488,7 +599,8 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
             " v",
             env!("CARGO_PKG_VERSION")
         )),
-    ]));
+    ]);
+    let text = Text::from(Spans::from(text));
     let help_message = Paragraph::new(text)
         .style(white)
         .alignment(Alignment::Right);
