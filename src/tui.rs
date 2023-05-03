@@ -518,6 +518,11 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     Message::Suspicion(sus) => {
                         if let Some(scan) = &mut app.scan {
                             scan.findings.push(sus);
+                            scan.findings.sort_by(|a, b| {
+                                a.level.cmp(&b.level)
+                                    .reverse()
+                                    .then(a.description.cmp(&b.description))
+                            });
                         }
                     }
                     Message::App { name, sus } => {

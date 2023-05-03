@@ -38,7 +38,7 @@ impl Suspicion {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
 pub enum SuspicionLevel {
     Low,
     Medium,
