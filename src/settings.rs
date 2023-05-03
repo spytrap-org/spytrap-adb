@@ -30,22 +30,21 @@ impl Settings {
             match key.as_str() {
                 "package_verifier_enable" => {
                     if value != "1" {
-                        warn!("Scanning apps with Google Play Protect has been disabled");
+                        warn!("Google Play Protect has been turned off programmatically");
                         sus.push(Suspicion {
                             level: SuspicionLevel::High,
-                            description: "Scanning apps with Google Play Protect has been disabled"
+                            description: "Google Play Protect has been turned off programmatically"
                                 .to_string(),
                         });
                     }
                 }
                 "package_verifier_user_consent" => {
                     if value != "1" {
-                        warn!("Mandatory user consent for app installations has been disabled");
+                        warn!("Scanning apps with Google Play Protect has been disabled");
                         sus.push(Suspicion {
-                            level: SuspicionLevel::Medium,
-                            description:
-                                "Mandatory user consent for app installations has been disabled"
-                                    .to_string(),
+                            level: SuspicionLevel::High,
+                            description: "Scanning apps with Google Play Protect has been disabled"
+                                .to_string(),
                         });
                     }
                 }
