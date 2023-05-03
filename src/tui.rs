@@ -233,6 +233,7 @@ impl AppInfos {
             SuspicionLevel::High => self.high.push(item),
             SuspicionLevel::Medium => self.medium.push(item),
             SuspicionLevel::Low => self.low.push(item),
+            SuspicionLevel::Good => (),
         }
     }
 

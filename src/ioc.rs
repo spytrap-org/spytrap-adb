@@ -29,6 +29,7 @@ impl Suspicion {
                     SuspicionLevel::High => "high",
                     SuspicionLevel::Medium => "medium",
                     SuspicionLevel::Low => "low",
+                    SuspicionLevel::Good => "good",
                 },
                 self.level.terminal_color(),
             ),
@@ -40,6 +41,7 @@ impl Suspicion {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
 pub enum SuspicionLevel {
+    Good,
     Low,
     Medium,
     High,
@@ -53,6 +55,9 @@ impl SuspicionLevel {
                 .fg(Color::Yellow)
                 .add_modifier(Modifier::BOLD),
             SuspicionLevel::Low => Style::default().add_modifier(Modifier::BOLD),
+            SuspicionLevel::Good => Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD),
         }
     }
 }

@@ -39,7 +39,14 @@ impl Settings {
                     }
                 }
                 "package_verifier_user_consent" => {
-                    if value != "1" {
+                    if value == "1" {
+                        info!("Scanning apps with Google Play Protect has been enabled");
+                        sus.push(Suspicion {
+                            level: SuspicionLevel::Good,
+                            description: "Scanning apps with Google Play Protect has been enabled"
+                                .to_string(),
+                        });
+                    } else {
                         warn!("Scanning apps with Google Play Protect has been disabled");
                         sus.push(Suspicion {
                             level: SuspicionLevel::High,
