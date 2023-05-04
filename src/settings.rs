@@ -30,27 +30,26 @@ impl Settings {
             match key.as_str() {
                 "package_verifier_enable" => {
                     if value != "1" {
-                        warn!("Google Play Protect has been turned off programmatically");
+                        warn!("Google Play Protect is turned off");
                         sus.push(Suspicion {
                             level: SuspicionLevel::High,
-                            description: "Google Play Protect has been turned off programmatically"
-                                .to_string(),
+                            description: "Google Play Protect is turned off".to_string(),
                         });
                     }
                 }
                 "package_verifier_user_consent" => {
                     if value == "1" {
-                        info!("Scanning apps with Google Play Protect has been enabled");
+                        info!("Scanning apps with Google Play Protect is enabled");
                         sus.push(Suspicion {
                             level: SuspicionLevel::Good,
-                            description: "Scanning apps with Google Play Protect has been enabled"
+                            description: "Scanning apps with Google Play Protect is enabled"
                                 .to_string(),
                         });
                     } else {
-                        warn!("Scanning apps with Google Play Protect has been disabled");
+                        warn!("Scanning apps with Google Play Protect is disabled");
                         sus.push(Suspicion {
                             level: SuspicionLevel::High,
-                            description: "Scanning apps with Google Play Protect has been disabled"
+                            description: "Scanning apps with Google Play Protect is disabled"
                                 .to_string(),
                         });
                     }
