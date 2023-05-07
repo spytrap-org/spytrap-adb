@@ -31,7 +31,7 @@ jobs:
         restore-keys: ${{ runner.os }}-cargo-release-
 
     - name: Build
-      run: cargo build --release --verbose
+      run: cargo build --release --verbose --target=x86_64-unknown-linux-musl
 
     - name: Upload binary
       uses: actions/upload-artifact@v3
