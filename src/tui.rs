@@ -150,7 +150,7 @@ impl App {
         }
     }
 
-    pub fn save_cursor(&mut self) {
+    pub async fn save_cursor(&mut self) -> Result<()> {
         self.cursor_backtrace.push(SavedCursor {
             offset: self.offset,
             cursor: self.cursor,
@@ -158,6 +158,8 @@ impl App {
         });
         self.offset = 0;
         self.cursor = 0;
+        self.stop_timer().await?;
+        Ok(())
     }
 
     pub fn key_up(&mut self) {
@@ -231,6 +233,7 @@ impl AppInfos {
             SuspicionLevel::High => self.high.push(item),
             SuspicionLevel::Medium => self.medium.push(item),
             SuspicionLevel::Low => self.low.push(item),
+            SuspicionLevel::Good => (),
         }
     }
 
@@ -328,6 +331,8 @@ pub async fn handle_key<B: Backend>(
                 app.cursor = saved.cursor;
                 if let Some(interval) = saved.interval {
                     app.start_timer(interval).await?;
+                } else {
+                    app.stop_timer().await?;
                 }
             }
         }
@@ -391,7 +396,7 @@ pub async fn handle_key<B: Backend>(
                 });
                 app.scan = Some(Scan::default());
                 app.cancel_scan = Some(cancel_tx);
-                app.save_cursor();
+                app.save_cursor().await?;
                 app.start_timer(SCAN_ACTIVITY_TICK_INTERVAL).await?;
             }
         }
@@ -514,6 +519,11 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     Message::Suspicion(sus) => {
                         if let Some(scan) = &mut app.scan {
                             scan.findings.push(sus);
+                            scan.findings.sort_by(|a, b| {
+                                a.level.cmp(&b.level)
+                                    .reverse()
+                                    .then(a.description.cmp(&b.description))
+                            });
                         }
                     }
                     Message::App { name, sus } => {
