@@ -1,5 +1,6 @@
 #!/bin/sh
 CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+mkdir -p -- "$CARGO_HOME"
 unshare -Umr sh -xe <<EOF
 mount -t tmpfs tmpfs /mnt
 mkdir /mnt/src /mnt/cargo
