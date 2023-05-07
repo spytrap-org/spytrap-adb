@@ -45,7 +45,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: bin
-        path: target/release/spytrap-adb
+        path: target/x86_64-unknown-linux-musl/release/spytrap-adb
 
   integration-test:
     needs: build
