@@ -39,7 +39,7 @@ jobs:
       run: rustup target add x86_64-unknown-linux-musl
 
     - name: Build
-      run: cargo build --release --verbose --target=x86_64-unknown-linux-musl
+      run: make
 
     - name: Upload binary
       uses: actions/upload-artifact@v3
