@@ -9,13 +9,45 @@ use spytrap_adb::scan;
 use spytrap_adb::tui;
 use spytrap_adb::utils;
 use std::borrow::Cow;
-use std::process::Command;
+use tokio::process::Command;
 
-async fn run(args: Args) -> Result<()> {
+async fn ensure_adb_running(choice: &args::AdbServerChoice) -> Result<()> {
+    if *choice != args::AdbServerChoice::Never {
+        debug!("Making sure adb server is running...");
+        let status = Command::new("adb")
+            .arg("start-server")
+            .status()
+            .await
+            .context("Failed to start adb binary")?;
+        if !status.success() {
+            bail!("Failed to ensure adb server is running: exited with status={status:?}");
+        }
+    }
+
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let args = Args::parse();
+
+    if args.subcommand.is_some() {
+        let logging = match args.verbose {
+            0 => "info",
+            1 => "spytrap_adb=debug,info",
+            2 => "spytrap_adb=trace,debug",
+            _ => "trace",
+        };
+
+        env_logger::init_from_env(Env::default().default_filter_or(logging));
+    }
+
     let adb_host = Host::default();
 
     match args.subcommand {
         Some(SubCommand::Scan(scan)) => {
+            ensure_adb_running(&args.start_adb_server).await?;
+
             let rules_path = if let Some(path) = &scan.rules {
                 Cow::Borrowed(path)
             } else {
@@ -59,6 +91,8 @@ async fn run(args: Args) -> Result<()> {
             .await?;
         }
         Some(SubCommand::List(_)) => {
+            ensure_adb_running(&args.start_adb_server).await?;
+
             debug!("Listing devices from adb...");
             let devices = adb_host
                 .devices::<Vec<_>>()
@@ -83,6 +117,8 @@ async fn run(args: Args) -> Result<()> {
                 .context("Failed to download stalkerware-indicators ioc.yaml")?;
         }
         None => {
+            ensure_adb_running(&args.start_adb_server).await?;
+
             let mut app = tui::App::new(adb_host);
             app.init().await?;
             let mut terminal = tui::setup()?;
@@ -93,33 +129,4 @@ async fn run(args: Args) -> Result<()> {
     }
 
     Ok(())
-}
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    let args = Args::parse();
-
-    if args.subcommand.is_some() {
-        let logging = match args.verbose {
-            0 => "info",
-            1 => "spytrap_adb=debug,info",
-            2 => "spytrap_adb=trace,debug",
-            _ => "trace",
-        };
-
-        env_logger::init_from_env(Env::default().default_filter_or(logging));
-    }
-
-    if args.start_adb_server != args::AdbServerChoice::Never {
-        debug!("Making sure adb server is running...");
-        let status = Command::new("adb")
-            .arg("start-server")
-            .status()
-            .context("Failed to start adb binary")?;
-        if !status.success() {
-            bail!("Failed to ensure adb server is running: exited with status={status:?}");
-        }
-    }
-
-    run(args).await
 }
