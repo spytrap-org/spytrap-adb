@@ -67,7 +67,12 @@ pub struct Completions {
 
 impl Completions {
     pub fn generate(&self) -> Result<()> {
-        clap_complete::generate(self.shell, &mut Args::command(), "spytrap-adb", &mut stdout());
+        clap_complete::generate(
+            self.shell,
+            &mut Args::command(),
+            "spytrap-adb",
+            &mut stdout(),
+        );
         Ok(())
     }
 }
