@@ -1,7 +1,11 @@
-use clap::{ArgAction, Parser};
+use crate::errors::*;
+use clap::{ArgAction, CommandFactory, Parser};
+use clap_complete::Shell;
+use std::io::stdout;
 use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
+#[command(version)]
 pub struct Args {
     /// More verbose logs
     #[arg(short, long, global = true, action(ArgAction::Count))]
@@ -31,6 +35,7 @@ pub enum SubCommand {
     Scan(Scan),
     List(List),
     DownloadIoc(DownloadIoc),
+    Completions(Completions),
 }
 
 /// Run a scan on a given device
@@ -53,3 +58,16 @@ pub struct List {}
 /// Download the latest version of stalkerware-indicators ioc.yaml
 #[derive(Debug, Parser)]
 pub struct DownloadIoc {}
+
+/// Generate shell completions
+#[derive(Debug, Parser)]
+pub struct Completions {
+    pub shell: Shell,
+}
+
+impl Completions {
+    pub fn generate(&self) -> Result<()> {
+        clap_complete::generate(self.shell, &mut Args::command(), "spytrap-adb", &mut stdout());
+        Ok(())
+    }
+}

@@ -116,6 +116,9 @@ async fn main() -> Result<()> {
                 .await
                 .context("Failed to download stalkerware-indicators ioc.yaml")?;
         }
+        Some(SubCommand::Completions(completions)) => {
+            completions.generate()?;
+        }
         None => {
             ensure_adb_running(&args.start_adb_server).await?;
 
