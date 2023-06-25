@@ -55,8 +55,9 @@ async fn main() -> Result<()> {
                 Cow::Owned(path)
             };
 
-            let (rules, sha256) =
-                rules::load_map_from_file(rules_path.as_ref()).context("Failed to load rules")?;
+            let (rules, sha256) = rules::load_map_from_file(rules_path.as_ref())
+                .await
+                .context("Failed to load rules")?;
             info!(
                 "Loaded {} rules from {rules_path:?} (sha256={sha256})",
                 rules.len()
@@ -122,7 +123,7 @@ async fn main() -> Result<()> {
         None => {
             ensure_adb_running(&args.start_adb_server).await?;
 
-            let mut app = tui::App::new(adb_host);
+            let mut app = tui::App::new(adb_host).await?;
             app.init().await?;
             let mut terminal = tui::setup()?;
             let ret = tui::run(&mut terminal, &mut app).await;

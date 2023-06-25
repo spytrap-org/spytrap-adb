@@ -1,8 +1,10 @@
 use crate::errors::*;
+use crate::rules;
 use crate::utils;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use tokio::fs;
@@ -180,6 +182,24 @@ impl Repository {
             .context("Failed to write update state file")?;
 
         Ok(())
+    }
+
+    pub async fn read_ioc_file(&self) -> Result<HashMap<String, String>> {
+        let update_state = self
+            .update_state
+            .as_ref()
+            .context("No IOC file is present")?;
+        let path = Self::ioc_file_path()?;
+        let (rules, sha256) = rules::load_map_from_file(path).await?;
+        if sha256 == update_state.sha256 {
+            Ok(rules)
+        } else {
+            bail!(
+                "Mismatch of sha256 checksum (expected {:?}, got {:?})",
+                update_state.sha256,
+                sha256
+            );
+        }
     }
 
     async fn http_get(&self, url: &str) -> Result<reqwest::Response> {

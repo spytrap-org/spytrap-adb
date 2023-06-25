@@ -1,8 +1,8 @@
 use crate::errors::*;
 use crate::ioc::{Repository, Suspicion, SuspicionLevel};
-use crate::rules;
 use crate::scan;
 use crate::utils;
+use chrono::NaiveDateTime;
 use crossterm::event::EventStream;
 use crossterm::event::{KeyEvent, KeyModifiers};
 use crossterm::{
@@ -22,6 +22,7 @@ use ratatui::{
 };
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
+use std::collections::HashMap;
 use std::io;
 use std::io::Stdout;
 use std::iter::Chain;
@@ -72,6 +73,7 @@ pub struct SavedCursor {
 
 pub struct App {
     adb_host: Host,
+    repository: Repository,
     events_tx: mpsc::Sender<Message>,
     events_rx: mpsc::Receiver<Message>,
     timer_tx: mpsc::Sender<TimerCmd>,
@@ -87,11 +89,15 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(adb_host: Host) -> Self {
+    pub async fn new(adb_host: Host) -> Result<Self> {
+        let repository = Repository::init()
+            .await
+            .context("Failed top open IOC repository")?;
         let (events_tx, events_rx) = mpsc::channel(5);
         let (timer_tx, timer_rx) = mpsc::channel(5);
-        Self {
+        Ok(Self {
             adb_host,
+            repository,
             events_tx,
             events_rx,
             timer_tx,
@@ -103,7 +109,7 @@ impl App {
             cursor_backtrace: vec![],
             scan: None,
             cancel_scan: None,
-        }
+        })
     }
 
     pub async fn init(&mut self) -> Result<()> {
@@ -278,6 +284,7 @@ pub enum Action {
 pub async fn run_scan(
     adb_host: Host,
     device: DeviceInfo,
+    rules: HashMap<String, String>,
     events_tx: mpsc::Sender<Message>,
 ) -> Result<()> {
     let device = adb_host
@@ -286,8 +293,6 @@ pub async fn run_scan(
         .await
         .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
 
-    let repo = Repository::ioc_file_path()?;
-    let (rules, _sha256) = rules::load_map_from_file(repo).context("Failed to load rules")?;
     scan::run(
         &device,
         &rules,
@@ -379,6 +384,12 @@ pub async fn handle_key<B: Backend>(
             } else if let Some(device) = app.devices.get(app.cursor) {
                 let adb_host = app.adb_host.clone();
                 let device = device.clone();
+                // TODO: this shouldn't use await in the keyboard handler
+                let rules = app
+                    .repository
+                    .read_ioc_file()
+                    .await
+                    .context("Failed to load rules")?;
                 let events_tx = app.events_tx.clone();
 
                 let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
@@ -388,7 +399,7 @@ pub async fn handle_key<B: Backend>(
                             debug!("Scan has been canceled");
                             events_tx.send(Message::ScanEnded).await.ok();
                         }
-                        ret = run_scan(adb_host, device, events_tx.clone()) => {
+                        ret = run_scan(adb_host, device, rules, events_tx.clone()) => {
                             debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
                             events_tx.send(Message::ScanEnded).await.ok();
                         }
@@ -610,6 +621,19 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
             env!("CARGO_PKG_VERSION")
         )),
     ]);
+
+    if let Some(update_state) = &app.repository.update_state {
+        let dt = NaiveDateTime::from_timestamp_opt(update_state.last_updated, 0).unwrap();
+        let last_updated = dt.format("%Y-%m-%d").to_string();
+        text.extend([
+            Span::raw(" (db updated: "),
+            Span::raw(last_updated),
+            Span::raw(", git: "),
+            Span::raw(&update_state.git_commit[..12]),
+            Span::raw(")"),
+        ]);
+    }
+
     let text = Text::from(Line::from(text));
     let help_message = Paragraph::new(text)
         .style(white)

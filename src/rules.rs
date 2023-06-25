@@ -1,8 +1,8 @@
 use crate::errors::*;
 use crate::utils;
 use std::collections::HashMap;
-use std::fs;
 use std::path::Path;
+use tokio::fs;
 
 pub fn load_map_from_buf(buf: &[u8]) -> Result<(HashMap<String, String>, String)> {
     let sha256 = utils::sha256(buf);
@@ -17,10 +17,13 @@ pub fn load_map_from_buf(buf: &[u8]) -> Result<(HashMap<String, String>, String)
     Ok((map, sha256))
 }
 
-pub fn load_map_from_file<P: AsRef<Path>>(path: P) -> Result<(HashMap<String, String>, String)> {
+pub async fn load_map_from_file<P: AsRef<Path>>(
+    path: P,
+) -> Result<(HashMap<String, String>, String)> {
     let path = path.as_ref();
-    let buf =
-        fs::read(path).with_context(|| anyhow!("Failed to read appid rules file: {:?}", path))?;
+    let buf = fs::read(path)
+        .await
+        .with_context(|| anyhow!("Failed to read appid rules file: {:?}", path))?;
     load_map_from_buf(&buf)
 }
 
