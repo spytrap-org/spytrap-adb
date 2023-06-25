@@ -16,7 +16,7 @@ use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
-    text::{Span, Spans, Text},
+    text::{Line, Span, Text},
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame, Terminal,
 };
@@ -554,7 +554,7 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
     Ok(())
 }
 
-fn cursor<'a, T: IntoIterator<Item = Span<'a>>>(msg: T, selected: bool) -> (Spans<'a>, Style) {
+fn cursor<'a, T: IntoIterator<Item = Span<'a>>>(msg: T, selected: bool) -> (Line<'a>, Style) {
     let mut style = Style::default();
     if selected {
         style = style.bg(DARK_GREY);
@@ -566,7 +566,7 @@ fn cursor<'a, T: IntoIterator<Item = Span<'a>>>(msg: T, selected: bool) -> (Span
     )];
     row.extend(msg);
 
-    (Spans::from(row), style)
+    (Line::from(row), style)
 }
 
 pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
@@ -610,7 +610,7 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
             env!("CARGO_PKG_VERSION")
         )),
     ]);
-    let text = Text::from(Spans::from(text));
+    let text = Text::from(Line::from(text));
     let help_message = Paragraph::new(text)
         .style(white)
         .alignment(Alignment::Right);
