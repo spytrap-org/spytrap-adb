@@ -122,7 +122,8 @@ async fn main() -> Result<()> {
         None => {
             ensure_adb_running(&args.start_adb_server).await?;
 
-            let mut app = tui::App::new(adb_host);
+            let repo = ioc::Repository::init().await?;
+            let mut app = tui::App::new(adb_host, repo);
             app.init().await?;
             let mut terminal = tui::setup()?;
             let ret = tui::run(&mut terminal, &mut app).await;

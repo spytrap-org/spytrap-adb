@@ -1,3 +1,4 @@
+use chrono::{offset::Utc, DateTime, Local, TimeZone};
 use sha2::{Digest, Sha256};
 
 pub fn human_option_str(x: Option<&String>) -> &str {
@@ -11,6 +12,12 @@ pub fn human_option_str(x: Option<&String>) -> &str {
 pub fn now() -> i64 {
     let now = chrono::offset::Utc::now();
     now.timestamp()
+}
+
+pub fn format_datetime(timestamp: i64) -> String {
+    let utc = Utc.timestamp_opt(timestamp, 0).unwrap();
+    let dt = DateTime::<Local>::from(utc);
+    dt.format("%Y-%m-%d %H:%M").to_string()
 }
 
 pub fn sha256(buf: &[u8]) -> String {

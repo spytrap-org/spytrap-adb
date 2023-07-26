@@ -36,18 +36,22 @@ const DARK_GREY: Color = Color::Rgb(0x3b, 0x3b, 0x3b);
 /// Number of items to navigate with page up/down keys
 const PAGE_MODIFIER: usize = 10;
 /// The number of lines used by the spytrap-adb UI around the scroll view
-const SCROLL_CHROME_HEIGHT: usize = 5;
+const SCROLL_CHROME_HEIGHT: usize = 6;
 
 const DEVICE_REFRESH_INTERVAL: Duration = Duration::from_secs(1);
-const SCAN_ACTIVITY_TICK_INTERVAL: Duration = Duration::from_millis(100);
+const ACTIVITY_TICK_INTERVAL: Duration = Duration::from_millis(100);
 const ACTIVITY: &[&str] = &[".", "o", "O", "°", " ", " ", "°", "O", "o", ".", " ", " "];
 
 #[derive(Debug)]
 pub enum Message {
-    ScanEnded,
     Suspicion(Suspicion),
-    Tick,
     App { name: String, sus: Suspicion },
+    StartDownload,
+    ScanTick,
+    ScanEnded,
+    DownloadTick,
+    DownloadEnded,
+    DeviceRefreshTick,
 }
 
 #[derive(Debug)]
@@ -72,6 +76,7 @@ pub struct SavedCursor {
 
 pub struct App {
     adb_host: Host,
+    repository: Repository,
     events_tx: mpsc::Sender<Message>,
     events_rx: mpsc::Receiver<Message>,
     timer_tx: mpsc::Sender<TimerCmd>,
@@ -82,16 +87,21 @@ pub struct App {
     cursor: usize,
     /// the previous cursor positions before switching into a different scroll-view
     cursor_backtrace: Vec<SavedCursor>,
+
     scan: Option<Scan>,
     cancel_scan: Option<mpsc::Sender<()>>,
+
+    download: Option<Download>,
+    cancel_download: Option<mpsc::Sender<()>>,
 }
 
 impl App {
-    pub fn new(adb_host: Host) -> Self {
+    pub fn new(adb_host: Host, repository: Repository) -> Self {
         let (events_tx, events_rx) = mpsc::channel(5);
         let (timer_tx, timer_rx) = mpsc::channel(5);
         Self {
             adb_host,
+            repository,
             events_tx,
             events_rx,
             timer_tx,
@@ -101,8 +111,12 @@ impl App {
             offset: 0,
             cursor: 0,
             cursor_backtrace: vec![],
+
             scan: None,
             cancel_scan: None,
+
+            download: None,
+            cancel_download: None,
         }
     }
 
@@ -114,6 +128,11 @@ impl App {
             .map_err(|e| anyhow!("Failed to list devices from adb: {}", e))?;
         self.devices = devices;
         self.start_timer(DEVICE_REFRESH_INTERVAL).await?;
+
+        if self.repository.update_state.is_none() {
+            self.events_tx.send(Message::StartDownload).await.ok();
+        }
+
         Ok(())
     }
 
@@ -206,18 +225,37 @@ impl App {
 }
 
 #[derive(Debug, Default)]
+pub struct Spinner {
+    idx: usize,
+}
+
+impl Spinner {
+    pub fn activity_tick(&mut self) {
+        self.idx += 1;
+        self.idx %= ACTIVITY.len();
+    }
+
+    pub fn render(&self) -> Span {
+        Span::styled(
+            ACTIVITY[self.idx],
+            Style::default()
+                .fg(Color::LightGreen)
+                .add_modifier(Modifier::BOLD),
+        )
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct Download {
+    spinner: Spinner,
+}
+
+#[derive(Debug, Default)]
 pub struct Scan {
     findings: Vec<Suspicion>,
     apps: IndexMap<String, AppInfos>,
     expanded: BTreeSet<String>,
-    activity_spinner: usize,
-}
-
-impl Scan {
-    pub fn activity_tick(&mut self) {
-        self.activity_spinner += 1;
-        self.activity_spinner %= ACTIVITY.len();
-    }
+    spinner: Spinner,
 }
 
 #[derive(Debug, PartialEq, Eq, Default)]
@@ -299,6 +337,14 @@ pub async fn run_scan(
     Ok(())
 }
 
+pub async fn run_download() -> Result<()> {
+    let mut repo = Repository::init().await?;
+    repo.download_ioc_file()
+        .await
+        .context("Failed to download stalkerware-indicators ioc.yaml")?;
+    Ok(())
+}
+
 pub async fn handle_key<B: Backend>(
     terminal: &Terminal<B>,
     app: &mut App,
@@ -320,7 +366,9 @@ pub async fn handle_key<B: Backend>(
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            if let Some(tx) = app.cancel_scan.take() {
+            if let Some(tx) = app.cancel_download.take() {
+                tx.send(()).await.ok();
+            } else if let Some(tx) = app.cancel_scan.take() {
                 tx.send(()).await.ok();
             } else if app.scan.take().is_none() {
                 println!("Exiting...");
@@ -383,21 +431,31 @@ pub async fn handle_key<B: Backend>(
 
                 let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
                 tokio::spawn(async move {
-                    tokio::select! {
-                        _ = cancel_rx.recv() => {
-                            debug!("Scan has been canceled");
-                            events_tx.send(Message::ScanEnded).await.ok();
-                        }
-                        ret = run_scan(adb_host, device, events_tx.clone()) => {
-                            debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
-                            events_tx.send(Message::ScanEnded).await.ok();
+                    let mut interval = time::interval(ACTIVITY_TICK_INTERVAL);
+                    let scan = run_scan(adb_host, device, events_tx.clone());
+                    tokio::pin!(scan);
+
+                    loop {
+                        tokio::select! {
+                            _ = cancel_rx.recv() => {
+                                debug!("Scan has been canceled");
+                                events_tx.send(Message::ScanEnded).await.ok();
+                                break;
+                            }
+                            ret = &mut scan => {
+                                debug!("Scan has completed: {:?}", ret); // TODO print errors in UI
+                                events_tx.send(Message::ScanEnded).await.ok();
+                                break;
+                            }
+                            _ = interval.tick() => {
+                                events_tx.send(Message::ScanTick).await.ok();
+                            }
                         }
                     }
                 });
                 app.scan = Some(Scan::default());
                 app.cancel_scan = Some(cancel_tx);
                 app.save_cursor().await?;
-                app.start_timer(SCAN_ACTIVITY_TICK_INTERVAL).await?;
             }
         }
         Event::Key(KeyEvent {
@@ -437,8 +495,7 @@ pub async fn handle_key<B: Backend>(
             modifiers: KeyModifiers::CONTROL,
             ..
         }) => {
-            // TODO: check if we're in device list or report view
-            app.refresh_devices().await?;
+            app.events_tx.send(Message::StartDownload).await.ok();
         }
         Event::Key(KeyEvent {
             code: KeyCode::Char('l'),
@@ -479,7 +536,7 @@ async fn run_timer(mut rx: mpsc::Receiver<TimerCmd>, tx: mpsc::Sender<Message>) 
                     }
                 }
                 _ = timer.tick() => {
-                    tx.send(Message::Tick).await?;
+                    tx.send(Message::DeviceRefreshTick).await?;
                 }
             }
         }
@@ -493,6 +550,7 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
 
     let timer_rx = app.timer_rx.take().context("Timer already started")?;
     tasks.spawn(run_timer(timer_rx, app.events_tx.clone()));
+
     loop {
         terminal.draw(|f| ui(f, app))?;
 
@@ -512,10 +570,6 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                 let Some(event) = event else { break };
                 debug!("Received message from channel: event={event:?}");
                 match event {
-                    Message::ScanEnded => {
-                        app.cancel_scan.take();
-                        app.stop_timer().await?;
-                    }
                     Message::Suspicion(sus) => {
                         if let Some(scan) = &mut app.scan {
                             scan.findings.push(sus);
@@ -536,12 +590,56 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                             });
                         }
                     }
-                    Message::Tick => {
+                    Message::StartDownload => {
+                        let events_tx = app.events_tx.clone();
+
+                        let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
+                        tokio::spawn(async move {
+                            let mut interval = time::interval(ACTIVITY_TICK_INTERVAL);
+                            let download = run_download();
+                            tokio::pin!(download);
+
+                            loop {
+                                tokio::select! {
+                                    _ = cancel_rx.recv() => {
+                                        debug!("Download has been canceled");
+                                        events_tx.send(Message::DownloadEnded).await.ok();
+                                        break;
+                                    }
+                                    ret = &mut download => {
+                                        debug!("Download has completed: {:?}", ret); // TODO print errors in UI
+                                        events_tx.send(Message::DownloadEnded).await.ok();
+                                        break;
+                                    }
+                                    _ = interval.tick() => {
+                                        events_tx.send(Message::DownloadTick).await.ok();
+                                    }
+                                }
+                            }
+                        });
+                        app.download = Some(Download::default());
+                        app.cancel_download = Some(cancel_tx);
+                    }
+                    Message::ScanTick => {
                         if let Some(scan) = &mut app.scan {
-                            scan.activity_tick();
-                        } else {
-                            app.refresh_devices().await?;
+                            scan.spinner.activity_tick();
                         }
+                    }
+                    Message::ScanEnded => {
+                        app.cancel_scan.take();
+                    }
+                    Message::DownloadTick => {
+                        if let Some(download) = &mut app.download {
+                            download.spinner.activity_tick();
+                        }
+                    }
+                    Message::DownloadEnded => {
+                        app.cancel_download.take();
+                        app.download.take();
+                        app.repository = Repository::init().await?;
+                    }
+                    Message::DeviceRefreshTick => {
+                        app.refresh_devices().await?;
                     }
                 }
             }
@@ -579,26 +677,39 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
                 Constraint::Length(1),
                 Constraint::Length(1),
                 Constraint::Min(1),
+                Constraint::Length(1),
             ]
             .as_ref(),
         )
         .split(f.size());
 
+    f.render_widget(render_help_widget(app), chunks[0]);
+    f.render_widget(Block::default().style(white), chunks[1]);
+    f.render_widget(render_app_widget(app), chunks[2]);
+    f.render_widget(render_statusline_widget(app), chunks[3]);
+}
+
+fn render_help_widget(app: &App) -> Paragraph {
+    let white = Style::default().fg(Color::White).bg(Color::Black);
     let mut text = Vec::new();
 
     if app.cancel_scan.is_some() {
         if let Some(scan) = &app.scan {
-            text.push(Span::styled(
-                ACTIVITY[scan.activity_spinner],
-                Style::default()
-                    .fg(Color::LightGreen)
-                    .add_modifier(Modifier::BOLD),
-            ));
+            text.push(scan.spinner.render());
         }
         text.push(Span::raw(" scanning - "));
-    } else {
+    }
+
+    if app.cancel_download.is_some() {
+        if let Some(download) = &app.download {
+            text.push(download.spinner.render());
+        }
+        text.push(Span::raw(" downloading - "));
+    }
+
+    if text.is_empty() {
         text.push(Span::raw("idle - "));
-    };
+    }
 
     text.extend([
         Span::raw("Press "),
@@ -611,14 +722,15 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
         )),
     ]);
     let text = Text::from(Line::from(text));
-    let help_message = Paragraph::new(text)
+    Paragraph::new(text)
         .style(white)
-        .alignment(Alignment::Right);
-    f.render_widget(help_message, chunks[0]);
+        .alignment(Alignment::Right)
+}
 
-    f.render_widget(Block::default().style(white), chunks[1]);
+fn render_app_widget(app: &App) -> List {
+    let white = Style::default().fg(Color::White).bg(Color::Black);
 
-    let widget = if let Some(scan) = &app.scan {
+    if let Some(scan) = &app.scan {
         let mut list = Vec::new();
         let mut i = 0;
 
@@ -730,8 +842,25 @@ pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
                 .border_style(Style::default().fg(Color::Green))
                 .title(title),
         )
-    };
-    f.render_widget(widget, chunks[2]);
+    }
+}
+
+fn render_statusline_widget(app: &App) -> Paragraph {
+    let white = Style::default().fg(Color::White).bg(Color::Black);
+    let yellow = Style::default().fg(Color::Yellow).bg(Color::Black);
+    let mut text = Vec::new();
+
+    if let Some(update_state) = &app.repository.update_state {
+        text.push(Span::raw("git:"));
+        text.push(Span::styled(&update_state.git_commit, yellow));
+        text.push(Span::raw(" updated:"));
+        text.push(Span::raw(utils::format_datetime(update_state.last_updated)));
+    }
+
+    let text = Text::from(Line::from(text));
+    Paragraph::new(text)
+        .style(white)
+        .alignment(Alignment::Right)
 }
 
 pub fn setup() -> Result<Terminal<CrosstermBackend<Stdout>>> {
