@@ -22,6 +22,7 @@ use ratatui::{
 };
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
+use std::convert::Infallible;
 use std::io;
 use std::io::Stdout;
 use std::iter::Chain;
@@ -87,12 +88,8 @@ pub struct App {
     cursor: usize,
     /// the previous cursor positions before switching into a different scroll-view
     cursor_backtrace: Vec<SavedCursor>,
-
     scan: Option<Scan>,
-    cancel_scan: Option<mpsc::Sender<()>>,
-
     download: Option<Download>,
-    cancel_download: Option<mpsc::Sender<()>>,
 }
 
 impl App {
@@ -111,12 +108,8 @@ impl App {
             offset: 0,
             cursor: 0,
             cursor_backtrace: vec![],
-
             scan: None,
-            cancel_scan: None,
-
             download: None,
-            cancel_download: None,
         }
     }
 
@@ -248,6 +241,7 @@ impl Spinner {
 #[derive(Debug, Default)]
 pub struct Download {
     spinner: Spinner,
+    cancel: Option<mpsc::Sender<Infallible>>,
 }
 
 #[derive(Debug, Default)]
@@ -256,6 +250,7 @@ pub struct Scan {
     apps: IndexMap<String, AppInfos>,
     expanded: BTreeSet<String>,
     spinner: Spinner,
+    cancel: Option<mpsc::Sender<Infallible>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Default)]
@@ -366,10 +361,10 @@ pub async fn handle_key<B: Backend>(
             modifiers: KeyModifiers::NONE,
             ..
         }) => {
-            if let Some(tx) = app.cancel_download.take() {
-                tx.send(()).await.ok();
-            } else if let Some(tx) = app.cancel_scan.take() {
-                tx.send(()).await.ok();
+            if let Some(tx) = app.download.take() {
+                drop(tx);
+            } else if let Some(tx) = app.scan.as_mut().and_then(|s| s.cancel.take()) {
+                drop(tx);
             } else if app.scan.take().is_none() {
                 println!("Exiting...");
                 return Ok(Some(Action::Shutdown));
@@ -453,8 +448,10 @@ pub async fn handle_key<B: Backend>(
                         }
                     }
                 });
-                app.scan = Some(Scan::default());
-                app.cancel_scan = Some(cancel_tx);
+                app.scan = Some(Scan {
+                    cancel: Some(cancel_tx),
+                    ..Default::default()
+                });
                 app.save_cursor().await?;
             }
         }
@@ -617,8 +614,10 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                                 }
                             }
                         });
-                        app.download = Some(Download::default());
-                        app.cancel_download = Some(cancel_tx);
+                        app.download = Some(Download {
+                            cancel: Some(cancel_tx),
+                            ..Default::default()
+                        });
                     }
                     Message::ScanTick => {
                         if let Some(scan) = &mut app.scan {
@@ -626,7 +625,9 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                         }
                     }
                     Message::ScanEnded => {
-                        app.cancel_scan.take();
+                        if let Some(scan) = &mut app.scan {
+                            scan.cancel.take();
+                        }
                     }
                     Message::DownloadTick => {
                         if let Some(download) = &mut app.download {
@@ -634,7 +635,6 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                         }
                     }
                     Message::DownloadEnded => {
-                        app.cancel_download.take();
                         app.download.take();
                         app.repository = Repository::init().await?;
                     }
@@ -693,18 +693,18 @@ fn render_help_widget(app: &App) -> Paragraph {
     let white = Style::default().fg(Color::White).bg(Color::Black);
     let mut text = Vec::new();
 
-    if app.cancel_scan.is_some() {
-        if let Some(scan) = &app.scan {
+    if let Some(scan) = &app.scan {
+        if scan.cancel.is_some() {
             text.push(scan.spinner.render());
+            text.push(Span::raw(" scanning - "));
         }
-        text.push(Span::raw(" scanning - "));
     }
 
-    if app.cancel_download.is_some() {
-        if let Some(download) = &app.download {
+    if let Some(download) = &app.download {
+        if download.cancel.is_some() {
             text.push(download.spinner.render());
+            text.push(Span::raw(" downloading - "));
         }
-        text.push(Span::raw(" downloading - "));
     }
 
     if text.is_empty() {
