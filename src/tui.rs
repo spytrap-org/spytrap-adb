@@ -847,14 +847,17 @@ fn render_app_widget(app: &App) -> List {
 
 fn render_statusline_widget(app: &App) -> Paragraph {
     let white = Style::default().fg(Color::White).bg(Color::Black);
-    let yellow = Style::default().fg(Color::Yellow).bg(Color::Black);
+    let green = Style::default().fg(Color::Green).bg(Color::Black);
     let mut text = Vec::new();
 
     if let Some(update_state) = &app.repository.update_state {
-        text.push(Span::raw("git:"));
-        text.push(Span::styled(&update_state.git_commit, yellow));
-        text.push(Span::raw(" updated:"));
-        text.push(Span::raw(utils::format_datetime(update_state.last_updated)));
+        text.push(Span::raw("ioc-git:"));
+        text.push(Span::styled(&update_state.git_commit, green));
+        text.push(Span::raw(" released:"));
+        text.push(Span::styled(
+            utils::format_datetime(update_state.released),
+            green,
+        ));
     }
 
     let text = Text::from(Line::from(text));

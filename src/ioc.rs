@@ -1,5 +1,6 @@
 use crate::errors::*;
 use crate::utils;
+use chrono::{offset::Utc, DateTime};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 use serde::{Deserialize, Serialize};
@@ -8,8 +9,8 @@ use std::path::{Path, PathBuf};
 use tokio::fs;
 
 // query the latest commit to detect if we need to update
-const IOC_GIT_REFS_URL: &str =
-    "https://api.github.com/repos/AssoEchap/stalkerware-indicators/branches";
+const IOC_GIT_BRANCH_URL: &str =
+    "https://api.github.com/repos/AssoEchap/stalkerware-indicators/branches/master";
 const IOC_GIT_BRANCH: &str = "master";
 const IOC_REFRESH_INTERVAL: i64 = 3 * 60; // Assume the cache is ok for 3h
 const IOC_DOWNLOAD_URL: &str =
@@ -65,7 +66,7 @@ impl SuspicionLevel {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct UpdateState {
     pub last_update_check: i64,
-    pub last_updated: i64,
+    pub released: i64,
     pub git_commit: String,
     pub sha256: String,
 }
@@ -124,7 +125,7 @@ impl Repository {
         })
     }
 
-    fn ioc_download_url(commit: &GithubCommit) -> String {
+    fn ioc_download_url(commit: &GithubRef) -> String {
         IOC_DOWNLOAD_URL.replace("{{commit}}", &commit.sha)
     }
 
@@ -138,13 +139,13 @@ impl Repository {
     }
 
     pub async fn download_ioc_file(&mut self) -> Result<()> {
-        let commit = self
-            .current_github_commit(IOC_GIT_REFS_URL)
+        let branch = self
+            .current_github_branch(IOC_GIT_BRANCH_URL)
             .await
             .context("Failed to determine latest git commit for stalkerware-indicators")?;
 
         if let Some(update_state) = &mut self.update_state {
-            if update_state.git_commit == commit.sha {
+            if update_state.git_commit == branch.sha {
                 let path = Self::ioc_file_path()?;
                 let buf = fs::read(&path)
                     .await
@@ -153,7 +154,7 @@ impl Repository {
                 if update_state.sha256 == utils::sha256(&buf) {
                     info!(
                         "We're still on most recent git commit, marking as fresh... (commit={:?})",
-                        commit.sha
+                        branch.sha
                     );
                     update_state.last_update_check = utils::now();
                     self.write_state_file()
@@ -164,14 +165,15 @@ impl Repository {
             }
         }
 
-        let ioc_download_url = Self::ioc_download_url(&commit);
+        let released = branch.commit.release_timestamp()?;
+        let ioc_download_url = Self::ioc_download_url(&branch);
         let sha256 = self.download_ioc_database(&ioc_download_url).await?;
 
         let now = utils::now();
         self.update_state = Some(UpdateState {
             last_update_check: now,
-            last_updated: now,
-            git_commit: commit.sha,
+            released,
+            git_commit: branch.sha,
             sha256,
         });
 
@@ -232,34 +234,51 @@ impl Repository {
         Ok(())
     }
 
-    async fn current_github_commit(&self, url: &str) -> Result<GithubCommit> {
+    async fn current_github_branch(&self, url: &str) -> Result<GithubRef> {
         info!("Fetching git repository meta data: {url:?}...");
-        let branches = self
+        let branch = self
             .http_get(url)
             .await?
-            .json::<Vec<GithubBranch>>()
+            .json::<GithubBranch>()
             .await
             .context("Failed to receive http response")?;
 
-        for branch in branches {
-            if branch.name == IOC_GIT_BRANCH {
-                let commit = branch.commit;
-                debug!("Found github commit for branch {IOC_GIT_BRANCH}: {commit:?}");
-                return Ok(commit);
-            }
-        }
-
-        bail!("Failed to find branch: {IOC_GIT_BRANCH:?}")
+        let commit = branch.commit;
+        debug!("Found github commit for branch {IOC_GIT_BRANCH}: {commit:?}");
+        Ok(commit)
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GithubBranch {
     name: String,
+    commit: GithubRef,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GithubRef {
+    sha: String,
     commit: GithubCommit,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GithubCommit {
-    sha: String,
+    committer: GithubGitAuthor,
+}
+
+impl GithubCommit {
+    fn release_timestamp(&self) -> Result<i64> {
+        let date = &self.committer.date;
+        let dt = DateTime::parse_from_rfc3339(date)
+            .with_context(|| anyhow!("Failed to parse datetime from github: {date:?}"))?;
+        let dt = DateTime::<Utc>::from(dt);
+        Ok(dt.timestamp())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GithubGitAuthor {
+    name: String,
+    email: String,
+    date: String,
 }
