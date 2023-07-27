@@ -42,8 +42,9 @@ pub enum SubCommand {
 #[derive(Debug, Parser)]
 pub struct Scan {
     pub serial: Option<String>,
+    /// Use specific rule files instead of latest downloaded
     #[arg(long)]
-    pub rules: Option<PathBuf>,
+    pub rules: Vec<PathBuf>,
     #[arg(long)]
     pub test_load_only: bool,
     /// Do not scan apps for suspicious permissions

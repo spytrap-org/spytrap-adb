@@ -6,10 +6,10 @@ use crate::ioc::{Suspicion, SuspicionLevel};
 use crate::package;
 use crate::pm;
 use crate::remote_clock;
+use crate::rules::Rules;
 use crate::settings;
 use crate::tui::Message;
 use forensic_adb::Device;
-use std::collections::HashMap;
 use tokio::sync::mpsc;
 
 pub enum ScanNotifier {
@@ -47,7 +47,7 @@ impl From<&args::Scan> for Settings {
 
 pub async fn run(
     device: &Device,
-    rules: &HashMap<String, String>,
+    rules: &Rules,
     scan: &Settings,
     report: &mut ScanNotifier,
 ) -> Result<()> {

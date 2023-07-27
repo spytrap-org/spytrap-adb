@@ -1,5 +1,8 @@
 use crate::errors::*;
+use crate::http;
+use crate::rules;
 use crate::utils;
+use indexmap::IndexMap;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 use serde::{Deserialize, Serialize};
@@ -8,12 +11,12 @@ use std::path::{Path, PathBuf};
 use tokio::fs;
 
 // query the latest commit to detect if we need to update
-const IOC_GIT_REFS_URL: &str =
+const IOC_GIT_BRANCHES_URL: &str =
     "https://api.github.com/repos/AssoEchap/stalkerware-indicators/branches";
 const IOC_GIT_BRANCH: &str = "master";
-const IOC_REFRESH_INTERVAL: i64 = 3 * 60; // Assume the cache is ok for 3h
 const IOC_DOWNLOAD_URL: &str =
-    "https://github.com/AssoEchap/stalkerware-indicators/raw/{{commit}}/ioc.yaml";
+    "https://github.com/AssoEchap/stalkerware-indicators/raw/{{commit}}/{{filename}}";
+const IOC_DB_FILES: &[&str] = &["ioc.yaml", "watchware.yaml"];
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Suspicion {
@@ -62,17 +65,19 @@ impl SuspicionLevel {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct UpdateState {
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RepositoryContent {
     pub last_update_check: i64,
-    pub last_updated: i64,
+    pub released: i64,
     pub git_commit: String,
-    pub sha256: String,
+    pub files: IndexMap<String, String>,
 }
 
+#[derive(Debug, Clone)]
 pub struct Repository {
-    pub update_state: Option<UpdateState>,
-    client: reqwest::Client,
+    pub path: PathBuf,
+    pub content: Option<RepositoryContent>,
+    client: http::Client,
 }
 
 impl Repository {
@@ -80,14 +85,6 @@ impl Repository {
         let dir = dirs::data_local_dir().context("Failed to find local data dir")?;
         let dir = dir.join("spytrap-adb");
         Ok(dir)
-    }
-
-    pub fn ioc_file_path() -> Result<PathBuf> {
-        Ok(Self::data_path()?.join("ioc.yaml"))
-    }
-
-    pub fn update_file_path() -> Result<PathBuf> {
-        Ok(Self::data_path()?.join("update.json"))
     }
 
     pub async fn init() -> Result<Self> {
@@ -101,165 +98,88 @@ impl Repository {
             .await
             .with_context(|| anyhow!("Failed to create directory at {path:?}"))?;
 
-        let update_file_path = Self::update_file_path()?;
-        let update_state = match fs::read(&update_file_path).await {
-            Ok(buf) => serde_json::from_slice::<UpdateState>(&buf).ok(),
+        let db_path = path.join("update.json");
+        let content = match fs::read(&db_path).await {
+            Ok(buf) => serde_json::from_slice::<RepositoryContent>(&buf).ok(),
             Err(err) if err.kind() == ErrorKind::NotFound => None,
             Err(err) => {
                 return Err(err)
-                    .with_context(|| anyhow!("Failed to read update file at {update_file_path:?}"))
+                    .with_context(|| anyhow!("Failed to read database file at {db_path:?}"))
             }
         };
 
-        static APP_USER_AGENT: &str =
-            concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
-
-        let client = reqwest::Client::builder()
-            .user_agent(APP_USER_AGENT)
-            .build()
-            .context("Failed to setup http client")?;
+        let client = http::Client::new()?;
         Ok(Self {
-            update_state,
+            path: db_path,
+            content,
             client,
         })
     }
 
-    fn ioc_download_url(commit: &GithubCommit) -> String {
-        IOC_DOWNLOAD_URL.replace("{{commit}}", &commit.sha)
-    }
+    pub async fn download_ioc_db(&mut self) -> Result<()> {
+        let branch = self
+            .client
+            .github_branch_metadata(IOC_GIT_BRANCHES_URL, IOC_GIT_BRANCH)
+            .await?;
 
-    pub fn is_update_check_due(&self) -> bool {
-        if let Some(update_state) = &self.update_state {
-            let age = utils::now() - update_state.last_update_check;
-            age >= IOC_REFRESH_INTERVAL
-        } else {
-            true
-        }
-    }
-
-    pub async fn download_ioc_file(&mut self) -> Result<()> {
-        let commit = self
-            .current_github_commit(IOC_GIT_REFS_URL)
-            .await
-            .context("Failed to determine latest git commit for stalkerware-indicators")?;
-
-        if let Some(update_state) = &mut self.update_state {
-            if update_state.git_commit == commit.sha {
-                let path = Self::ioc_file_path()?;
-                let buf = fs::read(&path)
+        if let Some(content) = &mut self.content {
+            if content.git_commit == branch.sha {
+                info!(
+                    "We're still on most recent git commit, marking as fresh... (commit={:?})",
+                    branch.sha
+                );
+                content.last_update_check = utils::now();
+                self.write_database_file()
                     .await
-                    .with_context(|| anyhow!("Failed to open ioc file at {path:?}"))?;
-
-                if update_state.sha256 == utils::sha256(&buf) {
-                    info!(
-                        "We're still on most recent git commit, marking as fresh... (commit={:?})",
-                        commit.sha
-                    );
-                    update_state.last_update_check = utils::now();
-                    self.write_state_file()
-                        .await
-                        .context("Failed to write update state file")?;
-                    return Ok(());
-                }
+                    .context("Failed to write database file")?;
+                return Ok(());
             }
         }
-
-        let ioc_download_url = Self::ioc_download_url(&commit);
-        let sha256 = self.download_ioc_database(&ioc_download_url).await?;
 
         let now = utils::now();
-        self.update_state = Some(UpdateState {
-            last_update_check: now,
-            last_updated: now,
-            git_commit: commit.sha,
-            sha256,
-        });
+        let released = branch.commit.release_timestamp()?;
 
-        self.write_state_file()
-            .await
-            .context("Failed to write update state file")?;
-
-        Ok(())
-    }
-
-    async fn http_get(&self, url: &str) -> Result<reqwest::Response> {
-        let req = self
-            .client
-            .get(url)
-            .send()
-            .await
-            .context("Failed to send HTTP request")?;
-
-        let status = req.status();
-        let headers = req.headers();
-        trace!("Received response from server: status={status:?}, headers={headers:?}");
-
-        let req = req.error_for_status()?;
-        Ok(req)
-    }
-
-    pub async fn download_ioc_database(&mut self, url: &str) -> Result<String> {
-        info!("Downloading IOC file from {url:?}...");
-        let body = self
-            .http_get(url)
-            .await?
-            .bytes()
-            .await
-            .context("Failed to download HTTP response")?;
-
-        let ioc_file_path = Self::ioc_file_path()?;
-        debug!(
-            "Writing IOC file to {ioc_file_path:?}... ({} bytes)",
-            body.len()
-        );
-        fs::write(&ioc_file_path, &body)
-            .await
-            .with_context(|| anyhow!("Failed to write IOC file to {ioc_file_path:?}"))?;
-
-        let sha256 = utils::sha256(&body);
-
-        Ok(sha256)
-    }
-
-    async fn write_state_file(&self) -> Result<()> {
-        let update_file_path = Self::update_file_path()?;
-        let mut buf = serde_json::to_vec(&self.update_state)?;
-        buf.push(b'\n');
-        debug!("Writing update state file to {update_file_path:?}...");
-        fs::write(&update_file_path, &buf).await.with_context(|| {
-            anyhow!("Failed to write update state file at {update_file_path:?}")
-        })?;
-        Ok(())
-    }
-
-    async fn current_github_commit(&self, url: &str) -> Result<GithubCommit> {
-        info!("Fetching git repository meta data: {url:?}...");
-        let branches = self
-            .http_get(url)
-            .await?
-            .json::<Vec<GithubBranch>>()
-            .await
-            .context("Failed to receive http response")?;
-
-        for branch in branches {
-            if branch.name == IOC_GIT_BRANCH {
-                let commit = branch.commit;
-                debug!("Found github commit for branch {IOC_GIT_BRANCH}: {commit:?}");
-                return Ok(commit);
-            }
+        let mut files = IndexMap::new();
+        for filename in IOC_DB_FILES {
+            let data = self
+                .client
+                .github_download_file(IOC_DOWNLOAD_URL, &branch, filename)
+                .await?;
+            files.insert(filename.to_string(), data);
         }
 
-        bail!("Failed to find branch: {IOC_GIT_BRANCH:?}")
+        self.content = Some(RepositoryContent {
+            last_update_check: now,
+            released,
+            git_commit: branch.sha,
+            files,
+        });
+        self.write_database_file()
+            .await
+            .context("Failed to write database file")?;
+        Ok(())
     }
-}
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct GithubBranch {
-    name: String,
-    commit: GithubCommit,
-}
+    async fn write_database_file(&self) -> Result<()> {
+        let path = &self.path;
+        let mut buf = serde_json::to_vec(&self.content)?;
+        buf.push(b'\n');
+        debug!("Writing database file to {path:?}...");
+        fs::write(&path, &buf)
+            .await
+            .with_context(|| anyhow!("Failed to write database file at {path:?}"))?;
+        Ok(())
+    }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct GithubCommit {
-    sha: String,
+    pub fn parse_rules(&self) -> Result<rules::Rules> {
+        let content = self
+            .content
+            .as_ref()
+            .context("Local IOC repository does not have any content downloaded yet")?;
+        let mut rules = rules::Rules::default();
+        for (name, data) in &content.files {
+            rules.load_yaml(name, data.as_bytes())?;
+        }
+        Ok(rules)
+    }
 }

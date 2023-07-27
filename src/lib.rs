@@ -2,6 +2,7 @@ pub mod accessibility;
 pub mod args;
 pub mod dumpsys;
 pub mod errors;
+pub mod http;
 pub mod ioc;
 pub mod package;
 pub mod parsers;
