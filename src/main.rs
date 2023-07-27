@@ -8,7 +8,7 @@ use spytrap_adb::rules;
 use spytrap_adb::scan;
 use spytrap_adb::tui;
 use spytrap_adb::utils;
-use std::borrow::Cow;
+use tokio::fs;
 use tokio::process::Command;
 
 async fn ensure_adb_running(choice: &args::AdbServerChoice) -> Result<()> {
@@ -48,29 +48,19 @@ async fn main() -> Result<()> {
         Some(SubCommand::Scan(scan)) => {
             ensure_adb_running(&args.start_adb_server).await?;
 
-            let rules_path = if let Some(path) = &scan.rules {
-                Cow::Borrowed(path)
+            let rules = if scan.rules.is_empty() {
+                let repo = ioc::Repository::init().await?;
+                repo.parse_rules()?
             } else {
-                let path = ioc::Repository::ioc_file_path()?;
-                Cow::Owned(path)
-            };
-
-            let (rules, sha256) =
-                rules::load_map_from_file(rules_path.as_ref()).context("Failed to load rules")?;
-            info!(
-                "Loaded {} rules from {rules_path:?} (sha256={sha256})",
-                rules.len()
-            );
-
-            let repo = ioc::Repository::init().await?;
-            if let Some(update_state) = &repo.update_state {
-                if update_state.sha256 == sha256 {
-                    info!(
-                        "Rules database was downloaded from commit={}",
-                        update_state.git_commit
-                    );
+                let mut rules = rules::Rules::default();
+                for path in &scan.rules {
+                    let buf = fs::read(&path)
+                        .await
+                        .with_context(|| anyhow!("Failed to read rules from file: {path:?}"))?;
+                    rules.load_yaml(path, &buf)?;
                 }
-            }
+                rules
+            };
 
             if scan.test_load_only {
                 info!("Rules loaded successfully");
@@ -112,7 +102,7 @@ async fn main() -> Result<()> {
         }
         Some(SubCommand::DownloadIoc(_download)) => {
             let mut repo = ioc::Repository::init().await?;
-            repo.download_ioc_file()
+            repo.download_ioc_db()
                 .await
                 .context("Failed to download stalkerware-indicators ioc.yaml")?;
         }

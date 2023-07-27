@@ -1,27 +1,35 @@
 use crate::errors::*;
 use crate::utils;
 use std::collections::HashMap;
-use std::fs;
-use std::path::Path;
+use std::fmt;
 
-pub fn load_map_from_buf(buf: &[u8]) -> Result<(HashMap<String, String>, String)> {
-    let sha256 = utils::sha256(buf);
-    let list = stalkerware_indicators::parse_from_buf(buf)?;
-    let mut map = HashMap::new();
-    for rule in list {
-        for package in rule.packages {
-            map.insert(package, rule.name.to_string());
-        }
-    }
-
-    Ok((map, sha256))
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Rules {
+    map: HashMap<String, String>,
 }
 
-pub fn load_map_from_file<P: AsRef<Path>>(path: P) -> Result<(HashMap<String, String>, String)> {
-    let path = path.as_ref();
-    let buf =
-        fs::read(path).with_context(|| anyhow!("Failed to read appid rules file: {:?}", path))?;
-    load_map_from_buf(&buf)
+impl Rules {
+    pub fn load_yaml<F: fmt::Debug>(&mut self, name: F, buf: &[u8]) -> Result<String> {
+        let sha256 = utils::sha256(buf);
+
+        let list = stalkerware_indicators::parse_from_buf(buf)
+            .context("Failed to load stalkerware-indicators yaml")?;
+        let num_of_rules = list.len();
+
+        for rule in list {
+            for package in rule.packages {
+                self.map.insert(package, rule.name.to_string());
+            }
+        }
+
+        info!("Loaded {num_of_rules} rules from {name:?} (sha256={sha256})",);
+
+        Ok(sha256)
+    }
+
+    pub fn get(&self, pkg_id: &str) -> Option<&String> {
+        self.map.get(pkg_id)
+    }
 }
 
 #[cfg(test)]
@@ -31,8 +39,11 @@ mod tests {
 
     #[test]
     fn test_parse_ioc_yaml() {
-        let (map, _) = load_map_from_buf(
-            b"
+        let mut rules = Rules::default();
+        rules
+            .load_yaml(
+                "unit-test",
+                b"
 - name: Reptilicus
   names:
   - Reptilicus
@@ -107,10 +118,10 @@ mod tests {
     - my2.snoopza.com
     - api.snoopza.com
 ",
-        )
-        .unwrap();
+            )
+            .unwrap();
         assert_eq!(
-            map,
+            rules.map,
             hashmap![
                 "com.brot.storage.work".to_string() => "Reptilicus".to_string(),
                 "com.cycle.start.mess".to_string() => "Reptilicus".to_string(),

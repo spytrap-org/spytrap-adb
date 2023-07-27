@@ -1,6 +1,5 @@
 use crate::errors::*;
 use crate::ioc::{Repository, Suspicion, SuspicionLevel};
-use crate::rules;
 use crate::scan;
 use crate::utils;
 use crossterm::event::EventStream;
@@ -51,7 +50,7 @@ pub enum Message {
     ScanTick,
     ScanEnded,
     DownloadTick,
-    DownloadEnded,
+    DownloadEnded(Option<Repository>),
     DeviceRefreshTick,
 }
 
@@ -122,7 +121,7 @@ impl App {
         self.devices = devices;
         self.start_timer(DEVICE_REFRESH_INTERVAL).await?;
 
-        if self.repository.update_state.is_none() {
+        if self.repository.content.is_none() {
             self.events_tx.send(Message::StartDownload).await.ok();
         }
 
@@ -310,6 +309,7 @@ pub enum Action {
 
 pub async fn run_scan(
     adb_host: Host,
+    repo: Repository,
     device: DeviceInfo,
     events_tx: mpsc::Sender<Message>,
 ) -> Result<()> {
@@ -319,8 +319,7 @@ pub async fn run_scan(
         .await
         .with_context(|| anyhow!("Failed to access device: {:?}", device.serial))?;
 
-    let repo = Repository::ioc_file_path()?;
-    let (rules, _sha256) = rules::load_map_from_file(repo).context("Failed to load rules")?;
+    let rules = repo.parse_rules().context("Failed to load rules")?;
     scan::run(
         &device,
         &rules,
@@ -332,12 +331,11 @@ pub async fn run_scan(
     Ok(())
 }
 
-pub async fn run_download() -> Result<()> {
-    let mut repo = Repository::init().await?;
-    repo.download_ioc_file()
+pub async fn run_download(mut repo: Repository) -> Result<Repository> {
+    repo.download_ioc_db()
         .await
-        .context("Failed to download stalkerware-indicators ioc.yaml")?;
-    Ok(())
+        .context("Failed to download stalkerware-indicators yaml files")?;
+    Ok(repo)
 }
 
 pub async fn handle_key<B: Backend>(
@@ -421,13 +419,14 @@ pub async fn handle_key<B: Backend>(
                 }
             } else if let Some(device) = app.devices.get(app.cursor) {
                 let adb_host = app.adb_host.clone();
+                let repo = app.repository.clone();
                 let device = device.clone();
                 let events_tx = app.events_tx.clone();
 
                 let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
                 tokio::spawn(async move {
                     let mut interval = time::interval(ACTIVITY_TICK_INTERVAL);
-                    let scan = run_scan(adb_host, device, events_tx.clone());
+                    let scan = run_scan(adb_host, repo, device, events_tx.clone());
                     tokio::pin!(scan);
 
                     loop {
@@ -589,23 +588,33 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     }
                     Message::StartDownload => {
                         let events_tx = app.events_tx.clone();
+                        let repo = app.repository.clone();
 
                         let (cancel_tx, mut cancel_rx) = mpsc::channel(1);
                         tokio::spawn(async move {
                             let mut interval = time::interval(ACTIVITY_TICK_INTERVAL);
-                            let download = run_download();
+                            let download = run_download(repo);
                             tokio::pin!(download);
 
                             loop {
                                 tokio::select! {
                                     _ = cancel_rx.recv() => {
                                         debug!("Download has been canceled");
-                                        events_tx.send(Message::DownloadEnded).await.ok();
+                                        events_tx.send(Message::DownloadEnded(None)).await.ok();
                                         break;
                                     }
                                     ret = &mut download => {
-                                        debug!("Download has completed: {:?}", ret); // TODO print errors in UI
-                                        events_tx.send(Message::DownloadEnded).await.ok();
+                                        let repo = match ret {
+                                            Ok(repo) => {
+                                                debug!("Download has completed");
+                                                Some(repo)
+                                            }
+                                            Err(err) => {
+                                                error!("Download has failed: {err:?}"); // TODO print errors in UI
+                                                None
+                                            }
+                                        };
+                                        events_tx.send(Message::DownloadEnded(repo)).await.ok();
                                         break;
                                     }
                                     _ = interval.tick() => {
@@ -634,9 +643,11 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                             download.spinner.activity_tick();
                         }
                     }
-                    Message::DownloadEnded => {
+                    Message::DownloadEnded(repo) => {
                         app.download.take();
-                        app.repository = Repository::init().await?;
+                        if let Some(repo) = repo {
+                            app.repository = repo;
+                        }
                     }
                     Message::DeviceRefreshTick => {
                         app.refresh_devices().await?;
@@ -850,12 +861,12 @@ fn render_statusline_widget(app: &App) -> Paragraph {
     let green = Style::default().fg(Color::Green).bg(Color::Black);
     let mut text = Vec::new();
 
-    if let Some(update_state) = &app.repository.update_state {
+    if let Some(content) = &app.repository.content {
         text.push(Span::raw("ioc-git:"));
-        text.push(Span::styled(&update_state.git_commit, green));
+        text.push(Span::styled(&content.git_commit, green));
         text.push(Span::raw(" released:"));
         text.push(Span::styled(
-            utils::format_datetime(update_state.released),
+            utils::format_datetime(content.released),
             green,
         ));
     }

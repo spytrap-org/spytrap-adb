@@ -16,7 +16,7 @@ dirs = "5.0.0"
 env_logger = "0.10"
 forensic-adb = "0.6.2"
 hex = "0.4.3"
-indexmap = "2"
+indexmap = { version = "2", features = ["serde"] }
 log = "0.4.14"
 ratatui = "0.22"
 regex = "1.5.4"
