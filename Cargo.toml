@@ -1,7 +1,11 @@
 [package]
 name = "spytrap-adb"
-version = "0.1.0"
-authors = ["user"]
+version = "0.2.0"
+description = "Test a phone for stalkerware using adb and usb debugging to scan for suspicious apps and configuration"
+authors = ["kpcyrd <git@rxv.cc>"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/spytrap-org/spytrap-adb"
+categories = ["command-line-utilities"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

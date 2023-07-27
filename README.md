@@ -20,7 +20,7 @@ There's an interactive UI when running the command with no arguments:
 ./spytrap-adb
 ```
 
-Enable usb debugging on the device and connect the android device to the computer.
+Enable usb debugging on the phone and connect it to the computer over usb.
 
 You can also invoke some commands directly for non-interactive use:
 
