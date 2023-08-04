@@ -51,6 +51,9 @@ impl PackageInfo {
         let mut sus = Vec::new();
 
         match self.installer_package_name() {
+            Some("com.android.vending") => {
+                // TODO: authenticate this application is a legitimate google play store .apk
+            }
             Some("com.android.packageinstaller") => {
                 sus.push(Suspicion {
                     level: SuspicionLevel::High,
