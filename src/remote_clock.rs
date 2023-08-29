@@ -17,7 +17,7 @@ pub async fn determine(device: &Device) -> Result<(DateTime<Utc>, DateTime<Utc>,
 
 fn parse(s: &str) -> Result<DateTime<Utc>> {
     let dt = NaiveDateTime::parse_from_str(s, "%Y-%m-%d %T %f")?;
-    Ok(DateTime::<Utc>::from_utc(dt, Utc))
+    Ok(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))
 }
 
 #[cfg(test)]
