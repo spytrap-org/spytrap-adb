@@ -11,9 +11,9 @@ use std::path::{Path, PathBuf};
 use tokio::fs;
 
 // query the latest commit to detect if we need to update
-const IOC_GIT_BRANCHES_URL: &str =
+pub const IOC_GIT_BRANCHES_URL: &str =
     "https://api.github.com/repos/AssoEchap/stalkerware-indicators/branches";
-const IOC_GIT_BRANCH: &str = "master";
+pub const IOC_GIT_BRANCH: &str = "master";
 const IOC_DOWNLOAD_URL: &str =
     "https://github.com/AssoEchap/stalkerware-indicators/raw/{{commit}}/{{filename}}";
 const IOC_DB_FILES: &[&str] = &["ioc.yaml", "watchware.yaml"];
@@ -68,6 +68,8 @@ impl SuspicionLevel {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RepositoryContent {
     pub last_update_check: i64,
+    #[serde(default)]
+    pub update_available: bool,
     pub released: i64,
     pub git_commit: String,
     pub files: IndexMap<String, String>,
@@ -77,7 +79,7 @@ pub struct RepositoryContent {
 pub struct Repository {
     pub path: PathBuf,
     pub content: Option<RepositoryContent>,
-    client: http::Client,
+    pub client: http::Client,
 }
 
 impl Repository {
@@ -116,11 +118,16 @@ impl Repository {
         })
     }
 
-    pub async fn download_ioc_db(&mut self) -> Result<()> {
+    pub async fn query_latest_branch(&self) -> Result<http::GithubRef> {
         let branch = self
             .client
             .github_branch_metadata(IOC_GIT_BRANCHES_URL, IOC_GIT_BRANCH)
             .await?;
+        Ok(branch)
+    }
+
+    pub async fn download_ioc_db(&mut self) -> Result<()> {
+        let branch = self.query_latest_branch().await?;
 
         if let Some(content) = &mut self.content {
             if content.git_commit == branch.sha {
@@ -128,6 +135,7 @@ impl Repository {
                     "We're still on most recent git commit, marking as fresh... (commit={:?})",
                     branch.sha
                 );
+                content.update_available = false;
                 content.last_update_check = utils::now();
                 self.write_database_file()
                     .await
@@ -150,6 +158,7 @@ impl Repository {
 
         self.content = Some(RepositoryContent {
             last_update_check: now,
+            update_available: false,
             released,
             git_commit: branch.sha,
             files,
@@ -160,7 +169,7 @@ impl Repository {
         Ok(())
     }
 
-    async fn write_database_file(&self) -> Result<()> {
+    pub async fn write_database_file(&self) -> Result<()> {
         let path = &self.path;
         let mut buf = serde_json::to_vec(&self.content)?;
         buf.push(b'\n');
