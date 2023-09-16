@@ -1,5 +1,5 @@
 use crate::errors::*;
-use crate::ioc::{Repository, Suspicion, SuspicionLevel};
+use crate::ioc::{Repository, RepositoryContent, Suspicion, SuspicionLevel};
 use crate::scan;
 use crate::utils;
 use crossterm::event::EventStream;
@@ -42,6 +42,9 @@ const DEVICE_REFRESH_INTERVAL: Duration = Duration::from_secs(1);
 const ACTIVITY_TICK_INTERVAL: Duration = Duration::from_millis(100);
 const ACTIVITY: &[&str] = &[".", "o", "O", "°", " ", " ", "°", "O", "o", ".", " ", " "];
 
+/// Check for updates if this many seconds elapsed since last successful update check
+const DATABASE_UPDATE_CHECK_INTERVAL: i64 = 60 * 60 * 3;
+
 #[derive(Debug)]
 pub enum Message {
     Suspicion(Suspicion),
@@ -52,6 +55,7 @@ pub enum Message {
     DownloadTick,
     DownloadEnded(Option<Repository>),
     DeviceRefreshTick,
+    DatabaseUpdateAvailable(bool),
 }
 
 #[derive(Debug)]
@@ -121,9 +125,40 @@ impl App {
         self.devices = devices;
         self.start_timer(DEVICE_REFRESH_INTERVAL).await?;
 
-        if self.repository.content.is_none() {
+        if let Some(content) = &self.repository.content {
+            if !content.update_available
+                && utils::now() > content.last_update_check + DATABASE_UPDATE_CHECK_INTERVAL
+            {
+                debug!("Haven't checked for database updates in a while, checking now...");
+                let tx = self.events_tx.clone();
+                let repo = self.repository.clone();
+                let content = content.clone();
+                tokio::spawn(async move {
+                    if let Err(err) = Self::run_update_availability_check(&repo, &content, tx).await
+                    {
+                        warn!("Failed to check for updates: {err:#}");
+                    }
+                });
+            }
+        } else {
+            debug!("No existing database present, starting download...");
             self.events_tx.send(Message::StartDownload).await.ok();
         }
+
+        Ok(())
+    }
+
+    async fn run_update_availability_check(
+        repo: &Repository,
+        content: &RepositoryContent,
+        tx: mpsc::Sender<Message>,
+    ) -> Result<()> {
+        let branch = repo.query_latest_branch().await?;
+
+        let update_available = content.git_commit != branch.sha;
+        tx.send(Message::DatabaseUpdateAvailable(update_available))
+            .await
+            .ok();
 
         Ok(())
     }
@@ -652,6 +687,15 @@ pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Resul
                     Message::DeviceRefreshTick => {
                         app.refresh_devices().await?;
                     }
+                    Message::DatabaseUpdateAvailable(update_available) => {
+                        if let Some(content) = &mut app.repository.content {
+                            content.last_update_check = utils::now();
+                            content.update_available = update_available;
+                            app.repository.write_database_file()
+                                .await
+                                .context("Failed to write database file")?;
+                        }
+                    }
                 }
             }
             res = tasks.join_next() => {
@@ -859,6 +903,7 @@ fn render_app_widget(app: &App) -> List {
 fn render_statusline_widget(app: &App) -> Paragraph {
     let white = Style::default().fg(Color::White).bg(Color::Black);
     let green = Style::default().fg(Color::Green).bg(Color::Black);
+    let yellow = Style::default().fg(Color::Yellow).bg(Color::Black);
     let mut text = Vec::new();
 
     if let Some(content) = &app.repository.content {
@@ -869,6 +914,13 @@ fn render_statusline_widget(app: &App) -> Paragraph {
             utils::format_datetime(content.released),
             green,
         ));
+
+        if content.update_available {
+            text.push(Span::styled(
+                " (database update available, press ctrl+R)",
+                yellow,
+            ));
+        }
     }
 
     let text = Text::from(Line::from(text));
