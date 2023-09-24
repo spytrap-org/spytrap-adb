@@ -12,11 +12,23 @@ impl FromStr for Settings {
 
     fn from_str(s: &str) -> Result<Self> {
         let mut out = Self::default();
-        for line in s.lines() {
-            let (key, value) = line
-                .split_once('=')
-                .with_context(|| anyhow!("Failed to parse line as setting: {line:?}"))?;
-            out.values.insert(key.to_string(), value.to_string());
+        let mut failed_lines = Vec::new();
+        for (number, line) in s.lines().enumerate() {
+            // It does happen in real world that some variable values
+            // are multi line, so this make the parsing fail
+            // ignoring the lines and reporting it in the log
+            if let Some((key, value)) = line.split_once('=') {
+                out.values.insert(key.to_string(), value.to_string());
+            } else {
+                failed_lines.push(number);
+            }
+        }
+        if !failed_lines.is_empty() {
+            //Maybe should be reported as a warning in the report somehow ?
+            warn!(
+                "Error parsing settings at lines:{:?} content:{}",
+                failed_lines, s
+            );
         }
         Ok(out)
     }
