@@ -1,29 +1,56 @@
 use crate::errors::*;
 use crate::ioc::{Suspicion, SuspicionLevel};
-use crate::parsers::settings::Settings;
 use forensic_adb::Device;
 use std::collections::HashMap;
 
+const SETTINGS: &[(&str, &[&str])] = &[(
+    "global",
+    &[
+        "package_verifier_enable",
+        "package_verifier_user_consent",
+        "upload_apk_enable",
+    ],
+)];
+
 pub async fn dump(device: &Device) -> Result<HashMap<String, Settings>> {
-    let mut out = HashMap::new();
-    for namespace in ["system", "secure", "global"] {
-        let cmd = format!("settings list {}", namespace);
-        debug!("Executing {:?}", cmd);
-        let output = device
-            .execute_host_shell_command(&cmd)
-            .await
-            .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
+    let mut out = HashMap::<_, Settings>::new();
 
-        let settings = output
-            .parse::<Settings>()
-            .context("Failed to parse settings from device")?;
+    for (namespace, keys) in SETTINGS {
+        let settings = out.entry(namespace.to_string()).or_default();
 
-        out.insert(namespace.to_string(), settings);
+        for key in *keys {
+            let cmd = format!("settings get {namespace} {key}");
+            debug!("Executing {:?}", cmd);
+            let mut output = device
+                .execute_host_shell_command(&cmd)
+                .await
+                .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
+            if output.ends_with('\n') {
+                output.pop();
+            }
+            debug!(
+                "Received setting for namespace={namespace:?} key={key:?} from device: {output:?}"
+            );
+
+            if output != "null" {
+                settings.insert(key.to_string(), output);
+            }
+        }
     }
+
     Ok(out)
 }
 
+#[derive(Debug, PartialEq, Default)]
+pub struct Settings {
+    pub values: HashMap<String, String>,
+}
+
 impl Settings {
+    pub fn insert(&mut self, key: String, value: String) {
+        self.values.insert(key, value);
+    }
+
     pub fn audit(&self) -> Vec<Suspicion> {
         let mut sus = Vec::new();
         for (key, value) in &self.values {
