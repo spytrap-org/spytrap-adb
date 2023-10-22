@@ -1,6 +1,6 @@
 [package]
 name = "spytrap-adb"
-version = "0.2.0"
+version = "0.3.0"
 description = "Test a phone for stalkerware using adb and usb debugging to scan for suspicious apps and configuration"
 authors = ["kpcyrd <git@rxv.cc>"]
 license = "GPL-3.0-or-later"
