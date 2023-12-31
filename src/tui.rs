@@ -722,7 +722,7 @@ fn cursor<'a, T: IntoIterator<Item = Span<'a>>>(msg: T, selected: bool) -> (Line
     (Line::from(row), style)
 }
 
-pub fn ui<B: Backend>(f: &mut Frame<'_, B>, app: &App) {
+pub fn ui(f: &mut Frame<'_>, app: &App) {
     let white = Style::default().fg(Color::White).bg(Color::Black);
 
     let chunks = Layout::default()
@@ -858,7 +858,7 @@ fn render_app_widget(app: &App) -> List {
         }
 
         // scrolling
-        let list = &list[app.offset..];
+        let list = list.into_iter().skip(app.offset);
 
         let title = Span::styled("Findings", white.add_modifier(Modifier::BOLD));
         List::new(list).block(
