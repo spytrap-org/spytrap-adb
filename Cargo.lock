@@ -1547,7 +1547,7 @@ checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
 
 [[package]]
 name = "spytrap-adb"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "bstr",
@@ -1593,9 +1593,9 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "stalkerware-indicators"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5a6e28df1e810f8d2f83a72823c7a4101d41955463d54a792d45ec4fcafbc7c"
+checksum = "0c56344f88a50381b9e1af6e0ce508e412888ca0d9a4d7683c9ade9ea4ebe2ba"
 dependencies = [
  "anyhow",
  "log",
