@@ -11,7 +11,7 @@ pub async fn dump(device: &Device, package: &str) -> Result<PackageInfo> {
     );
     debug!("Executing {:?}", cmd);
     let output = device
-        .execute_host_shell_command(&cmd)
+        .execute_host_exec_out_command(&cmd)
         .await
         .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
     parsers::package::parse_output(&output, package)
@@ -128,7 +128,7 @@ mod tests {
 
     #[test]
     fn test_audit_package_spylive360() {
-        let data = include_str!("../test_data/dumpsys/package/spylive360.txt");
+        let data = include_bytes!("../test_data/dumpsys/package/spylive360.txt");
         let pkginfo = parsers::package::parse_output(data, "com.wifi0").unwrap();
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
@@ -166,7 +166,7 @@ mod tests {
 
     #[test]
     fn test_audit_package_contacts() {
-        let data = include_str!("../test_data/dumpsys/package/contacts.txt");
+        let data = include_bytes!("../test_data/dumpsys/package/contacts.txt");
         let pkginfo = parsers::package::parse_output(data, "com.android.contacts").unwrap();
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
@@ -177,7 +177,7 @@ mod tests {
 
     #[test]
     fn test_audit_package_fdroid() {
-        let data = include_str!("../test_data/dumpsys/package/fdroid.txt");
+        let data = include_bytes!("../test_data/dumpsys/package/fdroid.txt");
         let pkginfo = parsers::package::parse_output(data, "org.fdroid.fdroid").unwrap();
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
@@ -194,7 +194,7 @@ mod tests {
 
     #[test]
     fn test_audit_package_gpstest() {
-        let data = include_str!("../test_data/dumpsys/package/gpstest.txt");
+        let data = include_bytes!("../test_data/dumpsys/package/gpstest.txt");
         let pkginfo = parsers::package::parse_output(data, "com.android.gpstest.osmdroid").unwrap();
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[
@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn test_audit_package_jitsi() {
-        let data = include_str!("../test_data/dumpsys/package/jitsi.txt");
+        let data = include_bytes!("../test_data/dumpsys/package/jitsi.txt");
         let pkginfo = parsers::package::parse_output(data, "org.jitsi.meet").unwrap();
         let sus = pkginfo.audit();
         assert_eq!(&sus, &[

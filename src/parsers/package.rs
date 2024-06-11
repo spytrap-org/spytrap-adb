@@ -1,5 +1,7 @@
 use crate::errors::*;
+use bstr::ByteSlice;
 use std::collections::BTreeMap;
+use std::str;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Default)]
@@ -42,7 +44,7 @@ fn count_whitespace_prefix(line: &str) -> usize {
     line.chars().take_while(|ch| *ch == ' ').count()
 }
 
-pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
+pub fn parse_output(output: &[u8], package: &str) -> Result<PackageInfo> {
     let mut prev_line = None;
     let mut section_stack = Vec::new();
 
@@ -53,9 +55,10 @@ pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
 
     let mut indent = 0;
     for line in output.lines() {
+        let line = String::from_utf8_lossy(line);
         let trimmed_line = line.trim();
 
-        match count_whitespace_prefix(line) {
+        match count_whitespace_prefix(&line) {
             i if i < indent => {
                 section_stack.truncate(i / 2);
                 indent = i;
@@ -71,23 +74,23 @@ pub fn parse_output(output: &str, package: &str) -> Result<PackageInfo> {
             _ => (),
         }
 
-        prev_line = Some(trimmed_line);
+        prev_line = Some(trimmed_line.to_owned());
 
-        match section_stack.last() {
-            Some(&"requested permissions:") => {
+        match section_stack.last().map(|x| x.as_str()) {
+            Some("requested permissions:") => {
                 debug!("requested permission: {:?}", trimmed_line);
                 info.requested_permissions.push(trimmed_line.parse()?);
             }
-            Some(&"install permissions:") => {
+            Some("install permissions:") => {
                 debug!("install permission: {:?}", trimmed_line);
                 info.install_permissions.push(trimmed_line.parse()?);
             }
-            Some(&"runtime permissions:") => {
+            Some("runtime permissions:") => {
                 debug!("runtime permission: {:?}", trimmed_line);
                 info.runtime_permissions.push(trimmed_line.parse()?);
             }
             _ => {
-                if let Some(&"Packages:") = section_stack.first() {
+                if let Some("Packages:") = section_stack.first().map(|x| x.as_str()) {
                     trace!("package line: {:?}", line);
                     if let Some((key, value)) = trimmed_line.split_once('=') {
                         trace!(
@@ -124,7 +127,7 @@ mod tests {
 
     #[test]
     fn parse_package_spylive360() {
-        let data = include_str!("../../test_data/dumpsys/package/spylive360.txt");
+        let data = include_bytes!("../../test_data/dumpsys/package/spylive360.txt");
         let pkginfo = parse_output(data, "com.wifi0").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "com.wifi0".to_string(),
@@ -225,7 +228,7 @@ mod tests {
 
     #[test]
     fn parse_package_contacts() {
-        let data = include_str!("../../test_data/dumpsys/package/contacts.txt");
+        let data = include_bytes!("../../test_data/dumpsys/package/contacts.txt");
         let pkginfo = parse_output(data, "com.android.contacts").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "com.android.contacts".to_string(),
@@ -316,7 +319,7 @@ mod tests {
 
     #[test]
     fn parse_package_fdroid() {
-        let data = include_str!("../../test_data/dumpsys/package/fdroid.txt");
+        let data = include_bytes!("../../test_data/dumpsys/package/fdroid.txt");
         let pkginfo = parse_output(data, "org.fdroid.fdroid").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "org.fdroid.fdroid".to_string(),
@@ -395,7 +398,7 @@ mod tests {
 
     #[test]
     fn parse_package_gpstest() {
-        let data = include_str!("../../test_data/dumpsys/package/gpstest.txt");
+        let data = include_bytes!("../../test_data/dumpsys/package/gpstest.txt");
         let pkginfo = parse_output(data, "com.android.gpstest.osmdroid").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "com.android.gpstest.osmdroid".to_string(),
@@ -453,7 +456,7 @@ mod tests {
 
     #[test]
     fn parse_package_jitsi() {
-        let data = include_str!("../../test_data/dumpsys/package/jitsi.txt");
+        let data = include_bytes!("../../test_data/dumpsys/package/jitsi.txt");
         let pkginfo = parse_output(data, "org.jitsi.meet").unwrap();
         assert_eq!(pkginfo, PackageInfo {
             id: "org.jitsi.meet".to_string(),

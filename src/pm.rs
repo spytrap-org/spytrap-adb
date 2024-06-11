@@ -1,5 +1,7 @@
 use crate::errors::*;
+use bstr::ByteSlice;
 use forensic_adb::Device;
+use std::str;
 
 const CMD: &str = "pm list packages";
 
@@ -10,18 +12,19 @@ pub struct Apk {
 
 pub async fn list_packages(device: &Device) -> Result<Vec<Apk>> {
     let output = device
-        .execute_host_shell_command(CMD)
+        .execute_host_exec_out_command(CMD)
         .await
         .with_context(|| anyhow!("Failed to run: {:?}", CMD))?;
     parse_output(&output)
 }
 
-fn parse_output(output: &str) -> Result<Vec<Apk>> {
+fn parse_output(output: &[u8]) -> Result<Vec<Apk>> {
     let mut pkgs = Vec::new();
     for line in output.lines() {
         if line.is_empty() {
             continue;
         }
+        let line = String::from_utf8_lossy(line);
 
         if let Some(package) = line.strip_prefix("package:") {
             debug!("discovered package={:?}", package);
@@ -41,7 +44,7 @@ mod tests {
 
     #[test]
     pub fn test_parse_output() {
-        let data = "package:org.jitsi.meet
+        let data = b"package:org.jitsi.meet
 package:org.lineageos.overlay.accent.black
 package:com.android.cts.priv.ctsshim
 package:org.lineageos.overlay.accent.brown

@@ -21,10 +21,11 @@ pub async fn dump(device: &Device) -> Result<HashMap<String, Settings>> {
         for key in *keys {
             let cmd = format!("settings get {namespace} {key}");
             debug!("Executing {:?}", cmd);
-            let mut output = device
-                .execute_host_shell_command(&cmd)
+            let output = device
+                .execute_host_exec_out_command(&cmd)
                 .await
                 .with_context(|| anyhow!("Failed to run: {:?}", cmd))?;
+            let mut output = String::from_utf8_lossy(&output).into_owned();
             if output.ends_with('\n') {
                 output.pop();
             }
