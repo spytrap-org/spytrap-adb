@@ -6,10 +6,11 @@ const DATE_COMMAND: &str = "date -u '+%Y-%m-%d %T %N'";
 
 pub async fn determine(device: &Device) -> Result<(DateTime<Utc>, DateTime<Utc>, Duration)> {
     let output = device
-        .execute_host_shell_command(DATE_COMMAND)
+        .execute_host_exec_out_command(DATE_COMMAND)
         .await
         .with_context(|| anyhow!("Failed to run date command: {:?}", DATE_COMMAND))?;
     let local_time = Utc::now();
+    let output = String::from_utf8_lossy(&output);
     let remote_time = parse(output.trim()).context("Failed to parse remote time")?;
     let drift = remote_time.signed_duration_since(local_time);
     Ok((local_time, remote_time, drift))

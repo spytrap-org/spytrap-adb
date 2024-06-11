@@ -1550,6 +1550,7 @@ name = "spytrap-adb"
 version = "0.3.0"
 dependencies = [
  "anyhow",
+ "bstr",
  "chrono",
  "clap",
  "clap_complete",
