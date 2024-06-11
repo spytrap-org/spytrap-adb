@@ -17,14 +17,14 @@ clap = { version = "4", features = ["derive", "env"] }
 clap_complete = "4.2.1"
 crossterm = { version = "0.27", features = ["event-stream"] }
 dirs = "5.0.0"
-env_logger = "0.10"
-forensic-adb = "0.6.2"
+env_logger = "0.11"
+forensic-adb = "0.7"
 hex = "0.4.3"
 indexmap = { version = "2", features = ["serde"] }
 log = "0.4.14"
-ratatui = "0.25"
+ratatui = "0.26"
 regex = "1.5.4"
-reqwest = { version = "0.11.16", default-features = false, features = ["rustls-tls-native-roots", "brotli", "gzip", "deflate", "json"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-native-roots", "brotli", "gzip", "deflate", "json"] }
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.95"
 serde_yaml = "0.9"

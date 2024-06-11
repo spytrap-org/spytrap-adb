@@ -1,8 +1,12 @@
 use crate::errors::*;
 use chrono::{offset::Utc, DateTime};
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
 const APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
+
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(15);
+const READ_TIMEOUT: Duration = Duration::from_secs(30);
 
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -13,6 +17,8 @@ impl Client {
     pub fn new() -> Result<Self> {
         let http = reqwest::Client::builder()
             .user_agent(APP_USER_AGENT)
+            .connect_timeout(CONNECT_TIMEOUT)
+            .read_timeout(READ_TIMEOUT)
             .build()
             .context("Failed to setup http client")?;
         Ok(Self { http })
