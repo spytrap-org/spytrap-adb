@@ -10,6 +10,11 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.deb]
+section = "utils"
+priority = "optional"
+depends = "$auto, adb"
+
 [dependencies]
 anyhow = "1.0.44"
 bstr = "1.9.1"
