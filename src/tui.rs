@@ -522,6 +522,23 @@ pub async fn handle_key<B: Backend>(
             }
         }
         Event::Key(KeyEvent {
+            code: KeyCode::Home,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            app.offset = 0;
+            app.cursor = 0;
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::End,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            let max = app.view_length().saturating_sub(1);
+            app.cursor = max;
+            app.recalculate_scroll_offset(terminal)?;
+        }
+        Event::Key(KeyEvent {
             code: KeyCode::Char('r'),
             modifiers: KeyModifiers::CONTROL,
             ..
