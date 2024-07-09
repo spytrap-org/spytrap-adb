@@ -444,12 +444,12 @@ pub async fn handle_key<B: Backend>(
                         }
                     }
 
-                    let (name, _appinfos) = scan.apps.get_index(idx).unwrap();
-                    // toggle the app from the `expanded` list
-                    if scan.expanded.contains(name) {
-                        scan.expanded.remove(name);
-                    } else {
-                        scan.expanded.insert(name.clone());
+                    // if there is an item under the cursor
+                    if let Some((name, _appinfos)) = scan.apps.get_index(idx) {
+                        // toggle the app on the `expanded` list
+                        if !scan.expanded.remove(name) {
+                            scan.expanded.insert(name.clone());
+                        }
                     }
                 }
             } else if let Some(device) = app.devices.get(app.cursor) {
