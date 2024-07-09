@@ -29,11 +29,8 @@ jobs:
         key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-cargo-release-
 
-    - name: Install repro-env
-      run: |
-        wget 'https://github.com/kpcyrd/repro-env/releases/download/v0.3.2/repro-env'
-        echo '660995089d32178a63763cf47e1b97e265ef5cf24bf646d16728ca51bf2fab50  repro-env' | sha256sum -c -
-        sudo install -m755 repro-env -t /usr/bin
+    - name: Install dependencies (apt)
+      run: sudo apt-get install repro-env
 
     - name: Build
       run: make
