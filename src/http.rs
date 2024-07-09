@@ -95,11 +95,10 @@ pub struct GithubCommit {
 
 impl GithubCommit {
     pub fn release_timestamp(&self) -> Result<i64> {
-        let date = &self.committer.date;
-        let dt = DateTime::parse_from_rfc3339(date)
-            .with_context(|| anyhow!("Failed to parse datetime from github: {date:?}"))?;
-        let dt = DateTime::<Utc>::from(dt);
-        Ok(dt.timestamp())
+        let datetime = &self.committer.date;
+        let timestamp = parse_datetime(datetime)
+            .with_context(|| anyhow!("Failed to parse datetime from github: {datetime:?}"))?;
+        Ok(timestamp)
     }
 }
 
@@ -108,4 +107,21 @@ pub struct GithubGitAuthor {
     pub name: String,
     pub email: String,
     pub date: String,
+}
+
+fn parse_datetime(datetime: &str) -> Result<i64> {
+    let dt = DateTime::parse_from_rfc3339(datetime)?;
+    let dt = DateTime::<Utc>::from(dt);
+    Ok(dt.timestamp())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_datetime() {
+        let timestamp = parse_datetime("2024-07-02T23:34:14Z").unwrap();
+        assert_eq!(timestamp, 1719963254);
+    }
 }
