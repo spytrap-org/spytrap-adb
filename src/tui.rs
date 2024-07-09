@@ -444,12 +444,12 @@ pub async fn handle_key<B: Backend>(
                         }
                     }
 
-                    let (name, _appinfos) = scan.apps.get_index(idx).unwrap();
-                    // toggle the app from the `expanded` list
-                    if scan.expanded.contains(name) {
-                        scan.expanded.remove(name);
-                    } else {
-                        scan.expanded.insert(name.clone());
+                    // if there is an item under the cursor
+                    if let Some((name, _appinfos)) = scan.apps.get_index(idx) {
+                        // toggle the app on the `expanded` list
+                        if !scan.expanded.remove(name) {
+                            scan.expanded.insert(name.clone());
+                        }
                     }
                 }
             } else if let Some(device) = app.devices.get(app.cursor) {
@@ -520,6 +520,23 @@ pub async fn handle_key<B: Backend>(
             for _ in 0..PAGE_MODIFIER {
                 app.key_down(terminal)?;
             }
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::Home,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            app.offset = 0;
+            app.cursor = 0;
+        }
+        Event::Key(KeyEvent {
+            code: KeyCode::End,
+            modifiers: KeyModifiers::NONE,
+            ..
+        }) => {
+            let max = app.view_length().saturating_sub(1);
+            app.cursor = max;
+            app.recalculate_scroll_offset(terminal)?;
         }
         Event::Key(KeyEvent {
             code: KeyCode::Char('r'),
