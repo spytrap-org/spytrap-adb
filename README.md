@@ -17,7 +17,7 @@ Based on [stalkerware-indicators] data provided by [Echap].
 There's an interactive UI when running the command with no arguments:
 
 ```sh
-./spytrap-adb
+spytrap-adb
 ```
 
 Enable usb debugging on the phone and connect it to the computer over usb.
@@ -26,12 +26,40 @@ You can also invoke some commands directly for non-interactive use:
 
 ```sh
 # list available devices
-./spytrap-adb list
+spytrap-adb list
 # download indicators of compromise from https://github.com/AssoEchap/stalkerware-indicators
-./spytrap-adb download-ioc
+spytrap-adb download-ioc
 # scan the first connected device
-./spytrap-adb scan
+spytrap-adb scan
 ```
+
+## Installation
+
+<a href="https://repology.org/project/spytrap-adb/versions"><img align="right" src="https://repology.org/badge/vertical-allrepos/spytrap-adb.svg" alt="Packaging status"></a>
+
+**Arch Linux**
+
+    pacman -S spytrap-adb
+
+**Debian (sid)**
+
+    apt-get install spytrap-adb
+
+**Debian >= bookworm, Ubuntu >= 20.04**
+
+    sudo apt install ca-certificates curl gnupg
+    curl -sSf https://apt.vulns.xyz/kpcyrd.pgp | gpg --dearmor |  sudo tee /etc/apt/trusted.gpg.d/apt-vulns-xyz.gpg > /dev/null
+    echo deb https://apt.vulns.xyz stable main | sudo tee /etc/apt/sources.list.d/apt-vulns-xyz.list
+    apt update
+    apt install spytrap-adb
+
+**Pre-compiled binary (x86_64)**
+
+    wget https://github.com/spytrap-org/spytrap-adb/releases/latest/download/spytrap-adb
+    chmod +x
+    ./spytrap-adb
+
+This binary can be independently reproduced from source code, reproducible builds instructions can be found on the relevant [releases](https://github.com/spytrap-org/spytrap-adb/releases) page.
 
 ## Building from source
 
@@ -97,4 +125,4 @@ The adb server is not running correctly
 
 ## License
 
-GPLv3+
+`GPL-3.0-or-later`
