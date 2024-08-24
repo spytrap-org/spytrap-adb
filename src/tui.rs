@@ -753,7 +753,7 @@ pub fn ui(f: &mut Frame<'_>, app: &App) {
             ]
             .as_ref(),
         )
-        .split(f.size());
+        .split(f.area());
 
     f.render_widget(render_help_widget(app), chunks[0]);
     f.render_widget(Block::default().style(white), chunks[1]);
