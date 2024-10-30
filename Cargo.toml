@@ -28,7 +28,7 @@ forensic-adb = "0.7"
 hex = "0.4.3"
 indexmap = { version = "2", features = ["serde"] }
 log = "0.4.14"
-ratatui = "0.28"
+ratatui = "0.29"
 regex = "1.5.4"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-native-roots", "brotli", "gzip", "deflate", "json"] }
 serde = { version = "1.0.130", features = ["derive"] }
