@@ -11,14 +11,17 @@ use spytrap_adb::utils;
 use tokio::fs;
 use tokio::process::Command;
 
+const ADB_BINARY: Option<&str> = option_env!("SPYTRAP_ADB_BINARY");
+
 async fn ensure_adb_running(choice: &args::AdbServerChoice) -> Result<()> {
     if *choice != args::AdbServerChoice::Never {
         debug!("Making sure adb server is running...");
-        let status = Command::new("adb")
+        let adb_binary = ADB_BINARY.unwrap_or("adb");
+        let status = Command::new(adb_binary)
             .arg("start-server")
             .status()
             .await
-            .context("Failed to start adb binary")?;
+            .with_context(|| anyhow!("Failed to start adb binary: {adb_binary:?}"))?;
         if !status.success() {
             bail!("Failed to ensure adb server is running: exited with status={status:?}");
         }
