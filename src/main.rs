@@ -11,17 +11,22 @@ use spytrap_adb::utils;
 use tokio::fs;
 use tokio::process::Command;
 
-const ADB_BINARY: Option<&str> = option_env!("SPYTRAP_ADB_BINARY");
+// replace this with .unwrap_or after it became const
+// https://github.com/rust-lang/rust/issues/67792
+const ADB_BINARY: &str = if let Some(path) = option_env!("SPYTRAP_ADB_BINARY") {
+    path
+} else {
+    "adb"
+};
 
 async fn ensure_adb_running(choice: &args::AdbServerChoice) -> Result<()> {
     if *choice != args::AdbServerChoice::Never {
-        debug!("Making sure adb server is running...");
-        let adb_binary = ADB_BINARY.unwrap_or("adb");
-        let status = Command::new(adb_binary)
+        debug!("Making sure adb server is running (using {ADB_BINARY:?} binary)...");
+        let status = Command::new(ADB_BINARY)
             .arg("start-server")
             .status()
             .await
-            .with_context(|| anyhow!("Failed to start adb binary: {adb_binary:?}"))?;
+            .with_context(|| anyhow!("Failed to start adb binary: {ADB_BINARY:?}"))?;
         if !status.success() {
             bail!("Failed to ensure adb server is running: exited with status={status:?}");
         }
