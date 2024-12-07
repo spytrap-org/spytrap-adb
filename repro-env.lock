@@ -19,11 +19,11 @@ signature = "iNUEABYKAH0WIQQFx3danouXdAf+COadTFqhVCbaCgUCZrE/KV8UgAAAAAAuAChpc3N
 
 [[package]]
 name = "file"
-version = "5.46-1"
+version = "5.46-2"
 system = "archlinux"
-url = "https://archive.archlinux.org/packages/f/file/file-5.46-1-x86_64.pkg.tar.zst"
-sha256 = "91bb5453cebd168bce57c0c4ca2a1b8736c2b3db2675939fc82785407823b846"
-signature = "iHUEABYKAB0WIQQEKYl95fO9rFN6MGltQr3RFuAGjwUCZ04fqwAKCRBtQr3RFuAGj8nkAQCR/86402YACcwdy6B7gRvyveSzdtOJBI6USF+MCAxYiQEAnMWbLS76O7wVMlR8mebP3ZZFWh2iEOkOS1g0mK2C3g4="
+url = "https://archive.archlinux.org/packages/f/file/file-5.46-2-x86_64.pkg.tar.zst"
+sha256 = "bed2c2de3b8e0b694495695bde0bbde13c222d74014f2dd576834dcba6c0031a"
+signature = "iHUEABYKAB0WIQQEKYl95fO9rFN6MGltQr3RFuAGjwUCZ1KnTAAKCRBtQr3RFuAGjwS/AQCyZBC6qNTscykoS3gzVT3Aepq3Zl8EOrrQyu42JEMZygEAlSnTGqR4HtTMzUv2eiDHZpGCAp5WRK6uvPHvlFpxkg4="
 
 [[package]]
 name = "gc"
@@ -42,12 +42,28 @@ sha256 = "efcf9a912bb674205fe8cbc2f205ca3d64ec0e8e48700c74bac8952834dc4415"
 signature = "iNUEABYKAH0WIQQFx3danouXdAf+COadTFqhVCbaCgUCZuBXXV8UgAAAAAAuAChpc3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdwLmZpZnRoaG9yc2VtYW4ubmV0MDVDNzc3NUE5RThCOTc3NDA3RkUwOEU2OUQ0QzVBQTE1NDI2REEwQQAKCRCdTFqhVCbaChhNAQC1+ckQFrMS0NCEB/MuyxouCmUQ0COinRuR6OvZ4qoYhQD/X5l3opAxR9lO8dtqfoLbeGUqOwQUqzZHG8gF4Y8z0wQ="
 
 [[package]]
+name = "gpgme"
+version = "1.24.1-1"
+system = "archlinux"
+url = "https://archive.archlinux.org/packages/g/gpgme/gpgme-1.24.1-1-x86_64.pkg.tar.zst"
+sha256 = "8032f56d14b9cf48c6140ee53ed4f8b39d4f9ad84773f7e3ba0a1ca7633f0130"
+signature = "iHUEABYKAB0WIQQEKYl95fO9rFN6MGltQr3RFuAGjwUCZ1BzSQAKCRBtQr3RFuAGj+qhAQCg2j/HzevVCJrOnow2wKVLXEjIpmU7hh4PnxywYEREDgEAisBagKdc3FarGaPhxPANUDOBFznPUiPuKWXmkpVXNgY="
+
+[[package]]
 name = "guile"
 version = "3.0.10-1"
 system = "archlinux"
 url = "https://archive.archlinux.org/packages/g/guile/guile-3.0.10-1-x86_64.pkg.tar.zst"
 sha256 = "bf4d1b474045a88c7ad97b1ce56e8dd5786e5a10de02a8d33dc8f041edc8d01d"
 signature = "iNUEABYKAH0WIQQFx3danouXdAf+COadTFqhVCbaCgUCZnkshF8UgAAAAAAuAChpc3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdwLmZpZnRoaG9yc2VtYW4ubmV0MDVDNzc3NUE5RThCOTc3NDA3RkUwOEU2OUQ0QzVBQTE1NDI2REEwQQAKCRCdTFqhVCbaCruHAQDnjJsHGhq4cae34rHS1z+Hr6yzjVQSxvA6SE9XpredlAD/cstobLSMUsHswxf5df94XkoDPJdJs44uXE/iu9gsgQg="
+
+[[package]]
+name = "hwdata"
+version = "0.390-1"
+system = "archlinux"
+url = "https://archive.archlinux.org/packages/h/hwdata/hwdata-0.390-1-any.pkg.tar.zst"
+sha256 = "a227361d93e008952774df11306e2f50e01b8eb5ef47a16225818d536624291f"
+signature = "iQEzBAABCAAdFiEEW34/txt/EDKaHAOrdx32Yn7faB8FAmdR3t8ACgkQdx32Yn7faB+RXwf+LRtFfTKvI92hA2uMtVgqIwfraV2tlzL1sQuqlwqWTyCmN4v3PW1QJMqeh1ayxdQ+ue+OiOVtg1JC373mT4mmxuU22U3kmgCK9FQaXVo1N0sk6DECUwU44EdWskWJXzbVapeZbQQ9p4tkq4iskRvqhPbNykAqDpg+L8neDPjuqkIevdG3JFo+ChfcapoFQyqrk52jtEhYdrijHZVciWq6j6KQQbTijSubx4pNUnmfT3zeNxUw47Ad7H9LcnRNLf+6Tv01WOq1c6g6Lpg54i9zS0vgrkrMUuNVakF2znHxtsGA50pBGzJhQVcmCrdxUoFL2h4GejmRiiJNsOW7yWr70A=="
 
 [[package]]
 name = "jansson"
@@ -80,6 +96,14 @@ system = "archlinux"
 url = "https://archive.archlinux.org/packages/l/libisl/libisl-0.27-1-x86_64.pkg.tar.zst"
 sha256 = "55a36e8195e6d9ce2efeb4276c60df6b6e7d94812fa36f8423d5ce664a5d34df"
 signature = "iNUEABYKAH0WIQQFx3danouXdAf+COadTFqhVCbaCgUCZtWJeV8UgAAAAAAuAChpc3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdwLmZpZnRoaG9yc2VtYW4ubmV0MDVDNzc3NUE5RThCOTc3NDA3RkUwOEU2OUQ0QzVBQTE1NDI2REEwQQAKCRCdTFqhVCbaCgPbAP9GNpnE0ra4qZOGYyJtfnyG42f8Z9dLpX21F/sY/a2UCgD/dz8x7harwjTofWctVHyyCacJsLhSq2jvSfrvvL4H/w8="
+
+[[package]]
+name = "libldap"
+version = "2.6.9-1"
+system = "archlinux"
+url = "https://archive.archlinux.org/packages/l/libldap/libldap-2.6.9-1-x86_64.pkg.tar.zst"
+sha256 = "4c02deec26c5293ef37af433f343fc7fe783f37b7ef42a1bd8f91f4b162c5bda"
+signature = "iNUEABYKAH0WIQQFx3danouXdAf+COadTFqhVCbaCgUCZ0t7sl8UgAAAAAAuAChpc3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdwLmZpZnRoaG9yc2VtYW4ubmV0MDVDNzc3NUE5RThCOTc3NDA3RkUwOEU2OUQ0QzVBQTE1NDI2REEwQQAKCRCdTFqhVCbaCoWHAQCB+Yog4eSbdpYJz3+svRg9RoEyp1ehA1Ekbxr5FITYYQEA51sc3lp4zfGKV3iGb6BITjPYnuhm8bMqQG6vPX+wHgw="
 
 [[package]]
 name = "libmpc"
@@ -128,3 +152,11 @@ system = "archlinux"
 url = "https://archive.archlinux.org/packages/r/rust-musl/rust-musl-1:1.83.0-1-x86_64.pkg.tar.zst"
 sha256 = "51eceefd41c25912feff5ae16c3460a99d263b2a8a7be68a2a2bbcc73e629c4c"
 signature = "iHUEABYKAB0WIQSDvIiJNRtd67toQW64rAhgDxCM3wUCZ0iXwAAKCRC4rAhgDxCM36wRAQC8jFZaDhROX3uMAz3uB5C1w491SBANWlL4udDibvgNSwD/aQEHTueCG4DLQcEskmtKTevQtCEF7DORwDl3p5lw5Qs="
+
+[[package]]
+name = "sqlite"
+version = "3.47.1-2"
+system = "archlinux"
+url = "https://archive.archlinux.org/packages/s/sqlite/sqlite-3.47.1-2-x86_64.pkg.tar.zst"
+sha256 = "08fca115fa30fa73f5b8658902b14950bfee52f4a9c71c1ab20e7da020cef8bd"
+signature = "iQEzBAABCgAdFiEErcih/MFeAdRTEEGelGV6sg8qCSsFAmdRzqkACgkQlGV6sg8qCSs91Qf8D2LN76ogtO2yIAk7iVFVsFK6zzZiY77EcSj3FqERAmcr7KQh2kFCFj5YMPd5Tkk0tWKaGbXgqFlMHxHabkE+npYPVXT09Jh12CXKPbWM0msPGSusPu3MQeisMDtgmo+Xo5ycKlcCWwp+p1U1ij5ss9HqCSnXPY7Zj9JVfNbZmNIXPvsRzNbZaqq8uP3yeBONKZgspi9B+tNLJ+pUmneg1OirAVoOpIgHW5J7+VRO9AKoZiX6mDksme6fkRp0ST4ErKWeepAgaOC5oYNDzMk/PbQ1y3j3ZdaUM2Y9nwPyNkIo+wx0rxJPF8J6ZZ+eM8ZJpykA0BBlhwosItpDzKLPDQ=="
