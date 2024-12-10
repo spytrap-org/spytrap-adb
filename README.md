@@ -109,7 +109,7 @@ The adb server is not running correctly
 
 ### Installing adb on MacOS
 
-    brew install android-platform-tools
+    brew install spytrap-adb
 
 ### Installing adb on Arch Linux
 
