@@ -1,2 +1,2 @@
-pub use anyhow::{anyhow, bail, Context as _, Error, Result};
+pub use anyhow::{Context as _, Error, Result, anyhow, bail};
 pub use log::{debug, error, info, trace, warn};

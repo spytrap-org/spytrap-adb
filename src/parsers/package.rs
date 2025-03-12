@@ -95,9 +95,7 @@ pub fn parse_output(output: &[u8], package: &str) -> Result<PackageInfo> {
                     if let Some((key, value)) = trimmed_line.split_once('=') {
                         trace!(
                             "discovered for package {:?}: key={:?}, value={:?}",
-                            package,
-                            key,
-                            value
+                            package, key, value
                         );
                         info.fields.insert(key.to_string(), value.to_string());
                     }

@@ -6,7 +6,7 @@ authors = ["kpcyrd <git@rxv.cc>"]
 license = "GPL-3.0-or-later"
 repository = "https://github.com/spytrap-org/spytrap-adb"
 categories = ["command-line-utilities"]
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -22,9 +22,9 @@ chrono = { version = "0.4.19", default-features = false, features = ["clock"] }
 clap = { version = "4", features = ["derive", "env"] }
 clap_complete = "4.2.1"
 crossterm = { version = "0.28", features = ["event-stream"] }
-dirs = "5.0.0"
+dirs = "6"
 env_logger = "0.11"
-forensic-adb = "0.7"
+forensic-adb = "0.8"
 hex = "0.4.3"
 indexmap = { version = "2", features = ["serde"] }
 log = "0.4.14"
