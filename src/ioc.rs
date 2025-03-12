@@ -106,7 +106,7 @@ impl Repository {
             Err(err) if err.kind() == ErrorKind::NotFound => None,
             Err(err) => {
                 return Err(err)
-                    .with_context(|| anyhow!("Failed to read database file at {db_path:?}"))
+                    .with_context(|| anyhow!("Failed to read database file at {db_path:?}"));
             }
         };
 

@@ -1,12 +1,8 @@
-use chrono::{offset::Utc, TimeZone};
+use chrono::{TimeZone, offset::Utc};
 use sha2::{Digest, Sha256};
 
 pub fn human_option_str(x: Option<&String>) -> &str {
-    if let Some(x) = x {
-        x.as_str()
-    } else {
-        "-"
-    }
+    if let Some(x) = x { x.as_str() } else { "-" }
 }
 
 pub fn now() -> i64 {
