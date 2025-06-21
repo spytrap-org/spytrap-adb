@@ -21,7 +21,7 @@ bstr = "1.9.1"
 chrono = { version = "0.4.19", default-features = false, features = ["clock"] }
 clap = { version = "4", features = ["derive", "env"] }
 clap_complete = "4.2.1"
-crossterm = { version = "0.28", features = ["event-stream"] }
+crossterm = { version = "0.29", features = ["event-stream"] }
 dirs = "6"
 env_logger = "0.11"
 forensic-adb = "0.8"
