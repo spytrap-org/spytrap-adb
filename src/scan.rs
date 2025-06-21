@@ -104,6 +104,15 @@ pub async fn run(
                         pkg.id, name
                     );
                     warn!("Suspicious {:?}: {}", SuspicionLevel::High, alert);
+                    report
+                        .app(
+                            pkg.id.clone(),
+                            Suspicion {
+                                level: SuspicionLevel::High,
+                                description: alert,
+                            },
+                        )
+                        .await?;
                 }
 
                 // fetch infos about package
