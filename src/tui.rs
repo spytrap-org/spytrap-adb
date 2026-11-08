@@ -264,7 +264,7 @@ impl Spinner {
         self.idx %= ACTIVITY.len();
     }
 
-    pub fn render(&self) -> Span {
+    pub fn render(&self) -> Span<'_> {
         Span::styled(
             ACTIVITY[self.idx],
             Style::default()
@@ -763,7 +763,7 @@ pub fn ui(f: &mut Frame<'_>, app: &App) {
     f.render_widget(render_statusline_widget(app), chunks[3]);
 }
 
-fn render_help_widget(app: &App) -> Paragraph {
+fn render_help_widget(app: &App) -> Paragraph<'_> {
     let white = Style::default().fg(Color::White).bg(Color::Black);
     let mut text = Vec::new();
 
@@ -801,7 +801,7 @@ fn render_help_widget(app: &App) -> Paragraph {
         .alignment(Alignment::Right)
 }
 
-fn render_app_widget(app: &App) -> List {
+fn render_app_widget(app: &App) -> List<'_> {
     let white = Style::default().fg(Color::White).bg(Color::Black);
 
     if let Some(scan) = &app.scan {
@@ -919,7 +919,7 @@ fn render_app_widget(app: &App) -> List {
     }
 }
 
-fn render_statusline_widget(app: &App) -> Paragraph {
+fn render_statusline_widget(app: &App) -> Paragraph<'_> {
     let white = Style::default().fg(Color::White).bg(Color::Black);
     let green = Style::default().fg(Color::Green).bg(Color::Black);
     let yellow = Style::default().fg(Color::Yellow).bg(Color::Black);

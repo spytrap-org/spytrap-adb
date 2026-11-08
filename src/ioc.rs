@@ -25,7 +25,7 @@ pub struct Suspicion {
 }
 
 impl Suspicion {
-    pub fn to_terminal(&self) -> Vec<Span> {
+    pub fn to_terminal(&self) -> Vec<Span<'_>> {
         vec![
             Span::styled(
                 match self.level {
