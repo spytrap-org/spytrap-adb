@@ -12,8 +12,8 @@ use crossterm::{
 use forensic_adb::{AndroidStorageInput, DeviceInfo, Host};
 use indexmap::IndexMap;
 use ratatui::{
-    Frame, Terminal,
-    backend::{Backend, CrosstermBackend},
+    Frame,
+    backend::CrosstermBackend,
     layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
@@ -44,6 +44,8 @@ const ACTIVITY: &[&str] = &[".", "o", "O", "°", " ", " ", "°", "O", "o", ".", 
 
 /// Check for updates if this many seconds elapsed since last successful update check
 const DATABASE_UPDATE_CHECK_INTERVAL: i64 = 60 * 60 * 3;
+
+type Terminal = ratatui::Terminal<CrosstermBackend<Stdout>>;
 
 #[derive(Debug)]
 pub enum Message {
@@ -215,7 +217,7 @@ impl App {
         }
     }
 
-    pub fn key_down<B: Backend>(&mut self, terminal: &Terminal<B>) -> Result<()> {
+    pub fn key_down(&mut self, terminal: &Terminal) -> Result<()> {
         let max = self.view_length().saturating_sub(1);
 
         if self.cursor < max {
@@ -226,7 +228,7 @@ impl App {
         Ok(())
     }
 
-    pub fn recalculate_scroll_offset<B: Backend>(&mut self, terminal: &Terminal<B>) -> Result<()> {
+    pub fn recalculate_scroll_offset(&mut self, terminal: &Terminal) -> Result<()> {
         let scroll_height = terminal.size()?.height as usize - SCROLL_CHROME_HEIGHT;
         if self.cursor - self.offset > scroll_height {
             self.offset = self.cursor - scroll_height;
@@ -373,8 +375,8 @@ pub async fn run_download(mut repo: Repository) -> Result<Repository> {
     Ok(repo)
 }
 
-pub async fn handle_key<B: Backend>(
-    terminal: &Terminal<B>,
+pub async fn handle_key(
+    terminal: &Terminal,
     app: &mut App,
     event: Event,
 ) -> Result<Option<Action>> {
@@ -591,7 +593,7 @@ async fn run_timer(mut rx: mpsc::Receiver<TimerCmd>, tx: mpsc::Sender<Message>) 
     }
 }
 
-pub async fn run<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
+pub async fn run(terminal: &mut Terminal, app: &mut App) -> Result<()> {
     let mut stream = EventStream::new();
 
     let mut tasks = JoinSet::new();
@@ -946,7 +948,7 @@ fn render_statusline_widget(app: &App) -> Paragraph {
         .alignment(Alignment::Right)
 }
 
-pub fn setup() -> Result<Terminal<CrosstermBackend<Stdout>>> {
+pub fn setup() -> Result<Terminal> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
@@ -955,7 +957,7 @@ pub fn setup() -> Result<Terminal<CrosstermBackend<Stdout>>> {
     Ok(terminal)
 }
 
-pub fn cleanup(terminal: &mut Terminal<CrosstermBackend<Stdout>>) -> Result<()> {
+pub fn cleanup(terminal: &mut Terminal) -> Result<()> {
     disable_raw_mode()?;
     execute!(terminal.backend_mut(), LeaveAlternateScreen,)?;
     terminal.show_cursor()?;
